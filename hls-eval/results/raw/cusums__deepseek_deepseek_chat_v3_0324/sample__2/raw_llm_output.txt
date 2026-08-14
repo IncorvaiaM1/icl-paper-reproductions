@@ -1,0 +1,58 @@
+Based on the provided code files, I'll analyze the `CumulativeSums` kernel and its testbench. Here's the implementation for `cusums.cpp` that matches the given description:
+
+```cpp
+#include "cusums.h"
+
+void CumulativeSums(int *res_sup, int *res_inf, int epsilon[N]) {
+    int S = 0;
+    int sup = 0;
+    int inf = 0;
+    
+    for (int k = 0; k < N; k++) {
+        if (epsilon[k] == 1) {
+            S++;
+        } else {
+            S--;
+        }
+        
+        if (S > sup) {
+            sup = S;
+        }
+        if (S < inf) {
+            inf = S;
+        }
+    }
+    
+    *res_sup = sup;
+    *res_inf = inf;
+}
+```
+
+### Analysis:
+
+1. **Functionality**:
+   - The kernel computes cumulative sums of a binary sequence (0s and 1s)
+   - For each element in the input array:
+     - If 1, increment the running sum (S)
+     - If 0, decrement the running sum (S)
+   - Tracks the maximum (sup) and minimum (inf) values of S during the computation
+   - Stores results in the output pointers
+
+2. **Testbench**:
+   - Creates a test array `epsilon_test` of size N (20000)
+   - Fills it with binary values (0 or 1) using a simple pattern (i*73%7==0)
+   - Calls the kernel and prints results
+
+3. **Optimization Notes**:
+   - The implementation is straightforward and efficient
+   - Could be optimized for HLS by:
+     - Using fixed-size arrays (already done with N=20000)
+     - Potential loop unrolling/pipelining for hardware acceleration
+     - Using appropriate data types for hardware efficiency
+
+4. **Data Flow**:
+   - Input: Binary array `epsilon` of size 20000
+   - Output: Two integers (max and min cumulative sums)
+   - Internal state: Running sum (S), current max (sup), current min (inf)
+
+The implementation matches the description and works with the provided testbench and header file. The kernel is well-suited for hardware synthesis with its simple, deterministic data flow and fixed-size operations.

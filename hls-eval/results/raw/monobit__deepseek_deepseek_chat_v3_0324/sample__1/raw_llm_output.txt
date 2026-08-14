@@ -1,0 +1,28 @@
+I'll help you implement the monobit test function. The monobit test is a common statistical test used to check the randomness of a sequence by counting the number of 1s in a binary sequence.
+
+Here's the implementation of the `Frequency` function:
+
+```c
+#include "monobit.h"
+
+void Frequency(int *result, int epsilon[N]) {
+    int sum = 0;
+    
+    // Count the number of 1s in the sequence
+    for (int i = 0; i < N; i++) {
+        sum += epsilon[i];
+    }
+    
+    // Calculate the test statistic (number of 1s)
+    *result = sum;
+}
+```
+
+This function:
+1. Takes a pointer to store the result and the binary sequence `epsilon` as input
+2. Counts the number of 1s in the sequence by summing all elements (assuming 0s and 1s)
+3. Stores the count in the result pointer
+
+The monobit test typically compares this count to the expected number of 1s in a random sequence (which should be close to N/2 for a random sequence). The actual statistical test (comparing to expected values) would typically be done separately after getting this count.
+
+Note that N is defined in the header file, and we're assuming the sequence contains only 0s and 1s. The function doesn't perform the full monobit test calculation (which would include computing the test statistic and p-value), but just counts the number of 1s as requested.

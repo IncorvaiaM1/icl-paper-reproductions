@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "atax__qwen_qwen3_coder",
+    "benchmark_case_name": "atax",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "qwen/qwen3-coder",
+    "model_name_normalized": "qwen_qwen3_coder",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_atax` design is a high-level synthesis kernel that computes the matrix-vector product of a transposed matrix `A` with a vector `x`, and then computes the matrix-vector product of the original matrix `A` with the resulting vector. This is equivalent to computing `A^T(Ax)`, where `A^T` is the transpose of matrix `A`. The kernel takes in a matrix `A` and a vector `x` as inputs, and produces a vector `y` as output.\n\nComputes $A^T$ times $Ax$.\nIt takes the following as inputs,\n\n- $A: M \\times N$ matrix\n- $x$: vector of length $N$\n\nand gives the following as output:\n\n- $y$: vector of length $N$, where $y = A^T(Ax)$\n\n---\n\nTop-Level Function: `kernel_atax`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]);`\n\nInputs:\n- `A`: a 2D matrix of size 38x42, where each element is a `double` precision floating-point number.\n- `x`: a 1D vector of length 42, where each element is a `double` precision floating-point number.\n\nOutputs:\n- `y`: a 1D vector of length 42, where each element is a `double` precision floating-point number, representing the result of the computation `A^T(Ax)`.\n\nImportant Data Structures and Data Types:\n- `double`: a `double` precision floating-point number, used to represent the elements of the matrix `A` and vectors `x` and `y`.\n- `tmp`: a 1D vector of length 38, used as a temporary storage for intermediate results.\n\nSub-Components:\n- None\n\nNote: The kernel uses a temporary vector `tmp` to store intermediate results, which is necessary to avoid overwriting the input vector `x` during the computation.\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"atax_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"atax.h\"\n\nvoid init_array(int m, int n, double A[38][42], double x[42]) {\n    int i, j;\n    double fn;\n    fn = (double)n;\n\n    for (i = 0; i < n; i++)\n        x[i] = 1 + (i / fn);\n    for (i = 0; i < m; i++)\n        for (j = 0; j < n; j++)\n            A[i][j] = (double)((i + j) % n) / (5 * m);\n}\n\nvoid print_array(int n, double y[42])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"y\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", y[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"y\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int m = 38;\n    int n = 42;\n\n    double A[38][42];\n    double x[42];\n    double y[42];\n    double tmp[38];\n\n    init_array(m, n, A, x);\n\n    kernel_atax(A, x, y, tmp);\n\n    print_array(n, y);\n\n    return 0;\n}\n</INPUT_CODE name=\"atax_tb.cpp\">\n<INPUT_CODE name=\"atax.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]);\n\n</INPUT_CODE name=\"atax.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 12519.114588789,
+        "t1": 12520.772094547,
+        "execution_time": 1.6575057579993882
+    },
+    "response_json": {
+        "id": "gen-1786559445-uI3Klzf0HnY4MezfICka",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_atax.cpp\">\n#include \"atax.h\"\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    int i, j;\n\n    // Initialize y and tmp to zero\n    for (i = 0; i < 42; i++) {\n        y[i] = 0.0;\n    }\n    for (i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n    }\n\n    // First computation: tmp = A * x\n    for (i = 0; i < 38; i++) {\n        for (j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Second computation: y = A^T * tmp\n    for (i = 0; i < 42; i++) {\n        for (j = 0; j < 38; j++) {\n            y[i] += A[j][i] * tmp[j];\n        }\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786559445,
+        "model": "qwen/qwen3-coder",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 256,
+            "prompt_tokens": 1228,
+            "total_tokens": 1484,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1216,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0003812,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0003812,
+                "upstream_inference_prompt_cost": 0.0001252,
+                "upstream_inference_completions_cost": 0.000256
+            }
+        },
+        "provider": "DeepInfra"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_atax.cpp\">\n#include \"atax.h\"\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    int i, j;\n\n    // Initialize y and tmp to zero\n    for (i = 0; i < 42; i++) {\n        y[i] = 0.0;\n    }\n    for (i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n    }\n\n    // First computation: tmp = A * x\n    for (i = 0; i < 38; i++) {\n        for (j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Second computation: y = A^T * tmp\n    for (i = 0; i < 42; i++) {\n        for (j = 0; j < 38; j++) {\n            y[i] += A[j][i] * tmp[j];\n        }\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_atax.cpp": "\n#include \"atax.h\"\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    int i, j;\n\n    // Initialize y and tmp to zero\n    for (i = 0; i < 42; i++) {\n        y[i] = 0.0;\n    }\n    for (i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n    }\n\n    // First computation: tmp = A * x\n    for (i = 0; i < 38; i++) {\n        for (j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Second computation: y = A^T * tmp\n    for (i = 0; i < 42; i++) {\n        for (j = 0; j < 38; j++) {\n            y[i] += A[j][i] * tmp[j];\n        }\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 12521.045754298,
+            "t1": 12521.475084734,
+            "execution_time": 0.42933043599987286,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: y\n24.432982 25.770789 27.108596 28.446404 29.784211 29.568056 29.369935 29.188684 29.023139 28.872138 28.734515 28.609109 28.494755 28.390291 28.294552 28.206376 28.124598 28.048056 27.975586 27.906025 \n27.838209 27.770974 27.703158 27.633596 27.561127 27.484584 27.402807 27.314631 27.218892 27.114428 27.000074 26.874668 26.737045 26.586043 26.420499 26.239247 26.041127 25.824972 25.589621 25.333910 \n25.056676 24.756754 \nend   dump: y\n==END   DUMP_ARRAYS==\n",
+            "t0": 12521.494434759,
+            "t1": 12521.50949778,
+            "execution_time": 0.015063020999150467,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 12521.514174907,
+            "t1": 12521.514174907,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

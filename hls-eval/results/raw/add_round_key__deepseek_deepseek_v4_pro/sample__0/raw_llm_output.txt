@@ -1,0 +1,16 @@
+<OUTPUT_CODE name="add_round_key.cpp">
+#include "add_round_key.h"
+
+void AddRoundKey(unsigned char round, unsigned char (*state)[4][4], unsigned char const *RoundKey) {
+    // Iterate over each element of the 4x4 state matrix
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            // Calculate index into RoundKey according to the formula:
+            // index = (round * Nb * 4) + (i * Nb) + j
+            int idx = round * Nb * 4 + i * Nb + j;
+            // XOR the state element with the corresponding round key byte
+            (*state)[i][j] ^= RoundKey[idx];
+        }
+    }
+}
+</OUTPUT_CODE>

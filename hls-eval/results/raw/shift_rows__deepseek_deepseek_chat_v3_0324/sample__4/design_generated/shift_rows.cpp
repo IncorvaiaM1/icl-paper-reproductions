@@ -1,0 +1,41 @@
+
+#include "shift_rows.h"
+
+void ShiftRows(state_t *state) {
+    #pragma HLS INTERFACE m_axi port=state depth=16
+    #pragma HLS INTERFACE s_axilite port=return bundle=CTRL_BUS
+
+    state_t temp_state;
+    
+    // Copy the original state to temporary state
+    RowCopy:
+    for (int i = 0; i < 4; i++) {
+        #pragma HLS UNROLL
+        ColCopy:
+        for (int j = 0; j < 4; j++) {
+            #pragma HLS UNROLL
+            temp_state[i][j] = (*state)[i][j];
+        }
+    }
+
+    // Perform ShiftRows operation
+    (*state)[0][0] = temp_state[0][0];
+    (*state)[0][1] = temp_state[0][1];
+    (*state)[0][2] = temp_state[0][2];
+    (*state)[0][3] = temp_state[0][3];
+
+    (*state)[1][0] = temp_state[1][1];
+    (*state)[1][1] = temp_state[1][2];
+    (*state)[1][2] = temp_state[1][3];
+    (*state)[1][3] = temp_state[1][0];
+
+    (*state)[2][0] = temp_state[2][2];
+    (*state)[2][1] = temp_state[2][3];
+    (*state)[2][2] = temp_state[2][0];
+    (*state)[2][3] = temp_state[2][1];
+
+    (*state)[3][0] = temp_state[3][3];
+    (*state)[3][1] = temp_state[3][0];
+    (*state)[3][2] = temp_state[3][1];
+    (*state)[3][3] = temp_state[3][2];
+}

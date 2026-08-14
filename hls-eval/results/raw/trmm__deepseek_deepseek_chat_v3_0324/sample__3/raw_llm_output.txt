@@ -1,0 +1,36 @@
+To implement the triangular matrix multiplication (TRMM) kernel as described, we need to create a function that performs the operation `B = alpha * A * B`, where `A` is a lower triangular matrix, and the operation is performed in place on `B`. The function will be named `kernel_trmm` and will take the following parameters: `alpha` (a scalar), `A` (a 20x20 lower triangular matrix), and `B` (a 20x30 matrix).
+
+### Approach
+1. **Understanding TRMM Operation**: The operation `B = alpha * A * B` involves multiplying the lower triangular matrix `A` with matrix `B` and scaling the result by `alpha`. The result is stored back in `B`. Since `A` is lower triangular, we only need to consider the lower part of `A` (including the diagonal) for the multiplication.
+
+2. **Matrix Multiplication**: For each element in the resulting matrix, we compute the sum of the products of the corresponding elements from the lower part of `A` and the elements from `B`. The diagonal elements of `A` are considered, and the upper part of `A` is not used (as it is zero in a lower triangular matrix).
+
+3. **In-Place Update**: The result of the multiplication is stored in `B` in place, meaning the original `B` is updated with the new values.
+
+4. **Efficiency**: The implementation will use nested loops to traverse the matrices and perform the multiplication efficiently.
+
+### Solution Code
+```c
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
+            double sum = 0.0;
+            for (int k = 0; k <= i; k++) {
+                sum += A[i][k] * B[k][j];
+            }
+            B[i][j] = alpha * sum;
+        }
+    }
+}
+```
+
+### Explanation
+1. **Outer Loop (i)**: This loop iterates over each row of matrix `A` (20 rows).
+
+2. **Middle Loop (j)**: This loop iterates over each column of matrix `B` (30 columns).
+
+3. **Innermost Loop (k)**: This loop iterates from the start of the row in `A` (0) to the current row (i), multiplying each element of `A` (from the lower triangular part) with the corresponding element in `B` and summing these products.
+
+4. **Scaling and Storing**: The sum of the products is scaled by `alpha` and stored in the corresponding element of `B`, updating it in place.
+
+This approach ensures that the operation is performed efficiently, leveraging the lower triangular property of `A` and updating `B` with the result of the multiplication scaled by `alpha`. The nested loops traverse the matrices correctly, and the in-place update ensures no additional storage is required for the result.

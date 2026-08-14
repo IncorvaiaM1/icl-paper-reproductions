@@ -1,0 +1,24 @@
+
+#include "lu.h"
+
+void kernel_lu(double A[40][40]) {
+    for (int k = 0; k < 40; k++) {
+        // Compute upper triangular part (U) for current row k
+        for (int j = k; j < 40; j++) {
+            double sum = 0.0;
+            for (int m = 0; m < k; m++) {
+                sum += A[k][m] * A[m][j];
+            }
+            A[k][j] -= sum;
+        }
+        
+        // Compute lower triangular part (L) for current column k (below diagonal)
+        for (int i = k + 1; i < 40; i++) {
+            double sum = 0.0;
+            for (int m = 0; m < k; m++) {
+                sum += A[i][m] * A[m][k];
+            }
+            A[i][k] = (A[i][k] - sum) / A[k][k];
+        }
+    }
+}

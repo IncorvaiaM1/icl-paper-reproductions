@@ -1,0 +1,296 @@
+{
+  "compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "std": "c++14",
+  "vitis_include": null,
+  "suites": [
+    "polybench"
+  ],
+  "summary": {
+    "n": 28,
+    "compiled": 28,
+    "ran": 28,
+    "need_hls_headers": 0
+  },
+  "results": [
+    {
+      "design": "2mm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.88,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "3mm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.84,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "atax",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.94,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "bicg",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.87,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "cholesky",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.85,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "correlation",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.0,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "covariance",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.94,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "doitgen",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.95,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "durbin",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.56,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "fdtd-2d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.58,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "floyd-warshall",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.55,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "gemm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.53,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "gemver",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.52,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "gesummv",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.56,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "gramschmidt",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.55,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "heat-3d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.62,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "jacobi-1d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.58,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "jacobi-2d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.57,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "lu",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.57,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "ludcmp",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.6,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "mvt",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.49,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "nussinov",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.62,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "seidel-2d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.44,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "symm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.55,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "syr2k",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.33,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "syrk",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.32,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "trisolv",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.3,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "trmm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.31,
+      "run_s": 0.0,
+      "error": ""
+    }
+  ]
+}

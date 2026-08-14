@@ -1,0 +1,24 @@
+<OUTPUT_CODE name="kernel_atax.cpp">
+#include "atax.h"
+
+void kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {
+    const int M = 38;
+    const int N = 42;
+
+    // First compute tmp = A * x (matrix-vector multiplication)
+    for (int i = 0; i < M; i++) {
+        tmp[i] = 0.0;
+        for (int j = 0; j < N; j++) {
+            tmp[i] += A[i][j] * x[j];
+        }
+    }
+
+    // Then compute y = A^T * tmp (transpose matrix-vector multiplication)
+    for (int j = 0; j < N; j++) {
+        y[j] = 0.0;
+        for (int i = 0; i < M; i++) {
+            y[j] += A[i][j] * tmp[i];
+        }
+    }
+}
+</OUTPUT_CODE>

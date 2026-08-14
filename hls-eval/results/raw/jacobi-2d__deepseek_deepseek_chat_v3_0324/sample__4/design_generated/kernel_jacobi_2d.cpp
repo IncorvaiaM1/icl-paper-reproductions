@@ -1,0 +1,50 @@
+
+#include "jacobi-2d.h"
+
+void kernel_jacobi_2d(double A[30][30], double B[30][30]) {
+    const int TSTEPS = 20;
+    const int N = 30;
+
+    for (int t = 0; t < TSTEPS; t++) {
+        for (int i = 1; i < N - 1; i++) {
+            for (int j = 1; j < N - 1; j++) {
+                // Perform stencil computation and write to ping-pong buffer
+                if (t % 2 == 0) {
+                    B[i][j] = (A[i][j] + A[i-1][j] + A[i+1][j] + A[i][j-1] + A[i][j+1]) / 5.0;
+                } else {
+                    A[i][j] = (B[i][j] + B[i-1][j] + B[i+1][j] + B[i][j-1] + B[i][j+1]) / 5.0;
+                }
+            }
+        }
+
+        // Handle boundary conditions (copy edges)
+        if (t % 2 == 0) {
+            for (int i = 0; i < N; i++) {
+                B[i][0] = A[i][0];
+                B[i][N-1] = A[i][N-1];
+            }
+            for (int j = 0; j < N; j++) {
+                B[0][j] = A[0][j];
+                B[N-1][j] = A[N-1][j];
+            }
+        } else {
+            for (int i = 0; i < N; i++) {
+                A[i][0] = B[i][0];
+                A[i][N-1] = B[i][N-1];
+            }
+            for (int j = 0; j < N; j++) {
+                A[0][j] = B[0][j];
+                A[N-1][j] = B[N-1][j];
+            }
+        }
+    }
+
+    // Final result is in A if TSTEPS is odd, otherwise in B
+    if (TSTEPS % 2 == 1) {
+        for (int i = 1; i < N - 1; i++) {
+            for (int j = 1; j < N - 1; j++) {
+                A[i][j] = B[i][j];
+            }
+        }
+    }
+}

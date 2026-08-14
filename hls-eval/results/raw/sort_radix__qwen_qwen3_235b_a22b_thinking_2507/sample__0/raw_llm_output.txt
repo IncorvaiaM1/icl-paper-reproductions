@@ -1,0 +1,115 @@
+<OUTPUT_CODE name="sort_radix.cpp">
+#include "sort_radix.h"
+
+static void init(int bucket[BUCKETSIZE]) {
+    for (int i = 0; i < BUCKETSIZE; i++) {
+        bucket[i] = 0;
+    }
+}
+
+static void hist(int bucket[BUCKETSIZE], int a[SIZE], int exp) {
+    for (int i = 0; i < SIZE; i++) {
+        int block_id = i / ELEMENTSPERBLOCK;
+        int radix = (a[i] >> exp) & MASK;
+        bucket[block_id * RADIXSIZE + radix]++;
+    }
+}
+
+static void local_scan(int bucket[BUCKETSIZE]) {
+    for (int block_id = 0; block_id < NUMOFBLOCKS; block_id++) {
+        int base = block_id * RADIXSIZE;
+        int s0 = bucket[base];
+        int s1 = s0 + bucket[base+1];
+        int s2 = s1 + bucket[base+2];
+        int s3 = s2 + bucket[base+3];
+        bucket[base] = s0;
+        bucket[base+1] = s1;
+        bucket[base+2] = s2;
+        bucket[base+3] = s3;
+    }
+}
+
+static void sum_scan(int sum[SCAN_RADIX], int bucket[BUCKETSIZE]) {
+    const int NUM_GROUPS = NUMOFBLOCKS / SCAN_BLOCK;
+
+    for (int group_id = 0; group_id < NUM_GROUPS; group_id++) {
+        int group_total = 0;
+        for (int j = 0; j < SCAN_BLOCK; j++) {
+            int block_id = group_id * SCAN_BLOCK + j;
+            int bucket_index = block_id * RADIXSIZE + (RADIXSIZE-1);
+            group_total += bucket[bucket_index];
+        }
+        sum[group_id] = group_total;
+    }
+
+    int prefix = 0;
+    for (int i = 0; i < NUM_GROUPS; i++) {
+        int temp = sum[i];
+        sum[i] = prefix;
+        prefix += temp;
+    }
+}
+
+static void last_step_scan(int bucket[BUCKETSIZE], int sum[SCAN_RADIX]) {
+    const int NUM_GROUPS = NUMOFBLOCKS / SCAN_BLOCK;
+
+    for (int group_id = 0; group_id < NUM_GROUPS; group_id++) {
+        int block_totals[SCAN_BLOCK];
+        for (int j = 0; j < SCAN_BLOCK; j++) {
+            int block_id = group_id * SCAN_BLOCK + j;
+            int bucket_index = block_id * RADIXSIZE + (RADIXSIZE-1);
+            block_totals[j] = bucket[bucket_index];
+        }
+
+        int group_scan[SCAN_BLOCK];
+        group_scan[0] = 0;
+        for (int j = 1; j < SCAN_BLOCK; j++) {
+            group_scan[j] = group_scan[j-1] + block_totals[j-1];
+        }
+
+        int group_prefix = sum[group_id];
+
+        for (int j = 0; j < SCAN_BLOCK; j++) {
+            int block_id = group_id * SCAN_BLOCK + j;
+            int global_prefix = group_prefix + group_scan[j];
+
+            int block_scan[RADIXSIZE];
+            block_scan[0] = 0;
+            for (int r = 1; r < RADIXSIZE; r++) {
+                int bucket_index = block_id * RADIXSIZE + r - 1;
+                block_scan[r] = bucket[bucket_index];
+            }
+
+            for (int r = 0; r < RADIXSIZE; r++) {
+                int bucket_index = block_id * RADIXSIZE + r;
+                bucket[bucket_index] = global_prefix + block_scan[r];
+            }
+        }
+    }
+}
+
+static void update(int b[SIZE], int bucket[BUCKETSIZE], int a[SIZE], int exp) {
+    for (int i = 0; i < SIZE; i++) {
+        int block_id = i / ELEMENTSPERBLOCK;
+        int radix = (a[i] >> exp) & MASK;
+        int bucket_index = block_id * RADIXSIZE + radix;
+        int pos = bucket[bucket_index];
+        b[pos] = a[i];
+        bucket[bucket_index] = pos + 1;
+    }
+}
+
+void ss_sort(int a[SIZE], int b[SIZE], int bucket[BUCKETSIZE], int sum[SCAN_RADIX]) {
+    for (int exp = 0; exp < 32; exp += 2) {
+        init(bucket);
+        hist(bucket, a, exp);
+        local_scan(bucket);
+        sum_scan(sum, bucket);
+        last_step_scan(bucket, sum);
+        update(b, bucket, a, exp);
+        int *temp = a;
+        a = b;
+        b = temp;
+    }
+}
+</OUTPUT_CODE>

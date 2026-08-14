@@ -1,0 +1,50 @@
+
+#include "md_knn.h"
+
+void md_kernel(
+    TYPE force_x[nAtoms],
+    TYPE force_y[nAtoms],
+    TYPE force_z[nAtoms],
+    TYPE position_x[nAtoms],
+    TYPE position_y[nAtoms],
+    TYPE position_z[nAtoms],
+    int32_t NL[nAtoms * maxNeighbors]) {
+
+    // Initialize forces to zero
+    for (int i = 0; i < nAtoms; i++) {
+        force_x[i] = 0.0;
+        force_y[i] = 0.0;
+        force_z[i] = 0.0;
+    }
+
+    // Main computation loop
+    loop_i: for (int i = 0; i < nAtoms; i++) {
+        loop_j: for (int j = 0; j < maxNeighbors; j++) {
+            int neighbor_idx = NL[i * maxNeighbors + j];
+            if (neighbor_idx >= 0 && neighbor_idx < nAtoms) {
+                // Calculate distance components
+                TYPE delx = position_x[i] - position_x[neighbor_idx];
+                TYPE dely = position_y[i] - position_y[neighbor_idx];
+                TYPE delz = position_z[i] - position_z[neighbor_idx];
+
+                // Calculate squared distance
+                TYPE r2inv = delx * delx + dely * dely + delz * delz;
+                r2inv = 1.0 / r2inv;
+                TYPE r6inv = r2inv * r2inv * r2inv;
+
+                // Calculate Lennard-Jones force
+                TYPE force = r2inv * r6inv * (lj1 * r6inv - lj2);
+
+                // Update forces
+                force_x[i] += delx * force;
+                force_y[i] += dely * force;
+                force_z[i] += delz * force;
+
+                // Newton's third law (optional, depending on neighbor list symmetry)
+                force_x[neighbor_idx] -= delx * force;
+                force_y[neighbor_idx] -= dely * force;
+                force_z[neighbor_idx] -= delz * force;
+            }
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<OUTPUT_CODE name="BlockFrequency.cpp">
+#include "block.h"
+
+void BlockFrequency(double *result, int epsilon[M * N]) {
+    double sum = 0.0;
+
+    for (int i = 0; i < N; i++) {
+        int blockSum = 0;
+
+        for (int j = 0; j < M; j++) {
+            blockSum += epsilon[i * M + j];
+        }
+
+        double pi = (double)blockSum / M;
+        double v = pi - 0.5;
+        sum += v * v;
+    }
+
+    *result = sum;
+}
+</OUTPUT_CODE>

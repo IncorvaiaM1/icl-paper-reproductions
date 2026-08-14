@@ -1,0 +1,22 @@
+
+#include "floyd-warshall.h"
+
+void kernel_floyd_warshall(int path[60][60]) {
+    // Initialize diagonal to 0 (shortest path from node to itself is always 0)
+    for (int i = 0; i < 60; i++) {
+        path[i][i] = 0;
+    }
+
+    // Floyd-Warshall algorithm with k as intermediate node
+    for (int k = 0; k < 60; k++) {
+        for (int i = 0; i < 60; i++) {
+            for (int j = 0; j < 60; j++) {
+                // Check if path through node k is shorter
+                int intermediate = path[i][k] + path[k][j];
+                if (intermediate < path[i][j]) {
+                    path[i][j] = intermediate;
+                }
+            }
+        }
+    }
+}

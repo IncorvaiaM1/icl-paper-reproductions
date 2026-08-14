@@ -1,0 +1,47 @@
+<OUTPUT_CODE name="kernel_name.cpp">
+#include "kmp_kmp.h"
+
+void CPF(char pattern[PATTERN_SIZE], int32_t kmpNext[PATTERN_SIZE]) {
+    int32_t k = 0;
+    int32_t q;
+
+    kmpNext[0] = 0;
+    for (q = 1; q < PATTERN_SIZE; q++) {
+        while (k > 0 && pattern[q] != pattern[k]) {
+            k = kmpNext[k - 1];
+        }
+        if (pattern[q] == pattern[k]) {
+            k++;
+        }
+        kmpNext[q] = k;
+    }
+}
+
+int kmp(
+    char pattern[PATTERN_SIZE],
+    char input[STRING_SIZE],
+    int32_t kmpNext[PATTERN_SIZE],
+    int32_t n_matches[1]) {
+    int32_t k = 0;
+    int32_t q;
+    int32_t matches = 0;
+
+    CPF(pattern, kmpNext);
+
+    for (q = 0; q < STRING_SIZE; q++) {
+        while (k > 0 && input[q] != pattern[k]) {
+            k = kmpNext[k - 1];
+        }
+        if (input[q] == pattern[k]) {
+            k++;
+        }
+        if (k == PATTERN_SIZE) {
+            matches++;
+            k = kmpNext[k - 1];
+        }
+    }
+
+    n_matches[0] = matches;
+    return matches;
+}
+</OUTPUT_CODE>

@@ -1,0 +1,25 @@
+<OUTPUT_CODE name="add_round_key.cpp">
+#include "add_round_key.h"
+
+void AddRoundKey(unsigned char round, unsigned char (*state)[4][4], unsigned char const *RoundKey) {
+    // Calculate the starting index in the RoundKey array for this round
+    // The offset is: round * Nb * 4
+    // Nb = 4, so Nb * 4 = 16
+    // Thus offset = round * 16
+    int offset = round * Nb * 4;
+
+    // Iterate over the 4x4 state matrix
+    AddRoundKey_Loop_i:
+    for (int i = 0; i < 4; i++) {
+        AddRoundKey_Loop_j:
+        for (int j = 0; j < Nb; j++) {
+            // Calculate the index into the RoundKey array
+            // Formula: offset + (i * Nb) + j
+            int key_index = offset + (i * Nb) + j;
+            
+            // XOR the state element with the corresponding round key byte
+            (*state)[i][j] ^= RoundKey[key_index];
+        }
+    }
+}
+</OUTPUT_CODE>

@@ -1,0 +1,72 @@
+Based on the provided code and kernel description, I'll analyze the `CumulativeSums` kernel and its testbench.
+
+### Analysis of the Kernel
+
+1. **Functionality**:
+   - The kernel computes cumulative maximum (`res_sup`) and minimum (`res_inf`) values from a binary input array `epsilon[N]`
+   - It maintains a running sum `S` that:
+     - Increases by 1 when `epsilon[k]` is 1
+     - Decreases by 1 when `epsilon[k]` is 0
+   - Tracks the maximum and minimum values of `S` throughout the computation
+
+2. **Parameters**:
+   - Inputs:
+     - `epsilon`: Binary array of size N (20000)
+   - Outputs:
+     - `res_sup`: Pointer to store maximum cumulative sum
+     - `res_inf`: Pointer to store minimum cumulative sum
+
+3. **Testbench Analysis**:
+   - Initializes `epsilon_test` with a pattern where elements are 1 when divisible by 7 (i*73 % 7 == 0)
+   - Calls `CumulativeSums` and prints results
+
+4. **Expected Implementation**:
+   The kernel should:
+   - Initialize S to 0
+   - Initialize res_sup and res_inf to 0
+   - Iterate through epsilon array:
+     - Update S based on epsilon[i]
+     - Update res_sup if S > current res_sup
+     - Update res_inf if S < current res_inf
+
+5. **Optimization Considerations**:
+   - The kernel is optimized for HLS (High-Level Synthesis)
+   - Should have efficient dataflow
+   - Minimal resource usage (likely avoids unnecessary operations)
+
+### Suggested Implementation
+
+Here's how the implementation might look:
+
+```c
+void CumulativeSums(int *res_sup, int *res_inf, int epsilon[N]) {
+    int S = 0;
+    *res_sup = 0;
+    *res_inf = 0;
+    
+    for (int k = 0; k < N; k++) {
+        S += (epsilon[k] ? 1 : -1);
+        
+        if (S > *res_sup) {
+            *res_sup = S;
+        }
+        if (S < *res_inf) {
+            *res_inf = S;
+        }
+    }
+}
+```
+
+### Test Case Analysis
+
+The testbench creates a pattern where:
+- Elements are 1 when (i*73 % 7 == 0), 0 otherwise
+- 73 and 7 are coprime, so this creates a repeating pattern every 7 elements
+- Approximately 1/7th of elements will be 1 (about 2857 out of 20000)
+
+Expected output:
+- The cumulative sum will fluctuate around 0
+- Maximum will be positive (number of excess 1s in the longest positive run)
+- Minimum will be negative (number of excess 0s in the longest negative run)
+
+The exact values depend on the specific pattern, but the testbench will verify the implementation's correctness.

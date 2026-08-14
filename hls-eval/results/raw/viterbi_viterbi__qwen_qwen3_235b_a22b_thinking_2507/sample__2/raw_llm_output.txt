@@ -1,0 +1,49 @@
+<OUTPUT_CODE name="viterbi_viterbi.cpp">
+#include "viterbi_viterbi.h"
+
+int viterbi(tok_t obs[N_OBS], prob_t init[N_STATES], prob_t transition[N_STATES * N_STATES], prob_t emission[N_STATES * N_TOKENS], state_t path[N_OBS]) {
+    state_t backtrack[N_OBS][N_STATES];
+    prob_t llike_prev[N_STATES];
+    prob_t llike_curr[N_STATES];
+
+    for (int i = 0; i < N_STATES; i++) {
+        llike_prev[i] = init[i] + emission[i * N_TOKENS + obs[0]];
+    }
+
+    for (int t = 1; t < N_OBS; t++) {
+        for (int j = 0; j < N_STATES; j++) {
+            prob_t min_val = llike_prev[0] + transition[0 * N_STATES + j];
+            state_t min_state = 0;
+            for (int i = 1; i < N_STATES; i++) {
+                prob_t val = llike_prev[i] + transition[i * N_STATES + j];
+                if (val < min_val) {
+                    min_val = val;
+                    min_state = i;
+                }
+            }
+            llike_curr[j] = min_val + emission[j * N_TOKENS + obs[t]];
+            backtrack[t][j] = min_state;
+        }
+        for (int i = 0; i < N_STATES; i++) {
+            llike_prev[i] = llike_curr[i];
+        }
+    }
+
+    state_t end_state = 0;
+    prob_t min_val = llike_prev[0];
+    for (int i = 1; i < N_STATES; i++) {
+        if (llike_prev[i] < min_val) {
+            min_val = llike_prev[i];
+            end_state = i;
+        }
+    }
+
+    path[N_OBS-1] = end_state;
+    for (int t = N_OBS-2; t >= 0; t--) {
+        end_state = backtrack[t+1][end_state];
+        path[t] = end_state;
+    }
+
+    return 0;
+}
+</OUTPUT_CODE>

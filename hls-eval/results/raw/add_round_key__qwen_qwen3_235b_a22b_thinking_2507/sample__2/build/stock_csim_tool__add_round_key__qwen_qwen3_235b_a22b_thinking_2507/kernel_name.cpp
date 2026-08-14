@@ -1,0 +1,11 @@
+
+#include "add_round_key.h"
+
+void AddRoundKey(uint8_t round, state_t *state, const uint8_t *RoundKey) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            int index = round * 16 + i * 4 + j;
+            (*state)[i][j] ^= RoundKey[index];
+        }
+    }
+}

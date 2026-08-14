@@ -1,0 +1,14 @@
+
+#include "trmm.h"
+
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
+            double sum = 0.0;
+            for (int k = i; k < 20; k++) {
+                sum += A[k][i] * B[k][j];
+            }
+            B[i][j] = alpha * sum;
+        }
+    }
+}

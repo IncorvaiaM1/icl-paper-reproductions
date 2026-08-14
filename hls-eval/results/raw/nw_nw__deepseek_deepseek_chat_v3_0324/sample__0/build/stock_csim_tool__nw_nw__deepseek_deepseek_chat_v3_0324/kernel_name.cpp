@@ -1,0 +1,77 @@
+
+#include "nw_nw.h"
+
+#define MATCH_SCORE 1
+#define MISMATCH_SCORE -1
+#define GAP_SCORE -1
+
+#define IDX(i, j) ((i) * (BLEN + 1) + (j))
+
+void needwun(
+    char SEQA[ALEN],
+    char SEQB[BLEN],
+    char alignedA[ALEN + BLEN],
+    char alignedB[ALEN + BLEN],
+    int M[(ALEN + 1) * (BLEN + 1)],
+    char ptr[(ALEN + 1) * (BLEN + 1)])
+{
+    // Initialize first row and column of M and ptr
+    for (int i = 0; i <= ALEN; i++) {
+        M[IDX(i, 0)] = i * GAP_SCORE;
+        ptr[IDX(i, 0)] = 'u'; // up
+    }
+    for (int j = 0; j <= BLEN; j++) {
+        M[IDX(0, j)] = j * GAP_SCORE;
+        ptr[IDX(0, j)] = 'l'; // left
+    }
+
+    // Fill the matrix M
+    for (int i = 1; i <= ALEN; i++) {
+        for (int j = 1; j <= BLEN; j++) {
+            int match = M[IDX(i-1, j-1)] + (SEQA[i-1] == SEQB[j-1] ? MATCH_SCORE : MISMATCH_SCORE);
+            int del = M[IDX(i-1, j)] + GAP_SCORE;
+            int ins = M[IDX(i, j-1)] + GAP_SCORE;
+
+            if (match >= del && match >= ins) {
+                M[IDX(i, j)] = match;
+                ptr[IDX(i, j)] = 'd'; // diagonal
+            } else if (del >= ins) {
+                M[IDX(i, j)] = del;
+                ptr[IDX(i, j)] = 'u'; // up
+            } else {
+                M[IDX(i, j)] = ins;
+                ptr[IDX(i, j)] = 'l'; // left
+            }
+        }
+    }
+
+    // Traceback to compute aligned sequences
+    int i = ALEN;
+    int j = BLEN;
+    int pos = ALEN + BLEN - 1;
+
+    while (i > 0 || j > 0) {
+        if (ptr[IDX(i, j)] == 'd') {
+            alignedA[pos] = SEQA[i-1];
+            alignedB[pos] = SEQB[j-1];
+            i--;
+            j--;
+        } else if (ptr[IDX(i, j)] == 'u') {
+            alignedA[pos] = SEQA[i-1];
+            alignedB[pos] = '_';
+            i--;
+        } else { // 'l'
+            alignedA[pos] = '_';
+            alignedB[pos] = SEQB[j-1];
+            j--;
+        }
+        pos--;
+    }
+
+    // Pad remaining positions with underscores
+    while (pos >= 0) {
+        alignedA[pos] = '_';
+        alignedB[pos] = '_';
+        pos--;
+    }
+}

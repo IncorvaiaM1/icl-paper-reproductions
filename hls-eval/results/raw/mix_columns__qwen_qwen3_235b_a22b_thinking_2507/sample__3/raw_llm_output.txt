@@ -1,0 +1,22 @@
+<OUTPUT_CODE name="kernel_name.cpp">
+#include "mix_cols.h"
+
+static uint8_t xtime(uint8_t x) {
+    return (x << 1) ^ ((x & 0x80) ? 0x1b : 0);
+}
+
+void MixColumns(state_t *state) {
+    state_t &s = *state;
+    for (int c = 0; c < 4; c++) {
+        uint8_t s0 = s[c][0];
+        uint8_t s1 = s[c][1];
+        uint8_t s2 = s[c][2];
+        uint8_t s3 = s[c][3];
+        
+        s[c][0] = xtime(s0) ^ xtime(s1) ^ s1 ^ s2 ^ s3;
+        s[c][1] = s0 ^ xtime(s1) ^ xtime(s2) ^ s2 ^ s3;
+        s[c][2] = s0 ^ s1 ^ xtime(s2) ^ xtime(s3) ^ s3;
+        s[c][3] = xtime(s0) ^ s0 ^ s1 ^ s2 ^ xtime(s3);
+    }
+}
+</OUTPUT_CODE>

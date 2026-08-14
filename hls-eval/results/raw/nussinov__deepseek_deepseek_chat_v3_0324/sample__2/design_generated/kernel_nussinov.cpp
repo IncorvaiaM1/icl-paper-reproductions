@@ -1,0 +1,51 @@
+
+#include "nussinov.h"
+
+void kernel_nussinov(char seq[60], int table[60][60]) {
+    int n = 60;
+    
+    // Initialize the diagonal with 0
+    for (int i = 0; i < n; i++) {
+        table[i][i] = 0;
+    }
+    
+    // Fill the table for subsequences of length 1 to n-1
+    for (int length = 1; length < n; length++) {
+        for (int i = 0; i < n - length; i++) {
+            int j = i + length;
+            
+            // Case 1: skip i
+            int max_val = table[i+1][j];
+            
+            // Case 2: skip j
+            if (table[i][j-1] > max_val) {
+                max_val = table[i][j-1];
+            }
+            
+            // Case 3: pair i and j
+            int w = 0;
+            if ((seq[i] == 'A' && seq[j] == 'T') || 
+                (seq[i] == 'T' && seq[j] == 'A') || 
+                (seq[i] == 'U' && seq[j] == 'A') || 
+                (seq[i] == 'A' && seq[j] == 'U') || 
+                (seq[i] == 'G' && seq[j] == 'C') || 
+                (seq[i] == 'C' && seq[j] == 'G')) {
+                w = 1;
+            }
+            int case3 = table[i+1][j-1] + w;
+            if (case3 > max_val) {
+                max_val = case3;
+            }
+            
+            // Case 4: bifurcation
+            for (int k = i + 1; k < j; k++) {
+                int bifurcation = table[i][k] + table[k+1][j];
+                if (bifurcation > max_val) {
+                    max_val = bifurcation;
+                }
+            }
+            
+            table[i][j] = max_val;
+        }
+    }
+}

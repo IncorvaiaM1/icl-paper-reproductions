@@ -1,0 +1,34 @@
+
+#include "heat-3d.h"
+
+void kernel_heat_3d(double A[10][10][10], double B[10][10][10]) {
+    const int n = 10;
+    const int tsteps = 20;
+    const double alpha = 0.125;
+
+    // Time steps loop
+    for (int t = 0; t < tsteps; t++) {
+        // Iterate over the 3D grid
+        for (int i = 1; i < n-1; i++) {
+            for (int j = 1; j < n-1; j++) {
+                for (int k = 1; k < n-1; k++) {
+                    // Calculate the update using the heat equation
+                    double diff_x = A[i+1][j][k] - 2.0 * A[i][j][k] + A[i-1][j][k];
+                    double diff_y = A[i][j+1][k] - 2.0 * A[i][j][k] + A[i][j-1][k];
+                    double diff_z = A[i][j][k+1] - 2.0 * A[i][j][k] + A[i][j][k-1];
+                    
+                    B[i][j][k] = A[i][j][k] + alpha * (diff_x + diff_y + diff_z);
+                }
+            }
+        }
+
+        // Swap the arrays for next iteration
+        for (int i = 1; i < n-1; i++) {
+            for (int j = 1; j < n-1; j++) {
+                for (int k = 1; k < n-1; k++) {
+                    A[i][j][k] = B[i][j][k];
+                }
+            }
+        }
+    }
+}

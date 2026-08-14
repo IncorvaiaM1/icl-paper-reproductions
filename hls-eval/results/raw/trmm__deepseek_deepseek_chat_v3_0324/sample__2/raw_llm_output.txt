@@ -1,0 +1,65 @@
+## Understanding the Task
+
+The task is to implement a kernel function called `kernel_trmm` based on the provided files. The function performs a triangular matrix multiplication (TRMM) operation, specifically the operation `B = alpha * A * B` where:
+- `A` is a 20x20 lower triangular matrix
+- `B` is a 20x30 matrix
+- `alpha` is a scalar
+
+The function is defined in `trmm.h` and has a test bench in `trmm_tb.cpp` that initializes the matrices and calls the kernel.
+
+## Implementation Approach
+
+1. **Function Signature**: The function is declared as `void kernel_trmm(double alpha, double A[20][20], B[20][30])` in `trmm.h`.
+
+2. **TRMM Operation**: The operation is `B = alpha * A * B`. Since `A` is lower triangular, we can optimize the multiplication to only use the lower part of `A`.
+
+3. **Matrix Multiplication**: The operation involves nested loops to traverse the matrices and perform the multiplication.
+
+4. **In-Place Update**: The result is stored in `B` in-place, so we need to handle the updates carefully to avoid overwriting values that are still needed in the computation.
+
+5. **Test Bench**: The test bench in `trmm_tb.cpp` initializes the matrices and calls the kernel, then prints the results.
+
+## Solution Code
+
+```cpp
+#include "trmm.h"
+
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    int i, j, k;
+    double temp[20][30]; // Temporary matrix to store intermediate results
+
+    // Initialize the temporary matrix with B to avoid overwriting during computation
+    for (i = 0; i < 20; i++) {
+        for (j = 0; j < 30; j++) {
+            temp[i][j] = B[i][j];
+        }
+    }
+
+    // Perform the TRMM operation: B = alpha * A * B
+    for (i = 0; i < 20; i++) {
+        for (j = 0; j < 30; j++) {
+            double sum = 0.0;
+            // Only use the lower triangular part of A (k <= i)
+            for (k = 0; k <= i; k++) {
+                sum += A[i][k] * temp[k][j];
+            }
+            B[i][j] = alpha * sum;
+        }
+    }
+}
+```
+
+## Explanation
+
+1. **Temporary Matrix**: To avoid overwriting the values of `B` during the computation, we first copy the contents of `B` into a temporary matrix `temp`.
+
+2. **TRMM Operation**: The operation `B = alpha * A * B` is performed using nested loops:
+   - The outer loops traverse the rows and columns of `B`.
+   - The inner loop computes the sum of the products of the elements of the lower triangular part of `A` and the corresponding elements of the temporary matrix `temp`.
+   - The result is scaled by `alpha` and stored in `B`.
+
+3. **Lower Triangular Matrix**: Since `A` is lower triangular, the inner loop only considers elements where the row index `k` is less than or equal to the column index `i` (for lower triangular part).
+
+4. **Efficiency**: The use of a temporary matrix ensures that the original values of `B` are not overwritten during the computation, which is crucial for the correctness of the in-place update.
+
+This implementation efficiently performs the TRMM operation while handling the in-place update correctly and utilizing the lower triangular property of matrix `A`.

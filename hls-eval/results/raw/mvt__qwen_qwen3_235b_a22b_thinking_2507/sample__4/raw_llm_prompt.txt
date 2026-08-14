@@ -1,0 +1,153 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_mvt` design is a high-level synthesis kernel that performs a matrix-vector multiplication (MVT) composed with another MVT but with a transposed matrix. The kernel takes five inputs: two vectors `y1` and `y2` of length `N`, and a square matrix `A` of size `N x N`. The kernel outputs two vectors `x1` and `x2` of length `N`, where `x1` is the result of the MVT of `A` and `y1`, and `x2` is the result of the MVT of the transposed matrix `A` and `y2`.
+
+It takes the following as inputs,
+
+- $A: N \times N$ matrix
+- $y1, y2$: vectors of length $N$
+
+and gives the following as outputs:
+
+- $x1$: vector of length $N$, where $x1 = x1 + Ay1$
+- $x2$: vector of length $N$, where $x2 = x2 + A^Ty2$
+
+---
+
+Top-Level Function: `kernel_mvt`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_mvt(double x1[40], double x2[40], double y_1[40], double y_2[40], double A[40][40]);`
+
+Inputs:
+- `x1`: an input vector of length `N` (40 in this implementation) that will be updated with the result of the MVT of `A` and `y1`.
+- `x2`: an input vector of length `N` (40 in this implementation) that will be updated with the result of the MVT of the transposed matrix `A` and `y2`.
+- `y_1`: an input vector of length `N` (40 in this implementation) that is one of the operands of the MVT.
+- `y_2`: an input vector of length `N` (40 in this implementation) that is one of the operands of the MVT.
+- `A`: an input square matrix of size `N x N` (40 x 40 in this implementation) that is one of the operands of the MVT.
+
+Outputs:
+- `x1`: an output vector of length `N` (40 in this implementation) that is the result of the MVT of `A` and `y1`.
+- `x2`: an output vector of length `N` (40 in this implementation) that is the result of the MVT of the transposed matrix `A` and `y2`.
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point data type used to represent the elements of the input vectors and matrix.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="mvt_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "mvt.h"
+
+void init_array(
+    int n,
+    double x1[40],
+    double x2[40],
+    double y_1[40],
+    double y_2[40],
+    double A[40][40]) {
+    int i, j;
+
+    for (i = 0; i < n; i++) {
+        x1[i] = (double)(i % n) / n;
+        x2[i] = (double)((i + 1) % n) / n;
+        y_1[i] = (double)((i + 3) % n) / n;
+        y_2[i] = (double)((i + 4) % n) / n;
+        for (j = 0; j < n; j++)
+            A[i][j] = (double)(i * j % n) / n;
+    }
+}
+
+void print_array(int n, double x1[40], double x2[40])
+
+{
+    int i;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "x1");
+    for (i = 0; i < n; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", x1[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "x1");
+
+    fprintf(stderr, "begin dump: %s", "x2");
+    for (i = 0; i < n; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", x2[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "x2");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 40;
+
+    double A[40][40];
+    double x1[40];
+    double x2[40];
+    double y_1[40];
+    double y_2[40];
+
+    init_array(n, x1, x2, y_1, y_2, A);
+
+    kernel_mvt(x1, x2, y_1, y_2, A);
+
+    print_array(n, x1, x2);
+
+    return 0;
+}
+</INPUT_CODE name="mvt_tb.cpp">
+<INPUT_CODE name="mvt.h">
+#pragma once
+#include <cmath>
+
+void kernel_mvt(
+    double x1[40],
+    double x2[40],
+    double y_1[40],
+    double y_2[40],
+    double A[40][40]);
+
+</INPUT_CODE name="mvt.h">
+
+
+
+## Task Output
+

@@ -1,0 +1,51 @@
+
+#include "heat-3d.h"
+
+void kernel_heat_3d(double A[10][10][10], double B[10][10][10]) {
+    const int n = 10;
+    const int tsteps = 20;
+    double data_t[10][10][10];
+    double data_t_minus_1[10][10][10];
+
+    // Initialize data_t_minus_1 with input A
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            for (int k = 0; k < n; k++) {
+                data_t_minus_1[i][j][k] = A[i][j][k];
+            }
+        }
+    }
+
+    // Time step iterations
+    for (int t = 0; t < tsteps; t++) {
+        // Update interior points only (excluding boundaries)
+        for (int i = 1; i < n - 1; i++) {
+            for (int j = 1; j < n - 1; j++) {
+                for (int k = 1; k < n - 1; k++) {
+                    data_t[i][j][k] = data_t_minus_1[i][j][k] +
+                        0.125 * (data_t_minus_1[i + 1][j][k] - 2.0 * data_t_minus_1[i][j][k] + data_t_minus_1[i - 1][j][k]) +
+                        0.125 * (data_t_minus_1[i][j + 1][k] - 2.0 * data_t_minus_1[i][j][k] + data_t_minus_1[i][j - 1][k]) +
+                        0.125 * (data_t_minus_1[i][j][k + 1] - 2.0 * data_t_minus_1[i][j][k] + data_t_minus_1[i][j][k - 1]);
+                }
+            }
+        }
+
+        // Copy data_t to data_t_minus_1 for next iteration
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < n; k++) {
+                    data_t_minus_1[i][j][k] = data_t[i][j][k];
+                }
+            }
+        }
+    }
+
+    // Copy final result to output array B
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            for (int k = 0; k < n; k++) {
+                B[i][j][k] = data_t_minus_1[i][j][k];
+            }
+        }
+    }
+}

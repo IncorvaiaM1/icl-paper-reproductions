@@ -1,0 +1,18 @@
+
+#include "jacobi-1d.h"
+
+void kernel_jacobi_1d(double A[30], double B[30]) {
+    const int n = 30;
+    const int tsteps = 20;
+
+    for (int t = 0; t < tsteps; ++t) {
+        // 3-point stencil update for interior points
+        for (int i = 1; i < n - 1; ++i) {
+            B[i] = (A[i-1] + A[i] + A[i+1]) / 3.0;
+        }
+        // Copy B back to A for the next time step
+        for (int i = 0; i < n; ++i) {
+            A[i] = B[i];
+        }
+    }
+}

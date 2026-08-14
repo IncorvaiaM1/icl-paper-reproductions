@@ -1,0 +1,14 @@
+
+#include "trisolv.h"
+
+void kernel_trisolv(double L[40][40], double x[40], double b[40]) {
+    // Forward substitution: solve L * x = b for x
+    // L is a 40x40 lower triangular matrix
+    for (int i = 0; i < 40; i++) {
+        double sum = 0.0;
+        for (int j = 0; j < i; j++) {
+            sum += L[i][j] * x[j];
+        }
+        x[i] = (b[i] - sum) / L[i][i];
+    }
+}

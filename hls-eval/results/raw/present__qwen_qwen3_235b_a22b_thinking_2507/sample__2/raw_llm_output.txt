@@ -1,0 +1,77 @@
+<OUTPUT_CODE name="present80_encryptBlock.cpp">
+#include "present.h"
+
+static void sBoxLayer(block_t *block) {
+    for (int i = 0; i < PRESENT_BLOCK_SIZE_BYTES; i++) {
+        unsigned char high = (*block)[i] >> 4;
+        unsigned char low = (*block)[i] & 0x0F;
+        (*block)[i] = (sBox[high] << 4) | sBox[low];
+    }
+}
+
+void generateRoundKeys80(present_key_t *suppliedKey, keys_t *keys) {
+    present_key_t key;
+    for (int i = 0; i < PRESENT_80_KEY_SIZE_BYTES; i++) {
+        key[i] = (*suppliedKey)[i];
+    }
+
+    for (int i = 0; i < ROUNDS; i++) {
+        unsigned char t = key[0];
+        unsigned char u = key[1];
+        for (int j = 0; j < 9; j++) {
+            key[j] = key[j+1];
+        }
+        key[9] = t;
+        key[9] = (key[9] >> 3) | (u << 5);
+
+        key[0] = (sBox[key[0] >> 4] << 4) | (key[0] & 0x0F);
+
+        key[9] ^= (i+1);
+
+        for (int j = 0; j < ROUND_KEY_SIZE_BYTES; j++) {
+            (*keys)[i][j] = key[j];
+        }
+    }
+}
+
+void addRoundKey(block_t *block, round_key_t *roundKey) {
+    for (int i = 0; i < PRESENT_BLOCK_SIZE_BYTES; i++) {
+        (*block)[i] ^= (*roundKey)[i];
+    }
+}
+
+static const int pLayerTable[64] = {
+    0, 16, 32, 48, 1, 17, 33, 49, 2, 18, 34, 50, 3, 19, 35, 51,
+    4, 20, 36, 52, 5, 21, 37, 53, 6, 22, 38, 54, 7, 23, 39, 55,
+    8, 24, 40, 56, 9, 25, 41, 57, 10, 26, 42, 58, 11, 27, 43, 59,
+    12, 28, 44, 60, 13, 29, 45, 61, 14, 30, 46, 62, 15, 31, 47, 63
+};
+
+void pLayer(block_t *block) {
+    block_t newBlock = {0};
+    for (int i = 0; i < 64; i++) {
+        int targetBit = pLayerTable[i];
+        int fromByte = i / 8;
+        int fromBit = i % 8;
+        int toByte = targetBit / 8;
+        int toBit = targetBit % 8;
+        unsigned char bit = ((*block)[fromByte] >> fromBit) & 0x01;
+        newBlock[toByte] |= (bit << toBit);
+    }
+    for (int i = 0; i < PRESENT_BLOCK_SIZE_BYTES; i++) {
+        (*block)[i] = newBlock[i];
+    }
+}
+
+void present80_encryptBlock(block_t *block, present_key_t *key) {
+    keys_t roundKeys;
+    generateRoundKeys80(key, &roundKeys);
+
+    for (int round = 0; round < 31; round++) {
+        addRoundKey(block, (round_key_t*)&roundKeys[round]);
+        sBoxLayer(block);
+        pLayer(block);
+    }
+    addRoundKey(block, (round_key_t*)&roundKeys[31]);
+}
+</OUTPUT_CODE>

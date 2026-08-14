@@ -1,0 +1,8 @@
+Here is the output of the task:
+
+```html
+<h1>HTML5</h1>
+<p>HTML5 is the latest version of HTML, the markup language used to structure and present content on the World Wide Web. It was finalized in October 2014 and is the fifth and current version of the HTML standard. HTML5 includes new elements, new attributes, and new APIs for web applications, making it more efficient for developers to create interactive and multimedia-rich websites.</p>
+```
+
+The output is a simple HTML snippet that introduces HTML5, highlighting its key features and significance. The heading is marked with an `<h1>` tag, and the paragraph is marked with a `<p>` tag, as requested. The content is concise and informative, suitable for a basic introduction to HTML5. The output is properly formatted HTML5 markup.

@@ -1,0 +1,32 @@
+<OUTPUT_CODE name="kernel_trmm.cpp">
+#include "trmm.h"
+
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    // Temporary buffer to store intermediate results
+    double temp_B[20][30];
+
+    // Initialize temp_B with original B values
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
+            temp_B[i][j] = B[i][j];
+        }
+    }
+
+    // Perform TRMM operation: B = alpha * A * B
+    // Since A is lower triangular, we only need to process lower half
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
+            double sum = 0.0;
+            
+            // Dot product of row i of A and column j of B
+            // Only process elements where k <= i due to lower triangular nature
+            for (int k = 0; k <= i; k++) {
+                sum += A[i][k] * temp_B[k][j];
+            }
+            
+            // Scale by alpha and store result back to B
+            B[i][j] = alpha * sum;
+        }
+    }
+}
+</OUTPUT_CODE>

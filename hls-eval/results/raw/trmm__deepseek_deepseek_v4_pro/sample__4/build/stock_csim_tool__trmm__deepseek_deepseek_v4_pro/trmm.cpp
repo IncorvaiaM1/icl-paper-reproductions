@@ -1,0 +1,25 @@
+
+#include "trmm.h"
+
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    // Temporary buffer for a column of B to preserve original values
+    double col[20];
+
+    // Process each column of B independently
+    for (int j = 0; j < 30; j++) {
+        // Copy original column j into local buffer
+        for (int i = 0; i < 20; i++) {
+            col[i] = B[i][j];
+        }
+
+        // Compute new B column: B[i][j] = alpha * (col[i] + sum_{k=0}^{i-1} A[i][k] * col[k])
+        for (int i = 0; i < 20; i++) {
+            double sum = col[i]; // contribution from unit diagonal of A
+            // Dot product with strictly lower part of row i of A
+            for (int k = 0; k < i; k++) {
+                sum += A[i][k] * col[k];
+            }
+            B[i][j] = alpha * sum;
+        }
+    }
+}

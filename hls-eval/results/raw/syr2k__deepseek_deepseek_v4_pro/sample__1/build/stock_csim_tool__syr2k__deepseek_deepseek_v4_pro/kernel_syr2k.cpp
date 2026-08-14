@@ -1,0 +1,41 @@
+
+#include "syr2k.h"
+
+void kernel_syr2k(
+    double alpha,
+    double beta,
+    double C[30][30],
+    double A[30][20],
+    double B[30][20]) {
+
+    const int N = 30;
+    const int M = 20;
+
+    // First, scale C by beta: C = beta * C
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            C[i][j] = beta * C[i][j];
+        }
+    }
+
+    // Next, compute C += alpha * A * B^T + alpha * B * A^T
+    // Since UPLO = 'L', we only compute the lower triangular part of C.
+    // C is symmetric, so we only update C[i][j] for i >= j.
+    // The formula: C_out = alpha * A * B^T + alpha * B * A^T + beta * C
+    // We can compute the update as:
+    // For each i, j with i >= j:
+    //   C[i][j] += alpha * sum_{k=0}^{M-1} (A[i][k] * B[j][k] + B[i][k] * A[j][k])
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j <= i; j++) {
+            double sum = 0.0;
+            for (int k = 0; k < M; k++) {
+                sum += A[i][k] * B[j][k] + B[i][k] * A[j][k];
+            }
+            C[i][j] += alpha * sum;
+        }
+    }
+
+    // Since only the lower triangular part is used/stored, we are done.
+    // The upper part is not referenced according to BLAS convention for UPLO='L'.
+}

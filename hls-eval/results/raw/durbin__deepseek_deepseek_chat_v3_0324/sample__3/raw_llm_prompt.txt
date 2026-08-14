@@ -1,0 +1,122 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The Durbin kernel is an algorithm for solving Yule-Walker equations, which is a special case of Toeplitz systems. It takes a vector `r` of length `N` as input and produces a vector `y` of length `N` as output, such that `Ty = -r` where `T` is a symmetric, unit-diagonal, Toeplitz matrix defined by the vector `[1, r_0, ..., r_{N-1}]`. The algorithm is a direct implementation of the Durbin algorithm described in a book by Golub and Van Loan.
+
+It takes the following as input,
+
+- $r$: vector of length $N$.
+
+and gives the following as output:
+
+- $y$: vector of length $N$
+
+such that $Ty = -r$ where $T$ is a symmetric, unit-diagonal, Toeplitz matrix defined by the vector $[1,r_0, \ldots ,r_{N-1}]$.
+The C reference implementation is a direct implementation of the algorithm described in a book by Golub and Van Loan. The book mentions that a vector can be removed to use less space, but the implementation retains this vector.
+
+---
+
+Top-Level Function: `kernel_durbin`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_durbin(double r[40], double y[40]);`
+
+Inputs:
+- `r`: a vector of length `N` (40 in this implementation) containing the input values.
+
+Outputs:
+- `y`: a vector of length `N` (40 in this implementation) containing the output values.
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point number used to represent the input and output values.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="durbin_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "durbin.h"
+
+void init_array(int n, double r[40]) {
+    int i, j;
+
+    for (i = 0; i < n; i++) {
+        r[i] = (n + 1 - i);
+    }
+}
+
+void print_array(int n, double y[40])
+
+{
+    int i;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "y");
+    for (i = 0; i < n; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", y[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "y");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 40;
+
+    double r[40];
+    double y[40];
+
+    init_array(n, r);
+
+    kernel_durbin(r, y);
+
+    print_array(n, y);
+
+    return 0;
+}
+</INPUT_CODE name="durbin_tb.cpp">
+<INPUT_CODE name="durbin.h">
+#pragma once
+#include <cmath>
+
+void kernel_durbin(double r[40], double y[40]);
+
+</INPUT_CODE name="durbin.h">
+
+
+
+## Task Output
+

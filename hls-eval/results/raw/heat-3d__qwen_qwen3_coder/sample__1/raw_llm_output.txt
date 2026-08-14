@@ -1,0 +1,33 @@
+<OUTPUT_CODE name="kernel_heat_3d.cpp">
+#include "heat-3d.h"
+
+void kernel_heat_3d(double A[10][10][10], double B[10][10][10]) {
+    const double factor = 0.125;
+    int t, i, j, k;
+
+    // Time steps loop
+    for (t = 0; t < 20; t++) {
+        // Iterate over the 3D grid excluding boundaries
+        for (i = 1; i < 9; i++) {
+            for (j = 1; j < 9; j++) {
+                for (k = 1; k < 9; k++) {
+                    B[i][j][k] =
+                        A[i][j][k] +
+                        factor * (A[i + 1][j][k] - 2.0 * A[i][j][k] + A[i - 1][j][k]) +
+                        factor * (A[i][j + 1][k] - 2.0 * A[i][j][k] + A[i][j - 1][k]) +
+                        factor * (A[i][j][k + 1] - 2.0 * A[i][j][k] + A[i][j][k - 1]);
+                }
+            }
+        }
+
+        // Copy updated values back to A for next time step
+        for (i = 1; i < 9; i++) {
+            for (j = 1; j < 9; j++) {
+                for (k = 1; k < 9; k++) {
+                    A[i][j][k] = B[i][j][k];
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

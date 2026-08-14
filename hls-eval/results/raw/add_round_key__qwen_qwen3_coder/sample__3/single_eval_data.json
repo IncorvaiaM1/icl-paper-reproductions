@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "add_round_key__qwen_qwen3_coder",
+    "benchmark_case_name": "add_round_key",
+    "benchmark_case_tags": [
+        "c2hlsc"
+    ],
+    "model_name": "qwen/qwen3-coder",
+    "model_name_normalized": "qwen_qwen3_coder",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe AddRoundKey kernel function is a crucial component of the Advanced Encryption Standard (AES) cipher, responsible for adding the round key to the state. This process is performed by an XOR operation between the state and the round key. The state is a 4x4 matrix of bytes, while the round key is a one-dimensional array of bytes. The round key is added to the state in a specific order, determined by the round number and the AES key schedule. The kernel function takes three inputs: the round number, the state, and the round key. It iterates over each element of the state and performs an XOR operation with the corresponding element of the round key. The result is stored back in the state. This process is repeated for each round of the AES cipher.\n\nThe algorithm can be represented by the following equation:\n\\[ state_{i,j} = state_{i,j} \\oplus RoundKey_{(round \\times Nb \\times 4) + (i \\times Nb) + j} \\]\nwhere $state_{i,j}$ is the element at row $i$ and column $j$ of the state, $RoundKey_{k}$ is the $k^{th}$ element of the round key, $round$ is the round number, and $Nb$ is the number of columns in the state.\n\nThe kernel function is designed to be efficient and scalable, with a simple and regular dataflow. The use of XOR operations allows for fast and efficient implementation in hardware. The kernel function is also designed to be flexible, allowing for different round numbers and key schedules to be used.\n\n---\n\nTop-Level Function: `AddRoundKey`\n\nComplete Function Signature of the Top-Level Function:\n`void AddRoundKey(uint8_t round, state_t *state, const uint8_t *RoundKey);`\n\nInputs:\n- `round`: The round number, which determines the offset into the round key array. This is an 8-bit unsigned integer.\n- `state`: The state, which is a 4x4 matrix of bytes. This is a pointer to a 2D array of uint8_t.\n- `RoundKey`: The round key, which is a one-dimensional array of bytes. This is a pointer to a 1D array of uint8_t.\n\nOutputs:\n- None, the state is modified in-place.\n\nImportant Data Structures and Data Types:\n- `state_t`: A 4x4 matrix of bytes, represented as a 2D array of uint8_t. This data structure is used to represent the state of the AES cipher.\n- `uint8_t`: An 8-bit unsigned integer, used to represent the round number and the elements of the state and round key.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"add_round_key_tb.cpp\">\n#include \"add_round_key.h\"\n\nvoid phex(uint8_t *str) {\n\n    uint8_t len = 16;\n    unsigned char i;\n    for (i = 0; i < len; ++i)\n        printf(\"%.2x\", str[i]);\n    printf(\"\\n\");\n}\n// This function adds the round key to state.\nint main() {\n    uint8_t rkey[176];\n    for (int i = 0; i < 176; i++) {\n        rkey[i] = i;\n    }\n\n    state_t state = {{0xaa, 0xaa, 0xaa, 0xaa},\n                     {0xaa, 0xaa, 0xaa, 0xaa},\n                     {0xaa, 0xaa, 0xaa, 0xaa},\n                     {0xaa, 0xaa, 0xaa, 0xaa}};\n\n    AddRoundKey(0, &state, rkey);\n    phex((uint8_t *)state);\n    AddRoundKey(1, &state, rkey);\n    phex((uint8_t *)state);\n    AddRoundKey(2, &state, rkey);\n    phex((uint8_t *)state);\n    AddRoundKey(3, &state, rkey);\n    phex((uint8_t *)state);\n    return 0;\n}\n</INPUT_CODE name=\"add_round_key_tb.cpp\">\n<INPUT_CODE name=\"add_round_key.h\">\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define Nb 4\n#define Nk 4  // The number of 32 bit words in a key.\n#define Nr 10 // The number of rounds in AES Cipher.\n\n#define AES_KEYLEN 16 // Key length in bytes\n#define AES_keyExpSize 176\n\ntypedef uint8_t state_t[4][4];\nstruct AES_ctx {\n    uint8_t RoundKey[AES_keyExpSize];\n};\n\nvoid AddRoundKey(unsigned char, unsigned char (*)[4][4], unsigned char const *);\n</INPUT_CODE name=\"add_round_key.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 10921.086856339,
+        "t1": 10928.3768762,
+        "execution_time": 7.290019861000474
+    },
+    "response_json": {
+        "id": "gen-1786557847-zB4wGQWNks486vVsAP1I",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"add_round_key.cpp\">\n#include \"add_round_key.h\"\n\nvoid AddRoundKey(uint8_t round, state_t *state, const uint8_t *RoundKey) {\n    for (uint8_t i = 0; i < 4; ++i) {\n        for (uint8_t j = 0; j < 4; ++j) {\n            (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i * Nb) + j];\n        }\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786557847,
+        "model": "qwen/qwen3-coder",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 118,
+            "prompt_tokens": 1361,
+            "total_tokens": 1479,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1359,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.00051182,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.00051182,
+                "upstream_inference_prompt_cost": 0.00029942,
+                "upstream_inference_completions_cost": 0.0002124
+            }
+        },
+        "provider": "Google"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"add_round_key.cpp\">\n#include \"add_round_key.h\"\n\nvoid AddRoundKey(uint8_t round, state_t *state, const uint8_t *RoundKey) {\n    for (uint8_t i = 0; i < 4; ++i) {\n        for (uint8_t j = 0; j < 4; ++j) {\n            (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i * Nb) + j];\n        }\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "add_round_key.cpp": "\n#include \"add_round_key.h\"\n\nvoid AddRoundKey(uint8_t round, state_t *state, const uint8_t *RoundKey) {\n    for (uint8_t i = 0; i < 4; ++i) {\n        for (uint8_t j = 0; j < 4; ++j) {\n            (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i * Nb) + j];\n        }\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 10928.740226688,
+            "t1": 10929.145525839,
+            "execution_time": 0.405299150999781,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "aaaba8a9aeafacada2a3a0a1a6a7a4a5\nbabababababababababababababababa\n9a9b98999e9f9c9d9293909196979495\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+            "stderr": "",
+            "t0": 10929.169333231,
+            "t1": 10929.185969561,
+            "execution_time": 0.016636329999528243,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 10929.191860904,
+            "t1": 10929.191860904,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

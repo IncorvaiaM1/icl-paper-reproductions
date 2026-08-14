@@ -1,0 +1,15 @@
+
+#include "syr2k.h"
+
+void kernel_syr2k(double alpha, double beta, double C[30][30], double A[30][20], double B[30][20]) {
+    // Compute the lower triangular part of C = alpha * A * B^T + alpha * B * A^T + beta * C
+    for (int i = 0; i < 30; i++) {
+        for (int j = 0; j <= i; j++) {
+            double sum = 0.0;
+            for (int k = 0; k < 20; k++) {
+                sum += A[i][k] * B[j][k] + B[i][k] * A[j][k];
+            }
+            C[i][j] = alpha * sum + beta * C[i][j];
+        }
+    }
+}

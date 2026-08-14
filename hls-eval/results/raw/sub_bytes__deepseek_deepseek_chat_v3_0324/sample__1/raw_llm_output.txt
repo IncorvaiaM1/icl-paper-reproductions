@@ -1,0 +1,35 @@
+Based on the provided code and description, I'll implement the `SubBytes` function for the AES algorithm. The function performs a byte substitution using a predefined S-box lookup table.
+
+Here's the implementation:
+
+```c
+#include "sub.h"
+
+void SubBytes(state_t *state) {
+    // Iterate over each byte in the state matrix
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            // Perform the substitution using the S-box lookup
+            (*state)[i][j] = getSBoxValue((*state)[i][j]);
+        }
+    }
+}
+```
+
+This implementation:
+
+1. Takes a pointer to a 4x4 state matrix as input (state_t is defined as uint8_t[4][4])
+2. Uses nested loops to iterate through each byte in the matrix (4 rows x 4 columns)
+3. For each byte, performs a substitution using the predefined S-box lookup table via the getSBoxValue macro
+4. Stores the substituted value back in the same position in the state matrix
+
+The function modifies the state matrix in-place and doesn't return any value (void return type).
+
+The test case provided in sub_tb.cpp will show the transformation of the input state matrix:
+```
+Original state:
+00 11 22 33 44 55 66 77 88 99 aa bb cc dd ee ff
+```
+After SubBytes, the output will be the corresponding S-box substitutions for each of these values.
+
+The implementation is straightforward and follows the AES specification for the SubBytes transformation step, which is a simple byte substitution using the S-box lookup table. The S-box is defined in the header file and provides the necessary non-linear substitution for the AES algorithm.

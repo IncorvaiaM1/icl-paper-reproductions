@@ -1,0 +1,109 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "shift_rows__deepseek_deepseek_v4_pro",
+    "benchmark_case_name": "shift_rows",
+    "benchmark_case_tags": [
+        "c2hlsc"
+    ],
+    "model_name": "deepseek/deepseek-v4-pro",
+    "model_name_normalized": "deepseek_deepseek_v4_pro",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe ShiftRows kernel is a crucial component of the Advanced Encryption Standard (AES) algorithm, responsible for shifting the rows of the state matrix to the left by different offsets. The state matrix is a 4x4 array of bytes, where each row represents a 32-bit word. The ShiftRows operation is performed by rotating each row of the state matrix to the left by a number of columns equal to the row number, with the first row (row 0) not being shifted. This operation is a key part of the AES encryption process, as it helps to diffuse the plaintext data across the state matrix, making it more difficult to recover the original data without the encryption key. The ShiftRows operation can be represented mathematically as follows: \n\\[\n\\begin{bmatrix}\na_{0,0} & a_{0,1} & a_{0,2} & a_{0,3} \\\\\na_{1,0} & a_{1,1} & a_{1,2} & a_{1,3} \\\\\na_{2,0} & a_{2,1} & a_{2,2} & a_{2,3} \\\\\na_{3,0} & a_{3,1} & a_{3,2} & a_{3,3} \\\\\n\\end{bmatrix}\n\\rightarrow\n\\begin{bmatrix}\na_{0,0} & a_{0,1} & a_{0,2} & a_{0,3} \\\\\na_{1,1} & a_{1,2} & a_{1,3} & a_{1,0} \\\\\na_{2,2} & a_{2,3} & a_{2,0} & a_{2,1} \\\\\na_{3,3} & a_{3,0} & a_{3,1} & a_{3,2} \\\\\n\\end{bmatrix}\n\\]\nwhere $a_{i,j}$ represents the byte at row $i$ and column $j$ of the state matrix.\n\n---\n\nTop-Level Function: `ShiftRows`\n\nComplete Function Signature of the Top-Level Function:\n`void ShiftRows(state_t *state);`\n\nInputs:\n- `state`: a pointer to a 4x4 array of bytes, representing the state matrix to be shifted.\n\nOutputs:\n- None, the ShiftRows operation is performed in-place on the input state matrix.\n\nImportant Data Structures and Data Types:\n- `state_t`: a 4x4 array of bytes, representing the state matrix.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"shift_rows_tb.cpp\">\n#include \"shift_rows.h\"\n\nvoid phex(uint8_t *str) {\n\n    uint8_t len = 16;\n    unsigned char i;\n    for (i = 0; i < len; ++i)\n        printf(\"%.2x\", str[i]);\n    printf(\"\\n\");\n}\n\nint main() {\n    state_t state = {{0x00, 0x11, 0x22, 0x33},\n                     {0x44, 0x55, 0x66, 0x77},\n                     {0x88, 0x99, 0xaa, 0xbb},\n                     {0xcc, 0xdd, 0xee, 0xff}};\n\n    ShiftRows(&state);\n    phex((uint8_t *)state);\n\n    return 0;\n}\n</INPUT_CODE name=\"shift_rows_tb.cpp\">\n<INPUT_CODE name=\"shift_rows.h\">\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define Nb 4\n#define Nk 4  // The number of 32 bit words in a key.\n#define Nr 10 // The number of rounds in AES Cipher.\n\n#define AES_KEYLEN 16 // Key length in bytes\n#define AES_keyExpSize 176\n\ntypedef uint8_t state_t[4][4];\nstruct AES_ctx {\n    uint8_t RoundKey[AES_keyExpSize];\n};\n\nvoid ShiftRows(state_t *state);\n</INPUT_CODE name=\"shift_rows.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 28033.502807853,
+        "t1": 28049.822669577,
+        "execution_time": 16.319861723997747
+    },
+    "response_json": {
+        "id": "gen-1786575236-SH2InQQw7DCzxjrrxYlH",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"shift_rows.cpp\">\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n    uint8_t temp;\n\n    // Row 0 is not shifted.\n\n    // Row 1: shift left by 1.\n    temp = (*state)[1][0];\n    (*state)[1][0] = (*state)[1][1];\n    (*state)[1][1] = (*state)[1][2];\n    (*state)[1][2] = (*state)[1][3];\n    (*state)[1][3] = temp;\n\n    // Row 2: shift left by 2.\n    uint8_t temp0 = (*state)[2][0];\n    uint8_t temp1 = (*state)[2][1];\n    (*state)[2][0] = (*state)[2][2];\n    (*state)[2][1] = (*state)[2][3];\n    (*state)[2][2] = temp0;\n    (*state)[2][3] = temp1;\n\n    // Row 3: shift left by 3.\n    temp = (*state)[3][3];\n    (*state)[3][3] = (*state)[3][2];\n    (*state)[3][2] = (*state)[3][1];\n    (*state)[3][1] = (*state)[3][0];\n    (*state)[3][0] = temp;\n}\n</OUTPUT_CODE>",
+                    "role": "assistant",
+                    "reasoning": "We need respond only with code in XML format. Need generate implementation shift_rows.cpp. Need ensure include header. Need understand HLS synthesizable. ShiftRows on state_t pointer. Need implement AES ShiftRows. Let's inspect description and signatures. Header includes state_t uint8_t[4][4]. ShiftRows(state_t *state). Need perform in-place row shifts: row0 no shift, row1 left by 1, row2 left by 2, row3 left by 3. Need be careful with pointer type. We can write code.\n\nNeed HLS appropriate synthesis. Use loops maybe unroll. Need avoid printf? implementation can include header. Simple:\n\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n    uint8_t temp;\n    // row 1 shift left by 1\n    temp = (*state)[1][0];\n    (*state)[1][0] = (*state)[1][1];\n    (*state)[1][1] = (*state)[1][2];\n    (*state)[1][2] = (*state)[1][3];\n    (*state)[1][3] = temp;\n\n    // row 2 shift left by 2\n    uint8_t tmp0 = (*state)[2][0];\n    uint8_t tmp1 = (*state)[2][1];\n    (*state)[2][0] = (*state)[2][2];\n    (*state)[2][1] = (*state)[2][3];\n    (*state)[2][2] = tmp0;\n    (*state)[2][3] = tmp1;\n\n    // row 3 shift left by 3 (same as right by 1)\n    temp = (*state)[3][3];\n    (*state)[3][3] = (*state)[3][2];\n    (*state)[3][2] = (*state)[3][1];\n    (*state)[3][1] = (*state)[3][0];\n    (*state)[3][0] = temp;\n}\n\nCheck row3 left by 3: original [c,d,e,f] -> [f,c,d,e]? Actually left by 3 = right by1. matrix row3 [a30,a31,a32,a33] -> [a33,a30,a31,a32]. Code temp=a33, then state[3][3]=state[3][2], [3][2]=[3][1], [3][1]=[3][0], [3][0]=temp. results [a33,a30,a31,a32], yes. Row2 left by2: [a,b,c,d] -> [c,d,a,b]. Code tmp0=a tmp1=b, state[2][0]=c, [1]=d, [2]=tmp0, [3]=tmp1 yes. Row1: [a,b,c,d]->[b,c,d,a]. temp=a, set[1][0]=b, [1][1]=c, [1][2]=d, [1][3]=temp yes.\n\nNeed maybe use loops for HLS but okay. Could also implement with array partition? No constraints. Need output XML exactly. Only code. Ensure no markdown.\n\nNeed consider including header file. We'll output:\n\n<OUTPUT_CODE name=\"shift_rows.cpp\">\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n...\n}\n</OUTPUT_CODE>\n\nNeed maybe top-level function name exactly. Should match. Fine.\n\nNeed maybe account for state_t pointer alias? Use (*state). But maybe can use state[0]? Since pointer to array. In C++ state_t *state, can deref (*state)[i][j]. Could also do state[0][i][j]? Does that compile? state_t * state; state[0] is array, then state[0][row][col]. Yes. But C++ maybe more straightforward. I'll use (*state).\n\nNeed ensure temp arrays maybe for HLS? Provide robust. Potential issue: Vitis HLS might prefer loops to unroll? But direct assignment synthesizable. No issue. Let's craft final.\n\nCould maybe use uint8_t t[4]? We can avoid multiple temporaries.\n\nLet's output only XML.",
+                    "reasoning_details": [
+                        {
+                            "type": "reasoning.text",
+                            "text": "We need respond only with code in XML format. Need generate implementation shift_rows.cpp. Need ensure include header. Need understand HLS synthesizable. ShiftRows on state_t pointer. Need implement AES ShiftRows. Let's inspect description and signatures. Header includes state_t uint8_t[4][4]. ShiftRows(state_t *state). Need perform in-place row shifts: row0 no shift, row1 left by 1, row2 left by 2, row3 left by 3. Need be careful with pointer type. We can write code.\n\nNeed HLS appropriate synthesis. Use loops maybe unroll. Need avoid printf? implementation can include header. Simple:\n\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n    uint8_t temp;\n    // row 1 shift left by 1\n    temp = (*state)[1][0];\n    (*state)[1][0] = (*state)[1][1];\n    (*state)[1][1] = (*state)[1][2];\n    (*state)[1][2] = (*state)[1][3];\n    (*state)[1][3] = temp;\n\n    // row 2 shift left by 2\n    uint8_t tmp0 = (*state)[2][0];\n    uint8_t tmp1 = (*state)[2][1];\n    (*state)[2][0] = (*state)[2][2];\n    (*state)[2][1] = (*state)[2][3];\n    (*state)[2][2] = tmp0;\n    (*state)[2][3] = tmp1;\n\n    // row 3 shift left by 3 (same as right by 1)\n    temp = (*state)[3][3];\n    (*state)[3][3] = (*state)[3][2];\n    (*state)[3][2] = (*state)[3][1];\n    (*state)[3][1] = (*state)[3][0];\n    (*state)[3][0] = temp;\n}\n\nCheck row3 left by 3: original [c,d,e,f] -> [f,c,d,e]? Actually left by 3 = right by1. matrix row3 [a30,a31,a32,a33] -> [a33,a30,a31,a32]. Code temp=a33, then state[3][3]=state[3][2], [3][2]=[3][1], [3][1]=[3][0], [3][0]=temp. results [a33,a30,a31,a32], yes. Row2 left by2: [a,b,c,d] -> [c,d,a,b]. Code tmp0=a tmp1=b, state[2][0]=c, [1]=d, [2]=tmp0, [3]=tmp1 yes. Row1: [a,b,c,d]->[b,c,d,a]. temp=a, set[1][0]=b, [1][1]=c, [1][2]=d, [1][3]=temp yes.\n\nNeed maybe use loops for HLS but okay. Could also implement with array partition? No constraints. Need output XML exactly. Only code. Ensure no markdown.\n\nNeed consider including header file. We'll output:\n\n<OUTPUT_CODE name=\"shift_rows.cpp\">\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n...\n}\n</OUTPUT_CODE>\n\nNeed maybe top-level function name exactly. Should match. Fine.\n\nNeed maybe account for state_t pointer alias? Use (*state). But maybe can use state[0]? Since pointer to array. In C++ state_t *state, can deref (*state)[i][j]. Could also do state[0][i][j]? Does that compile? state_t * state; state[0] is array, then state[0][row][col]. Yes. But C++ maybe more straightforward. I'll use (*state).\n\nNeed ensure temp arrays maybe for HLS? Provide robust. Potential issue: Vitis HLS might prefer loops to unroll? But direct assignment synthesizable. No issue. Let's craft final.\n\nCould maybe use uint8_t t[4]? We can avoid multiple temporaries.\n\nLet's output only XML.",
+                            "format": "unknown",
+                            "index": 0
+                        }
+                    ]
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786575236,
+        "model": "deepseek/deepseek-v4-pro",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 1190,
+            "prompt_tokens": 1289,
+            "total_tokens": 2479,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 885,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1280,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0014764364,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0014764364,
+                "upstream_inference_prompt_cost": 6.84284e-05,
+                "upstream_inference_completions_cost": 0.001408008
+            }
+        },
+        "provider": "GMICloud"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"shift_rows.cpp\">\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n    uint8_t temp;\n\n    // Row 0 is not shifted.\n\n    // Row 1: shift left by 1.\n    temp = (*state)[1][0];\n    (*state)[1][0] = (*state)[1][1];\n    (*state)[1][1] = (*state)[1][2];\n    (*state)[1][2] = (*state)[1][3];\n    (*state)[1][3] = temp;\n\n    // Row 2: shift left by 2.\n    uint8_t temp0 = (*state)[2][0];\n    uint8_t temp1 = (*state)[2][1];\n    (*state)[2][0] = (*state)[2][2];\n    (*state)[2][1] = (*state)[2][3];\n    (*state)[2][2] = temp0;\n    (*state)[2][3] = temp1;\n\n    // Row 3: shift left by 3.\n    temp = (*state)[3][3];\n    (*state)[3][3] = (*state)[3][2];\n    (*state)[3][2] = (*state)[3][1];\n    (*state)[3][1] = (*state)[3][0];\n    (*state)[3][0] = temp;\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "shift_rows.cpp": "\n#include \"shift_rows.h\"\n\nvoid ShiftRows(state_t *state) {\n    uint8_t temp;\n\n    // Row 0 is not shifted.\n\n    // Row 1: shift left by 1.\n    temp = (*state)[1][0];\n    (*state)[1][0] = (*state)[1][1];\n    (*state)[1][1] = (*state)[1][2];\n    (*state)[1][2] = (*state)[1][3];\n    (*state)[1][3] = temp;\n\n    // Row 2: shift left by 2.\n    uint8_t temp0 = (*state)[2][0];\n    uint8_t temp1 = (*state)[2][1];\n    (*state)[2][0] = (*state)[2][2];\n    (*state)[2][1] = (*state)[2][3];\n    (*state)[2][2] = temp0;\n    (*state)[2][3] = temp1;\n\n    // Row 3: shift left by 3.\n    temp = (*state)[3][3];\n    (*state)[3][3] = (*state)[3][2];\n    (*state)[3][2] = (*state)[3][1];\n    (*state)[3][1] = (*state)[3][0];\n    (*state)[3][0] = temp;\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 28050.285567332,
+            "t1": 28050.795543111,
+            "execution_time": 0.5099757789976138,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "0011223355667744aabb8899ffccddee\n",
+            "stderr": "",
+            "t0": 28050.825663103,
+            "t1": 28050.848865052,
+            "execution_time": 0.023201948999485467,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 28050.85586086,
+            "t1": 28050.85586086,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

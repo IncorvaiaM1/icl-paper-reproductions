@@ -1,0 +1,22 @@
+
+#include "trisolv.h"
+
+void kernel_trisolv(double L[40][40], double x[40], double b[40]) {
+    #pragma HLS INTERFACE m_axi port=L bundle=gmem0
+    #pragma HLS INTERFACE m_axi port=x bundle=gmem1
+    #pragma HLS INTERFACE m_axi port=b bundle=gmem2
+    #pragma HLS INTERFACE s_axilite port=return bundle=control
+
+    double sum;
+    int i, j;
+
+    for (i = 0; i < 40; i++) {
+        #pragma HLS PIPELINE II=1
+        sum = 0.0;
+        for (j = 0; j < i; j++) {
+            #pragma HLS LOOP_FLATTEN
+            sum += L[i][j] * x[j];
+        }
+        x[i] = (b[i] - sum) / L[i][i];
+    }
+}

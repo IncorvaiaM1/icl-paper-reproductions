@@ -1,0 +1,125 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_jacobi_1d` design is a high-level synthesis implementation of a Jacobi-style stencil computation over 1D data with a 3-point stencil pattern. The algorithm iteratively updates the input data by taking the average of three neighboring points. The computation is performed in a time-stepped manner, where each time step updates the entire data array.
+
+The algorithm can be mathematically represented as:
+
+$$
+data^{t}_{(i)} = \frac{1}{3} \left( data^{t-1}_{(i)} + data^{t-1}_{(i-1)} + data^{t-1}_{(i+1)} \right)
+$$
+
+where $data^{t}_{(i)}$ represents the value at index $i$ at time step $t$, and $data^{t-1}_{(i)}$ represents the value at index $i$ at the previous time step.
+
+Note that the design assumes a fixed size of 30 for the input and output arrays, and a fixed number of time steps (20). These values can be adjusted by modifying the constants `n` and `tsteps` in the design.
+
+---
+
+Top-Level Function: `kernel_jacobi_1d`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_jacobi_1d(double A[30], double B[30]);`
+
+Inputs:
+- `A`: a 1D array of 30 `double` values, representing the input data at the previous time step.
+- `B`: a 1D array of 30 `double` values, representing the output data at the current time step.
+
+Outputs:
+- `A`: the updated input data at the current time step.
+- `B`: the output data at the current time step.
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point data type used to represent the input and output data.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="jacobi-1d_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "jacobi-1d.h"
+
+void init_array(int n, double A[30], double B[30]) {
+    int i;
+
+    for (i = 0; i < n; i++) {
+        A[i] = ((double)i + 2) / n;
+        B[i] = ((double)i + 3) / n;
+    }
+}
+
+void print_array(int n, double A[30])
+
+{
+    int i;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "A");
+    for (i = 0; i < n; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", A[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "A");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 30;
+    int tsteps = 20;
+
+    double A[30];
+    double B[30];
+
+    init_array(n, A, B);
+
+    kernel_jacobi_1d(A, B);
+
+    print_array(n, A);
+
+    return 0;
+}
+</INPUT_CODE name="jacobi-1d_tb.cpp">
+<INPUT_CODE name="jacobi-1d.h">
+#pragma once
+#include <cmath>
+
+void kernel_jacobi_1d(double A[30], double B[30]);
+
+</INPUT_CODE name="jacobi-1d.h">
+
+
+
+## Task Output
+

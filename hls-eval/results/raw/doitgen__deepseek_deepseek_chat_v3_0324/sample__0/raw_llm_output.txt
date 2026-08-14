@@ -1,0 +1,50 @@
+Based on the provided inputs, I'll generate the implementation for the `kernel_doitgen` function that performs the MADNESS algorithm computation.
+
+The kernel needs to:
+1. Take 3D array A (10x8x12), 2D array C4 (12x12), and 1D sum array (12)
+2. Perform the matrix multiplication-like operation A_out(r,q,p) = sum over s of A(r,q,s)*C4(p,s)
+3. Store the result in A (in-place)
+
+Here's the implementation:
+
+```c
+#include "doitgen.h"
+
+void kernel_doitgen(double A[10][8][12], double C4[12][12], double sum[12]) {
+    int r, q, p, s;
+    const int R = 10;
+    const int Q = 8;
+    const int S = 12;
+    const int P = 12;
+    
+    for (r = 0; r < R; r++) {
+        for (q = 0; q < Q; q++) {
+            // Initialize sum array to 0 for this r,q combination
+            for (p = 0; p < P; p++) {
+                sum[p] = 0.0;
+            }
+            
+            // Compute the sum for each p
+            for (p = 0; p < P; p++) {
+                for (s = 0; s < S; s++) {
+                    sum[p] += A[r][q][s] * C4[p][s];
+                }
+            }
+            
+            // Store the results back in A (in-place)
+            for (p = 0; p < P; p++) {
+                A[r][q][p] = sum[p];
+            }
+        }
+    }
+}
+```
+
+Key points about this implementation:
+1. It follows the mathematical operation described in the kernel description exactly
+2. It uses the sum array as temporary storage for each intermediate calculation
+3. The operation is performed in-place, modifying the input array A
+4. The dimensions are hardcoded as constants for optimization (R=10, Q=8, S=P=12)
+5. The nested loops are ordered to maximize cache efficiency (r and q in outer loops, with p and s in inner loops)
+
+The implementation matches the function signature from the header file and performs the computation described in the kernel description. The test bench can verify the correctness by comparing the output against expected results.

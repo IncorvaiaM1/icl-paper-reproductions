@@ -1,0 +1,30 @@
+<OUTPUT_CODE name="kernel_heat_3d.cpp">
+#include "heat-3d.h"
+
+void kernel_heat_3d(double A[10][10][10], double B[10][10][10]) {
+    int t, i, j, k;
+
+    for (t = 0; t < 20; t++) {
+        // Compute B from A for interior points
+        for (i = 1; i < 9; i++) {
+            for (j = 1; j < 9; j++) {
+                for (k = 1; k < 9; k++) {
+                    B[i][j][k] = A[i][j][k]
+                        + 0.125 * (A[i + 1][j][k] - 2.0 * A[i][j][k] + A[i - 1][j][k])
+                        + 0.125 * (A[i][j + 1][k] - 2.0 * A[i][j][k] + A[i][j - 1][k])
+                        + 0.125 * (A[i][j][k + 1] - 2.0 * A[i][j][k] + A[i][j][k - 1]);
+                }
+            }
+        }
+
+        // Copy B back to A for the next time step
+        for (i = 1; i < 9; i++) {
+            for (j = 1; j < 9; j++) {
+                for (k = 1; k < 9; k++) {
+                    A[i][j][k] = B[i][j][k];
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

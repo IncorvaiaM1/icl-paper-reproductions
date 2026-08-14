@@ -1,0 +1,90 @@
+
+#include "aes.h"
+
+void AddRoundKey(uint8_t round, state_t *state, const round_t *RoundKey) {
+    uint8_t i, j;
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j) {
+            (*state)[i][j] ^= (*RoundKey)[round * Nb * 4 + i * Nb + j];
+        }
+    }
+}
+
+void SubBytes(state_t *state) {
+    uint8_t i, j;
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j) {
+            (*state)[i][j] = getSBoxValue((*state)[i][j]);
+        }
+    }
+}
+
+void ShiftRows(state_t *state) {
+    uint8_t temp;
+
+    // Rotate first row 1 columns to left
+    temp = (*state)[1][0];
+    (*state)[1][0] = (*state)[1][1];
+    (*state)[1][1] = (*state)[1][2];
+    (*state)[1][2] = (*state)[1][3];
+    (*state)[1][3] = temp;
+
+    // Rotate second row 2 columns to left
+    temp = (*state)[2][0];
+    (*state)[2][0] = (*state)[2][2];
+    (*state)[2][2] = temp;
+
+    temp = (*state)[2][1];
+    (*state)[2][1] = (*state)[2][3];
+    (*state)[2][3] = temp;
+
+    // Rotate third row 3 columns to left
+    temp = (*state)[3][0];
+    (*state)[3][0] = (*state)[3][3];
+    (*state)[3][3] = (*state)[3][2];
+    (*state)[3][2] = (*state)[3][1];
+    (*state)[3][1] = temp;
+}
+
+uint8_t xtime(uint8_t x) {
+    return (x << 1) ^ (((x >> 7) & 1) * 0x1b);
+}
+
+void MixColumns(state_t *state) {
+    uint8_t i;
+    uint8_t Tmp, t0, t1, t2, t3;
+
+    for (i = 0; i < 4; ++i) {
+        t0 = (*state)[0][i];
+        t1 = (*state)[1][i];
+        t2 = (*state)[2][i];
+        t3 = (*state)[3][i];
+        Tmp = t0 ^ t1 ^ t2 ^ t3;
+        (*state)[0][i] ^= Tmp ^ xtime(t0 ^ t1);
+        (*state)[1][i] ^= Tmp ^ xtime(t1 ^ t2);
+        (*state)[2][i] ^= Tmp ^ xtime(t2 ^ t3);
+        (*state)[3][i] ^= Tmp ^ xtime(t3 ^ t0);
+    }
+}
+
+void Cipher(state_t *state, const round_t *RoundKey) {
+    uint8_t round;
+
+    // Add the First round key to the state before starting the rounds.
+    AddRoundKey(0, state, RoundKey);
+
+    // There will be Nr rounds.
+    // The first Nr-1 rounds are identical.
+    // These Nr-1 rounds are executed in the loop below.
+    for (round = 1; round < Nr; ++round) {
+        SubBytes(state);
+        ShiftRows(state);
+        MixColumns(state);
+        AddRoundKey(round, state, RoundKey);
+    }
+
+    // The last round is like the first Nr-1 rounds, but without MixColumns
+    SubBytes(state);
+    ShiftRows(state);
+    AddRoundKey(Nr, state, RoundKey);
+}

@@ -1,0 +1,502 @@
+{
+    "0": {
+        "eval_type": "hls_gen_zero_shot",
+        "eval_id": "nussinov__qwen_qwen3_coder",
+        "benchmark_case_name": "nussinov",
+        "benchmark_case_tags": [
+            "polybench"
+        ],
+        "model_name": "qwen/qwen3-coder",
+        "model_name_normalized": "qwen_qwen3_coder",
+        "temperature": 0.7,
+        "n_samples": 5,
+        "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe Nussinov kernel is an algorithm for predicting RNA folding, which is an instance of dynamic programming. It takes an RNA sequence as input and produces a dynamic programming table as output. The table is filled using a recursive formula that considers the maximum score of four possible cases: (1) the maximum score of the sub-problem without considering the current base pair, (2) the maximum score of the sub-problem without considering the current base, (3) the maximum score of the sub-problem with considering the current base pair, and (4) the maximum score of the sub-problem with considering the current base pair and the maximum score of the sub-problem without considering the current base pair.\n\nIt takes the following as input,\n\n- `seq`: RNA sequence of length $N$. The valid entries are one of 'A' 'G' 'C' 'T'. (or 'U' in place of 'T').\n\nand gives the following as output:\n\n- `table`: $N \\times N$ triangular matrix, which is the dynamic programming table.\n\nThe table is filled using the following formula:\n\n$$\ntable(i,j) = \\max\n\\begin{cases}\ntable(i+1,j) \\\\\ntable(i,j-1) \\\\\ntable(i+1,j-1) + w(i,j) \\\\\n\\max_{i < k < j}(table(i,k) + table(k+1,j))\n\\end{cases}\n$$\n\nwhere $w$ is the scoring function that evaluate the pair of sequences $seq[i]$ and $seq[j]$. For Nussinov algorithm, the scoring function returns 1 if the sequences are complementary (either 'A' with 'T' or 'G' with 'C'), and 0 otherwise.\n\n---\n\nTop-Level Function: `kernel_nussinov`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_nussinov(char seq[60], int table[60][60]);`\n\nInputs:\n- `seq`: an RNA sequence of length 60, where each element is one of 'A', 'G', 'C', 'T', or 'U'. The sequence is stored in a 1D array of characters.\n\nOutputs:\n- `table`: a 2D array of integers, representing the dynamic programming table. The table is a triangular matrix of size 60x60, where each element `table[i][j]` represents the maximum score of the sub-problem considering the RNA sequence from `i` to `j`.\n\nImportant Data Structures and Data Types:\n- `seq`: a 1D array of characters, representing the RNA sequence.\n- `table`: a 2D array of integers, representing the dynamic programming table.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"nussinov_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"nussinov.h\"\n\nvoid init_array(int n, char seq[60], int table[60][60]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        seq[i] = (char)((i + 1) % 4);\n    }\n\n    for (i = 0; i < n; i++)\n        for (j = 0; j < n; j++)\n            table[i][j] = 0;\n}\n\nvoid print_array(int n, int table[60][60])\n\n{\n    int i, j;\n    int t = 0;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"table\");\n    for (i = 0; i < n; i++) {\n        for (j = i; j < n; j++) {\n            if (t % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%d \", table[i][j]);\n            t++;\n        }\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"table\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 60;\n\n    char seq[60];\n    int table[60][60];\n\n    init_array(n, seq, table);\n\n    kernel_nussinov(seq, table);\n\n    print_array(n, table);\n\n    return 0;\n}\n</INPUT_CODE name=\"nussinov_tb.cpp\">\n<INPUT_CODE name=\"nussinov.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_nussinov(char seq[60], int table[60][60]);\n\n</INPUT_CODE name=\"nussinov.h\">\n\n\n\n## Task Output\n\n",
+        "model_timeout": false,
+        "prompt_too_long": false,
+        "llm_execution_time": {
+            "t0": 24960.471422021,
+            "t1": 24967.131008507,
+            "execution_time": 6.659586485999171
+        },
+        "response_json": {
+            "id": "gen-1786572084-WhHduwvynGj4swPQM8bg",
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "index": 0,
+                    "message": {
+                        "content": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the table to zero\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n\n            // Case 1: table[i+1][j]\n            score1 = (i + 1 < 60) ? table[i + 1][j] : 0;\n\n            // Case 2: table[i][j-1]\n            score2 = (j - 1 >= 0) ? table[i][j - 1] : 0;\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            score3 = 0;\n            if (i + 1 < 60 && j - 1 >= 0) {\n                char a = seq[i];\n                char b = seq[j];\n                int match = 0;\n                if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||\n                    (a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {\n                    match = 1;\n                }\n                score3 = table[i + 1][j - 1] + match;\n            }\n\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            score4 = 0;\n            if (i < j) {\n                for (k = i + 1; k < j; k++) {\n                    int sum = table[i][k] + table[k + 1][j];\n                    if (sum > score4) {\n                        score4 = sum;\n                    }\n                }\n            }\n\n            // Compute the maximum of the four scores\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+                        "role": "assistant"
+                    },
+                    "native_finish_reason": "stop"
+                }
+            ],
+            "created": 1786572084,
+            "model": "qwen/qwen3-coder",
+            "object": "chat.completion",
+            "usage": {
+                "completion_tokens": 583,
+                "prompt_tokens": 1341,
+                "total_tokens": 1924,
+                "completion_tokens_details": {
+                    "audio_tokens": 0,
+                    "reasoning_tokens": 0,
+                    "image_tokens": 0
+                },
+                "prompt_tokens_details": {
+                    "audio_tokens": 0,
+                    "cached_tokens": 320,
+                    "cache_write_tokens": 0,
+                    "video_tokens": 0
+                },
+                "cost": 0.0009213,
+                "is_byok": false,
+                "cost_details": {
+                    "upstream_inference_cost": 0.0009213,
+                    "upstream_inference_prompt_cost": 0.0003383,
+                    "upstream_inference_completions_cost": 0.000583
+                }
+            },
+            "provider": "DeepInfra"
+        },
+        "raw_output": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the table to zero\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n\n            // Case 1: table[i+1][j]\n            score1 = (i + 1 < 60) ? table[i + 1][j] : 0;\n\n            // Case 2: table[i][j-1]\n            score2 = (j - 1 >= 0) ? table[i][j - 1] : 0;\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            score3 = 0;\n            if (i + 1 < 60 && j - 1 >= 0) {\n                char a = seq[i];\n                char b = seq[j];\n                int match = 0;\n                if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||\n                    (a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {\n                    match = 1;\n                }\n                score3 = table[i + 1][j - 1] + match;\n            }\n\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            score4 = 0;\n            if (i < j) {\n                for (k = i + 1; k < j; k++) {\n                    int sum = table[i][k] + table[k + 1][j];\n                    if (sum > score4) {\n                        score4 = sum;\n                    }\n                }\n            }\n\n            // Compute the maximum of the four scores\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+        "generated_code": {
+            "kernel_nussinov.cpp": "\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the table to zero\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n\n            // Case 1: table[i+1][j]\n            score1 = (i + 1 < 60) ? table[i + 1][j] : 0;\n\n            // Case 2: table[i][j-1]\n            score2 = (j - 1 >= 0) ? table[i][j - 1] : 0;\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            score3 = 0;\n            if (i + 1 < 60 && j - 1 >= 0) {\n                char a = seq[i];\n                char b = seq[j];\n                int match = 0;\n                if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||\n                    (a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {\n                    match = 1;\n                }\n                score3 = table[i + 1][j - 1] + match;\n            }\n\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            score4 = 0;\n            if (i < j) {\n                for (k = i + 1; k < j; k++) {\n                    int sum = table[i][k] + table[k + 1][j];\n                    if (sum > score4) {\n                        score4 = sum;\n                    }\n                }\n            }\n\n            // Compute the maximum of the four scores\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n"
+        },
+        "can_parse_output": true,
+        "c_compile_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "",
+                "t0": 24967.434236038,
+                "t1": 24967.869352337,
+                "execution_time": 0.43511629899876425,
+                "timeout": false
+            }
+        },
+        "c_run_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: table\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 \nend   dump: table\n==END   DUMP_ARRAYS==\n",
+                "t0": 24967.889836878,
+                "t1": 24967.917335785,
+                "execution_time": 0.027498907002154738,
+                "timeout": false
+            }
+        },
+        "vitis_hls_tool_out": {
+            "data_execution": {
+                "return_code": -99,
+                "stdout": "",
+                "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+                "t0": 24967.922019145,
+                "t1": 24967.922019145,
+                "execution_time": 0.0,
+                "timeout": false
+            },
+            "data_tool": {}
+        }
+    },
+    "1": {
+        "eval_type": "hls_gen_zero_shot",
+        "eval_id": "nussinov__qwen_qwen3_coder",
+        "benchmark_case_name": "nussinov",
+        "benchmark_case_tags": [
+            "polybench"
+        ],
+        "model_name": "qwen/qwen3-coder",
+        "model_name_normalized": "qwen_qwen3_coder",
+        "temperature": 0.7,
+        "n_samples": 5,
+        "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe Nussinov kernel is an algorithm for predicting RNA folding, which is an instance of dynamic programming. It takes an RNA sequence as input and produces a dynamic programming table as output. The table is filled using a recursive formula that considers the maximum score of four possible cases: (1) the maximum score of the sub-problem without considering the current base pair, (2) the maximum score of the sub-problem without considering the current base, (3) the maximum score of the sub-problem with considering the current base pair, and (4) the maximum score of the sub-problem with considering the current base pair and the maximum score of the sub-problem without considering the current base pair.\n\nIt takes the following as input,\n\n- `seq`: RNA sequence of length $N$. The valid entries are one of 'A' 'G' 'C' 'T'. (or 'U' in place of 'T').\n\nand gives the following as output:\n\n- `table`: $N \\times N$ triangular matrix, which is the dynamic programming table.\n\nThe table is filled using the following formula:\n\n$$\ntable(i,j) = \\max\n\\begin{cases}\ntable(i+1,j) \\\\\ntable(i,j-1) \\\\\ntable(i+1,j-1) + w(i,j) \\\\\n\\max_{i < k < j}(table(i,k) + table(k+1,j))\n\\end{cases}\n$$\n\nwhere $w$ is the scoring function that evaluate the pair of sequences $seq[i]$ and $seq[j]$. For Nussinov algorithm, the scoring function returns 1 if the sequences are complementary (either 'A' with 'T' or 'G' with 'C'), and 0 otherwise.\n\n---\n\nTop-Level Function: `kernel_nussinov`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_nussinov(char seq[60], int table[60][60]);`\n\nInputs:\n- `seq`: an RNA sequence of length 60, where each element is one of 'A', 'G', 'C', 'T', or 'U'. The sequence is stored in a 1D array of characters.\n\nOutputs:\n- `table`: a 2D array of integers, representing the dynamic programming table. The table is a triangular matrix of size 60x60, where each element `table[i][j]` represents the maximum score of the sub-problem considering the RNA sequence from `i` to `j`.\n\nImportant Data Structures and Data Types:\n- `seq`: a 1D array of characters, representing the RNA sequence.\n- `table`: a 2D array of integers, representing the dynamic programming table.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"nussinov_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"nussinov.h\"\n\nvoid init_array(int n, char seq[60], int table[60][60]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        seq[i] = (char)((i + 1) % 4);\n    }\n\n    for (i = 0; i < n; i++)\n        for (j = 0; j < n; j++)\n            table[i][j] = 0;\n}\n\nvoid print_array(int n, int table[60][60])\n\n{\n    int i, j;\n    int t = 0;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"table\");\n    for (i = 0; i < n; i++) {\n        for (j = i; j < n; j++) {\n            if (t % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%d \", table[i][j]);\n            t++;\n        }\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"table\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 60;\n\n    char seq[60];\n    int table[60][60];\n\n    init_array(n, seq, table);\n\n    kernel_nussinov(seq, table);\n\n    print_array(n, table);\n\n    return 0;\n}\n</INPUT_CODE name=\"nussinov_tb.cpp\">\n<INPUT_CODE name=\"nussinov.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_nussinov(char seq[60], int table[60][60]);\n\n</INPUT_CODE name=\"nussinov.h\">\n\n\n\n## Task Output\n\n",
+        "model_timeout": false,
+        "prompt_too_long": false,
+        "llm_execution_time": {
+            "t0": 25190.008493191,
+            "t1": 25193.076801051,
+            "execution_time": 3.0683078600013687
+        },
+        "response_json": {
+            "id": "gen-1786572319-u5a9D4YXMbJqi8FRs7yi",
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "index": 0,
+                    "message": {
+                        "content": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\n// Scoring function for complementary base pairs\nint score(int i, int j, char seq[60]) {\n    char a = seq[i];\n    char b = seq[j];\n    if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A')) {\n        return 1;\n    } else if ((a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int n = 60;\n\n    // Initialize the table to zero\n    for (i = 0; i < n; i++) {\n        for (j = 0; j < n; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int l = 1; l < n; l++) {  // l is the length of the subsequence\n        for (i = 0; i < n - l; i++) {\n            j = i + l;\n            // Case 1: table[i+1][j]\n            int t1 = table[i + 1][j];\n            // Case 2: table[i][j-1]\n            int t2 = table[i][j - 1];\n            // Case 3: table[i+1][j-1] + w(i,j)\n            int t3 = table[i + 1][j - 1] + score(i, j, seq);\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            int t4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > t4) {\n                    t4 = temp;\n                }\n            }\n            // Take the maximum of all four cases\n            int max_val = t1;\n            if (t2 > max_val) max_val = t2;\n            if (t3 > max_val) max_val = t3;\n            if (t4 > max_val) max_val = t4;\n            table[i][j] = max_val;\n        }\n    }\n}\n</OUTPUT_CODE>",
+                        "role": "assistant"
+                    },
+                    "native_finish_reason": "stop"
+                }
+            ],
+            "created": 1786572319,
+            "model": "qwen/qwen3-coder",
+            "object": "chat.completion",
+            "usage": {
+                "completion_tokens": 552,
+                "prompt_tokens": 1341,
+                "total_tokens": 1893,
+                "completion_tokens_details": {
+                    "audio_tokens": 0,
+                    "reasoning_tokens": 0,
+                    "image_tokens": 0
+                },
+                "prompt_tokens_details": {
+                    "audio_tokens": 0,
+                    "cached_tokens": 1280,
+                    "cache_write_tokens": 0,
+                    "video_tokens": 0
+                },
+                "cost": 0.0006983,
+                "is_byok": false,
+                "cost_details": {
+                    "upstream_inference_cost": 0.0006983,
+                    "upstream_inference_prompt_cost": 0.0001463,
+                    "upstream_inference_completions_cost": 0.000552
+                }
+            },
+            "provider": "DeepInfra"
+        },
+        "raw_output": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\n// Scoring function for complementary base pairs\nint score(int i, int j, char seq[60]) {\n    char a = seq[i];\n    char b = seq[j];\n    if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A')) {\n        return 1;\n    } else if ((a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int n = 60;\n\n    // Initialize the table to zero\n    for (i = 0; i < n; i++) {\n        for (j = 0; j < n; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int l = 1; l < n; l++) {  // l is the length of the subsequence\n        for (i = 0; i < n - l; i++) {\n            j = i + l;\n            // Case 1: table[i+1][j]\n            int t1 = table[i + 1][j];\n            // Case 2: table[i][j-1]\n            int t2 = table[i][j - 1];\n            // Case 3: table[i+1][j-1] + w(i,j)\n            int t3 = table[i + 1][j - 1] + score(i, j, seq);\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            int t4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > t4) {\n                    t4 = temp;\n                }\n            }\n            // Take the maximum of all four cases\n            int max_val = t1;\n            if (t2 > max_val) max_val = t2;\n            if (t3 > max_val) max_val = t3;\n            if (t4 > max_val) max_val = t4;\n            table[i][j] = max_val;\n        }\n    }\n}\n</OUTPUT_CODE>",
+        "generated_code": {
+            "kernel_nussinov.cpp": "\n#include \"nussinov.h\"\n\n// Scoring function for complementary base pairs\nint score(int i, int j, char seq[60]) {\n    char a = seq[i];\n    char b = seq[j];\n    if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A')) {\n        return 1;\n    } else if ((a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int n = 60;\n\n    // Initialize the table to zero\n    for (i = 0; i < n; i++) {\n        for (j = 0; j < n; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int l = 1; l < n; l++) {  // l is the length of the subsequence\n        for (i = 0; i < n - l; i++) {\n            j = i + l;\n            // Case 1: table[i+1][j]\n            int t1 = table[i + 1][j];\n            // Case 2: table[i][j-1]\n            int t2 = table[i][j - 1];\n            // Case 3: table[i+1][j-1] + w(i,j)\n            int t3 = table[i + 1][j - 1] + score(i, j, seq);\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            int t4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > t4) {\n                    t4 = temp;\n                }\n            }\n            // Take the maximum of all four cases\n            int max_val = t1;\n            if (t2 > max_val) max_val = t2;\n            if (t3 > max_val) max_val = t3;\n            if (t4 > max_val) max_val = t4;\n            table[i][j] = max_val;\n        }\n    }\n}\n"
+        },
+        "can_parse_output": true,
+        "c_compile_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "",
+                "t0": 25193.371930534,
+                "t1": 25193.768076932,
+                "execution_time": 0.39614639800129225,
+                "timeout": false
+            }
+        },
+        "c_run_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: table\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 \nend   dump: table\n==END   DUMP_ARRAYS==\n",
+                "t0": 25193.788274324,
+                "t1": 25193.813477986,
+                "execution_time": 0.0252036620004219,
+                "timeout": false
+            }
+        },
+        "vitis_hls_tool_out": {
+            "data_execution": {
+                "return_code": -99,
+                "stdout": "",
+                "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+                "t0": 25193.81924431,
+                "t1": 25193.81924431,
+                "execution_time": 0.0,
+                "timeout": false
+            },
+            "data_tool": {}
+        }
+    },
+    "2": {
+        "eval_type": "hls_gen_zero_shot",
+        "eval_id": "nussinov__qwen_qwen3_coder",
+        "benchmark_case_name": "nussinov",
+        "benchmark_case_tags": [
+            "polybench"
+        ],
+        "model_name": "qwen/qwen3-coder",
+        "model_name_normalized": "qwen_qwen3_coder",
+        "temperature": 0.7,
+        "n_samples": 5,
+        "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe Nussinov kernel is an algorithm for predicting RNA folding, which is an instance of dynamic programming. It takes an RNA sequence as input and produces a dynamic programming table as output. The table is filled using a recursive formula that considers the maximum score of four possible cases: (1) the maximum score of the sub-problem without considering the current base pair, (2) the maximum score of the sub-problem without considering the current base, (3) the maximum score of the sub-problem with considering the current base pair, and (4) the maximum score of the sub-problem with considering the current base pair and the maximum score of the sub-problem without considering the current base pair.\n\nIt takes the following as input,\n\n- `seq`: RNA sequence of length $N$. The valid entries are one of 'A' 'G' 'C' 'T'. (or 'U' in place of 'T').\n\nand gives the following as output:\n\n- `table`: $N \\times N$ triangular matrix, which is the dynamic programming table.\n\nThe table is filled using the following formula:\n\n$$\ntable(i,j) = \\max\n\\begin{cases}\ntable(i+1,j) \\\\\ntable(i,j-1) \\\\\ntable(i+1,j-1) + w(i,j) \\\\\n\\max_{i < k < j}(table(i,k) + table(k+1,j))\n\\end{cases}\n$$\n\nwhere $w$ is the scoring function that evaluate the pair of sequences $seq[i]$ and $seq[j]$. For Nussinov algorithm, the scoring function returns 1 if the sequences are complementary (either 'A' with 'T' or 'G' with 'C'), and 0 otherwise.\n\n---\n\nTop-Level Function: `kernel_nussinov`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_nussinov(char seq[60], int table[60][60]);`\n\nInputs:\n- `seq`: an RNA sequence of length 60, where each element is one of 'A', 'G', 'C', 'T', or 'U'. The sequence is stored in a 1D array of characters.\n\nOutputs:\n- `table`: a 2D array of integers, representing the dynamic programming table. The table is a triangular matrix of size 60x60, where each element `table[i][j]` represents the maximum score of the sub-problem considering the RNA sequence from `i` to `j`.\n\nImportant Data Structures and Data Types:\n- `seq`: a 1D array of characters, representing the RNA sequence.\n- `table`: a 2D array of integers, representing the dynamic programming table.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"nussinov_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"nussinov.h\"\n\nvoid init_array(int n, char seq[60], int table[60][60]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        seq[i] = (char)((i + 1) % 4);\n    }\n\n    for (i = 0; i < n; i++)\n        for (j = 0; j < n; j++)\n            table[i][j] = 0;\n}\n\nvoid print_array(int n, int table[60][60])\n\n{\n    int i, j;\n    int t = 0;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"table\");\n    for (i = 0; i < n; i++) {\n        for (j = i; j < n; j++) {\n            if (t % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%d \", table[i][j]);\n            t++;\n        }\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"table\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 60;\n\n    char seq[60];\n    int table[60][60];\n\n    init_array(n, seq, table);\n\n    kernel_nussinov(seq, table);\n\n    print_array(n, table);\n\n    return 0;\n}\n</INPUT_CODE name=\"nussinov_tb.cpp\">\n<INPUT_CODE name=\"nussinov.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_nussinov(char seq[60], int table[60][60]);\n\n</INPUT_CODE name=\"nussinov.h\">\n\n\n\n## Task Output\n\n",
+        "model_timeout": false,
+        "prompt_too_long": false,
+        "llm_execution_time": {
+            "t0": 25337.218472107,
+            "t1": 25340.757264012,
+            "execution_time": 3.538791905000835
+        },
+        "response_json": {
+            "id": "gen-1786572470-3loDsC73RnIExBMhq8Gy",
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "index": 0,
+                    "message": {
+                        "content": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\n// Scoring function to check if two bases are complementary\nint score(char a, char b) {\n    if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||\n        (a == 'C' && b == 'G') || (a == 'G' && b == 'C') ||\n        (a == 'A' && b == 'T') || (a == 'T' && b == 'A') ||\n        (a == 'G' && b == 'C') || (a == 'C' && b == 'G')) {\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score;\n\n    // Initialize the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int length = 1; length < 60; length++) {\n        for (i = 0; i < 60 - length; i++) {\n            j = i + length;\n\n            // Case 1: table[i+1][j]\n            if (i + 1 < 60) {\n                max_score = table[i + 1][j];\n            } else {\n                max_score = 0;\n            }\n\n            // Case 2: table[i][j-1]\n            if (j - 1 >= 0) {\n                int score2 = table[i][j - 1];\n                if (score2 > max_score) {\n                    max_score = score2;\n                }\n            }\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            if (i + 1 < 60 && j - 1 >= 0) {\n                int score3 = table[i + 1][j - 1] + score(seq[i], seq[j]);\n                if (score3 > max_score) {\n                    max_score = score3;\n                }\n            }\n\n            // Case 4: max over all k of (table[i][k] + table[k+1][j])\n            int score4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > score4) {\n                    score4 = temp;\n                }\n            }\n            if (score4 > max_score) {\n                max_score = score4;\n            }\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+                        "role": "assistant"
+                    },
+                    "native_finish_reason": "stop"
+                }
+            ],
+            "created": 1786572470,
+            "model": "qwen/qwen3-coder",
+            "object": "chat.completion",
+            "usage": {
+                "completion_tokens": 630,
+                "prompt_tokens": 1341,
+                "total_tokens": 1971,
+                "completion_tokens_details": {
+                    "audio_tokens": 0,
+                    "reasoning_tokens": 0,
+                    "image_tokens": 0
+                },
+                "prompt_tokens_details": {
+                    "audio_tokens": 0,
+                    "cached_tokens": 1280,
+                    "cache_write_tokens": 0,
+                    "video_tokens": 0
+                },
+                "cost": 0.0007763,
+                "is_byok": false,
+                "cost_details": {
+                    "upstream_inference_cost": 0.0007763,
+                    "upstream_inference_prompt_cost": 0.0001463,
+                    "upstream_inference_completions_cost": 0.00063
+                }
+            },
+            "provider": "DeepInfra"
+        },
+        "raw_output": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\n// Scoring function to check if two bases are complementary\nint score(char a, char b) {\n    if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||\n        (a == 'C' && b == 'G') || (a == 'G' && b == 'C') ||\n        (a == 'A' && b == 'T') || (a == 'T' && b == 'A') ||\n        (a == 'G' && b == 'C') || (a == 'C' && b == 'G')) {\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score;\n\n    // Initialize the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int length = 1; length < 60; length++) {\n        for (i = 0; i < 60 - length; i++) {\n            j = i + length;\n\n            // Case 1: table[i+1][j]\n            if (i + 1 < 60) {\n                max_score = table[i + 1][j];\n            } else {\n                max_score = 0;\n            }\n\n            // Case 2: table[i][j-1]\n            if (j - 1 >= 0) {\n                int score2 = table[i][j - 1];\n                if (score2 > max_score) {\n                    max_score = score2;\n                }\n            }\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            if (i + 1 < 60 && j - 1 >= 0) {\n                int score3 = table[i + 1][j - 1] + score(seq[i], seq[j]);\n                if (score3 > max_score) {\n                    max_score = score3;\n                }\n            }\n\n            // Case 4: max over all k of (table[i][k] + table[k+1][j])\n            int score4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > score4) {\n                    score4 = temp;\n                }\n            }\n            if (score4 > max_score) {\n                max_score = score4;\n            }\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+        "generated_code": {
+            "kernel_nussinov.cpp": "\n#include \"nussinov.h\"\n\n// Scoring function to check if two bases are complementary\nint score(char a, char b) {\n    if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||\n        (a == 'C' && b == 'G') || (a == 'G' && b == 'C') ||\n        (a == 'A' && b == 'T') || (a == 'T' && b == 'A') ||\n        (a == 'G' && b == 'C') || (a == 'C' && b == 'G')) {\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score;\n\n    // Initialize the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int length = 1; length < 60; length++) {\n        for (i = 0; i < 60 - length; i++) {\n            j = i + length;\n\n            // Case 1: table[i+1][j]\n            if (i + 1 < 60) {\n                max_score = table[i + 1][j];\n            } else {\n                max_score = 0;\n            }\n\n            // Case 2: table[i][j-1]\n            if (j - 1 >= 0) {\n                int score2 = table[i][j - 1];\n                if (score2 > max_score) {\n                    max_score = score2;\n                }\n            }\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            if (i + 1 < 60 && j - 1 >= 0) {\n                int score3 = table[i + 1][j - 1] + score(seq[i], seq[j]);\n                if (score3 > max_score) {\n                    max_score = score3;\n                }\n            }\n\n            // Case 4: max over all k of (table[i][k] + table[k+1][j])\n            int score4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > score4) {\n                    score4 = temp;\n                }\n            }\n            if (score4 > max_score) {\n                max_score = score4;\n            }\n\n            table[i][j] = max_score;\n        }\n    }\n}\n"
+        },
+        "can_parse_output": true,
+        "c_compile_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "",
+                "t0": 25341.077060115,
+                "t1": 25341.509220719,
+                "execution_time": 0.43216060399936396,
+                "timeout": false
+            }
+        },
+        "c_run_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: table\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 \nend   dump: table\n==END   DUMP_ARRAYS==\n",
+                "t0": 25341.532117214,
+                "t1": 25341.553946566,
+                "execution_time": 0.021829352001077496,
+                "timeout": false
+            }
+        },
+        "vitis_hls_tool_out": {
+            "data_execution": {
+                "return_code": -99,
+                "stdout": "",
+                "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+                "t0": 25341.558258159,
+                "t1": 25341.558258159,
+                "execution_time": 0.0,
+                "timeout": false
+            },
+            "data_tool": {}
+        }
+    },
+    "3": {
+        "eval_type": "hls_gen_zero_shot",
+        "eval_id": "nussinov__qwen_qwen3_coder",
+        "benchmark_case_name": "nussinov",
+        "benchmark_case_tags": [
+            "polybench"
+        ],
+        "model_name": "qwen/qwen3-coder",
+        "model_name_normalized": "qwen_qwen3_coder",
+        "temperature": 0.7,
+        "n_samples": 5,
+        "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe Nussinov kernel is an algorithm for predicting RNA folding, which is an instance of dynamic programming. It takes an RNA sequence as input and produces a dynamic programming table as output. The table is filled using a recursive formula that considers the maximum score of four possible cases: (1) the maximum score of the sub-problem without considering the current base pair, (2) the maximum score of the sub-problem without considering the current base, (3) the maximum score of the sub-problem with considering the current base pair, and (4) the maximum score of the sub-problem with considering the current base pair and the maximum score of the sub-problem without considering the current base pair.\n\nIt takes the following as input,\n\n- `seq`: RNA sequence of length $N$. The valid entries are one of 'A' 'G' 'C' 'T'. (or 'U' in place of 'T').\n\nand gives the following as output:\n\n- `table`: $N \\times N$ triangular matrix, which is the dynamic programming table.\n\nThe table is filled using the following formula:\n\n$$\ntable(i,j) = \\max\n\\begin{cases}\ntable(i+1,j) \\\\\ntable(i,j-1) \\\\\ntable(i+1,j-1) + w(i,j) \\\\\n\\max_{i < k < j}(table(i,k) + table(k+1,j))\n\\end{cases}\n$$\n\nwhere $w$ is the scoring function that evaluate the pair of sequences $seq[i]$ and $seq[j]$. For Nussinov algorithm, the scoring function returns 1 if the sequences are complementary (either 'A' with 'T' or 'G' with 'C'), and 0 otherwise.\n\n---\n\nTop-Level Function: `kernel_nussinov`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_nussinov(char seq[60], int table[60][60]);`\n\nInputs:\n- `seq`: an RNA sequence of length 60, where each element is one of 'A', 'G', 'C', 'T', or 'U'. The sequence is stored in a 1D array of characters.\n\nOutputs:\n- `table`: a 2D array of integers, representing the dynamic programming table. The table is a triangular matrix of size 60x60, where each element `table[i][j]` represents the maximum score of the sub-problem considering the RNA sequence from `i` to `j`.\n\nImportant Data Structures and Data Types:\n- `seq`: a 1D array of characters, representing the RNA sequence.\n- `table`: a 2D array of integers, representing the dynamic programming table.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"nussinov_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"nussinov.h\"\n\nvoid init_array(int n, char seq[60], int table[60][60]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        seq[i] = (char)((i + 1) % 4);\n    }\n\n    for (i = 0; i < n; i++)\n        for (j = 0; j < n; j++)\n            table[i][j] = 0;\n}\n\nvoid print_array(int n, int table[60][60])\n\n{\n    int i, j;\n    int t = 0;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"table\");\n    for (i = 0; i < n; i++) {\n        for (j = i; j < n; j++) {\n            if (t % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%d \", table[i][j]);\n            t++;\n        }\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"table\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 60;\n\n    char seq[60];\n    int table[60][60];\n\n    init_array(n, seq, table);\n\n    kernel_nussinov(seq, table);\n\n    print_array(n, table);\n\n    return 0;\n}\n</INPUT_CODE name=\"nussinov_tb.cpp\">\n<INPUT_CODE name=\"nussinov.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_nussinov(char seq[60], int table[60][60]);\n\n</INPUT_CODE name=\"nussinov.h\">\n\n\n\n## Task Output\n\n",
+        "model_timeout": false,
+        "prompt_too_long": false,
+        "llm_execution_time": {
+            "t0": 25529.5003256,
+            "t1": 25534.273810049,
+            "execution_time": 4.773484448996896
+        },
+        "response_json": {
+            "id": "gen-1786572668-K7SIEmfCZMF9f6mERYSF",
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "index": 0,
+                    "message": {
+                        "content": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n\n            // Case 1: table[i+1][j]\n            score1 = table[i + 1][j];\n\n            // Case 2: table[i][j-1]\n            score2 = table[i][j - 1];\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            int w = 0;\n            if ((seq[i] == 'A' && seq[j] == 'U') || (seq[i] == 'U' && seq[j] == 'A') ||\n                (seq[i] == 'C' && seq[j] == 'G') || (seq[i] == 'G' && seq[j] == 'C')) {\n                w = 1;\n            }\n            score3 = table[i + 1][j - 1] + w;\n\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            score4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > score4) {\n                    score4 = temp;\n                }\n            }\n\n            // Compute the maximum of the four scores\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+                        "role": "assistant"
+                    },
+                    "native_finish_reason": "stop"
+                }
+            ],
+            "created": 1786572668,
+            "model": "qwen/qwen3-coder",
+            "object": "chat.completion",
+            "usage": {
+                "completion_tokens": 514,
+                "prompt_tokens": 1341,
+                "total_tokens": 1855,
+                "completion_tokens_details": {
+                    "audio_tokens": 0,
+                    "reasoning_tokens": 0,
+                    "image_tokens": 0
+                },
+                "prompt_tokens_details": {
+                    "audio_tokens": 0,
+                    "cached_tokens": 1280,
+                    "cache_write_tokens": 0,
+                    "video_tokens": 0
+                },
+                "cost": 0.0006603,
+                "is_byok": false,
+                "cost_details": {
+                    "upstream_inference_cost": 0.0006603,
+                    "upstream_inference_prompt_cost": 0.0001463,
+                    "upstream_inference_completions_cost": 0.000514
+                }
+            },
+            "provider": "DeepInfra"
+        },
+        "raw_output": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n\n            // Case 1: table[i+1][j]\n            score1 = table[i + 1][j];\n\n            // Case 2: table[i][j-1]\n            score2 = table[i][j - 1];\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            int w = 0;\n            if ((seq[i] == 'A' && seq[j] == 'U') || (seq[i] == 'U' && seq[j] == 'A') ||\n                (seq[i] == 'C' && seq[j] == 'G') || (seq[i] == 'G' && seq[j] == 'C')) {\n                w = 1;\n            }\n            score3 = table[i + 1][j - 1] + w;\n\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            score4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > score4) {\n                    score4 = temp;\n                }\n            }\n\n            // Compute the maximum of the four scores\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+        "generated_code": {
+            "kernel_nussinov.cpp": "\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            table[i][j] = 0;\n        }\n    }\n\n    // Fill the table using dynamic programming\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n\n            // Case 1: table[i+1][j]\n            score1 = table[i + 1][j];\n\n            // Case 2: table[i][j-1]\n            score2 = table[i][j - 1];\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            int w = 0;\n            if ((seq[i] == 'A' && seq[j] == 'U') || (seq[i] == 'U' && seq[j] == 'A') ||\n                (seq[i] == 'C' && seq[j] == 'G') || (seq[i] == 'G' && seq[j] == 'C')) {\n                w = 1;\n            }\n            score3 = table[i + 1][j - 1] + w;\n\n            // Case 4: max over k of (table[i][k] + table[k+1][j])\n            score4 = 0;\n            for (k = i + 1; k < j; k++) {\n                int temp = table[i][k] + table[k + 1][j];\n                if (temp > score4) {\n                    score4 = temp;\n                }\n            }\n\n            // Compute the maximum of the four scores\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n"
+        },
+        "can_parse_output": true,
+        "c_compile_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "",
+                "t0": 25534.556516606,
+                "t1": 25534.969256984,
+                "execution_time": 0.41274037800030783,
+                "timeout": false
+            }
+        },
+        "c_run_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: table\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 \nend   dump: table\n==END   DUMP_ARRAYS==\n",
+                "t0": 25534.98936076,
+                "t1": 25535.010093401,
+                "execution_time": 0.020732641001814045,
+                "timeout": false
+            }
+        },
+        "vitis_hls_tool_out": {
+            "data_execution": {
+                "return_code": -99,
+                "stdout": "",
+                "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+                "t0": 25535.014938485,
+                "t1": 25535.014938485,
+                "execution_time": 0.0,
+                "timeout": false
+            },
+            "data_tool": {}
+        }
+    },
+    "4": {
+        "eval_type": "hls_gen_zero_shot",
+        "eval_id": "nussinov__qwen_qwen3_coder",
+        "benchmark_case_name": "nussinov",
+        "benchmark_case_tags": [
+            "polybench"
+        ],
+        "model_name": "qwen/qwen3-coder",
+        "model_name_normalized": "qwen_qwen3_coder",
+        "temperature": 0.7,
+        "n_samples": 5,
+        "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe Nussinov kernel is an algorithm for predicting RNA folding, which is an instance of dynamic programming. It takes an RNA sequence as input and produces a dynamic programming table as output. The table is filled using a recursive formula that considers the maximum score of four possible cases: (1) the maximum score of the sub-problem without considering the current base pair, (2) the maximum score of the sub-problem without considering the current base, (3) the maximum score of the sub-problem with considering the current base pair, and (4) the maximum score of the sub-problem with considering the current base pair and the maximum score of the sub-problem without considering the current base pair.\n\nIt takes the following as input,\n\n- `seq`: RNA sequence of length $N$. The valid entries are one of 'A' 'G' 'C' 'T'. (or 'U' in place of 'T').\n\nand gives the following as output:\n\n- `table`: $N \\times N$ triangular matrix, which is the dynamic programming table.\n\nThe table is filled using the following formula:\n\n$$\ntable(i,j) = \\max\n\\begin{cases}\ntable(i+1,j) \\\\\ntable(i,j-1) \\\\\ntable(i+1,j-1) + w(i,j) \\\\\n\\max_{i < k < j}(table(i,k) + table(k+1,j))\n\\end{cases}\n$$\n\nwhere $w$ is the scoring function that evaluate the pair of sequences $seq[i]$ and $seq[j]$. For Nussinov algorithm, the scoring function returns 1 if the sequences are complementary (either 'A' with 'T' or 'G' with 'C'), and 0 otherwise.\n\n---\n\nTop-Level Function: `kernel_nussinov`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_nussinov(char seq[60], int table[60][60]);`\n\nInputs:\n- `seq`: an RNA sequence of length 60, where each element is one of 'A', 'G', 'C', 'T', or 'U'. The sequence is stored in a 1D array of characters.\n\nOutputs:\n- `table`: a 2D array of integers, representing the dynamic programming table. The table is a triangular matrix of size 60x60, where each element `table[i][j]` represents the maximum score of the sub-problem considering the RNA sequence from `i` to `j`.\n\nImportant Data Structures and Data Types:\n- `seq`: a 1D array of characters, representing the RNA sequence.\n- `table`: a 2D array of integers, representing the dynamic programming table.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"nussinov_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"nussinov.h\"\n\nvoid init_array(int n, char seq[60], int table[60][60]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        seq[i] = (char)((i + 1) % 4);\n    }\n\n    for (i = 0; i < n; i++)\n        for (j = 0; j < n; j++)\n            table[i][j] = 0;\n}\n\nvoid print_array(int n, int table[60][60])\n\n{\n    int i, j;\n    int t = 0;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"table\");\n    for (i = 0; i < n; i++) {\n        for (j = i; j < n; j++) {\n            if (t % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%d \", table[i][j]);\n            t++;\n        }\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"table\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 60;\n\n    char seq[60];\n    int table[60][60];\n\n    init_array(n, seq, table);\n\n    kernel_nussinov(seq, table);\n\n    print_array(n, table);\n\n    return 0;\n}\n</INPUT_CODE name=\"nussinov_tb.cpp\">\n<INPUT_CODE name=\"nussinov.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_nussinov(char seq[60], int table[60][60]);\n\n</INPUT_CODE name=\"nussinov.h\">\n\n\n\n## Task Output\n\n",
+        "model_timeout": false,
+        "prompt_too_long": false,
+        "llm_execution_time": {
+            "t0": 25741.516460636,
+            "t1": 25745.034431423,
+            "execution_time": 3.5179707869974663
+        },
+        "response_json": {
+            "id": "gen-1786572885-iwCDrOAZx6d1KM9ZDhSv",
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "index": 0,
+                    "message": {
+                        "content": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the diagonal and upper triangle of the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            if (i >= j) {\n                table[i][j] = 0;\n            }\n        }\n    }\n\n    // Fill the table in a bottom-up manner\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n            score1 = score2 = score3 = score4 = 0;\n\n            // Case 1: table[i+1][j]\n            if (i + 1 < 60) {\n                score1 = table[i + 1][j];\n            }\n\n            // Case 2: table[i][j-1]\n            if (j - 1 >= 0) {\n                score2 = table[i][j - 1];\n            }\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            if (i + 1 < 60 && j - 1 >= 0) {\n                int w = 0;\n                char base1 = seq[i];\n                char base2 = seq[j];\n                if ((base1 == 'A' && base2 == 'U') || (base1 == 'U' && base2 == 'A') ||\n                    (base1 == 'C' && base2 == 'G') || (base1 == 'G' && base2 == 'C')) {\n                    w = 1;\n                }\n                score3 = table[i + 1][j - 1] + w;\n            }\n\n            // Case 4: max_{i < k < j} (table[i][k] + table[k+1][j])\n            if (j - i > 1) {\n                for (k = i + 1; k < j; k++) {\n                    int score = table[i][k] + table[k + 1][j];\n                    if (score > score4) {\n                        score4 = score;\n                    }\n                }\n            }\n\n            // Compute the maximum of the four cases\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+                        "role": "assistant"
+                    },
+                    "native_finish_reason": "stop"
+                }
+            ],
+            "created": 1786572886,
+            "model": "qwen/qwen3-coder",
+            "object": "chat.completion",
+            "usage": {
+                "completion_tokens": 618,
+                "prompt_tokens": 1341,
+                "total_tokens": 1959,
+                "completion_tokens_details": {
+                    "audio_tokens": 0,
+                    "reasoning_tokens": 0,
+                    "image_tokens": 0
+                },
+                "prompt_tokens_details": {
+                    "audio_tokens": 0,
+                    "cached_tokens": 1280,
+                    "cache_write_tokens": 0,
+                    "video_tokens": 0
+                },
+                "cost": 0.0007643,
+                "is_byok": false,
+                "cost_details": {
+                    "upstream_inference_cost": 0.0007643,
+                    "upstream_inference_prompt_cost": 0.0001463,
+                    "upstream_inference_completions_cost": 0.000618
+                }
+            },
+            "provider": "DeepInfra"
+        },
+        "raw_output": "<OUTPUT_CODE name=\"kernel_nussinov.cpp\">\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the diagonal and upper triangle of the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            if (i >= j) {\n                table[i][j] = 0;\n            }\n        }\n    }\n\n    // Fill the table in a bottom-up manner\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n            score1 = score2 = score3 = score4 = 0;\n\n            // Case 1: table[i+1][j]\n            if (i + 1 < 60) {\n                score1 = table[i + 1][j];\n            }\n\n            // Case 2: table[i][j-1]\n            if (j - 1 >= 0) {\n                score2 = table[i][j - 1];\n            }\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            if (i + 1 < 60 && j - 1 >= 0) {\n                int w = 0;\n                char base1 = seq[i];\n                char base2 = seq[j];\n                if ((base1 == 'A' && base2 == 'U') || (base1 == 'U' && base2 == 'A') ||\n                    (base1 == 'C' && base2 == 'G') || (base1 == 'G' && base2 == 'C')) {\n                    w = 1;\n                }\n                score3 = table[i + 1][j - 1] + w;\n            }\n\n            // Case 4: max_{i < k < j} (table[i][k] + table[k+1][j])\n            if (j - i > 1) {\n                for (k = i + 1; k < j; k++) {\n                    int score = table[i][k] + table[k + 1][j];\n                    if (score > score4) {\n                        score4 = score;\n                    }\n                }\n            }\n\n            // Compute the maximum of the four cases\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n</OUTPUT_CODE>",
+        "generated_code": {
+            "kernel_nussinov.cpp": "\n#include \"nussinov.h\"\n\nvoid kernel_nussinov(char seq[60], int table[60][60]) {\n    int i, j, k;\n    int max_score, score1, score2, score3, score4;\n\n    // Initialize the diagonal and upper triangle of the table\n    for (i = 0; i < 60; i++) {\n        for (j = 0; j < 60; j++) {\n            if (i >= j) {\n                table[i][j] = 0;\n            }\n        }\n    }\n\n    // Fill the table in a bottom-up manner\n    for (int gap = 1; gap < 60; gap++) {\n        for (i = 0; i < 60 - gap; i++) {\n            j = i + gap;\n            score1 = score2 = score3 = score4 = 0;\n\n            // Case 1: table[i+1][j]\n            if (i + 1 < 60) {\n                score1 = table[i + 1][j];\n            }\n\n            // Case 2: table[i][j-1]\n            if (j - 1 >= 0) {\n                score2 = table[i][j - 1];\n            }\n\n            // Case 3: table[i+1][j-1] + w(i,j)\n            if (i + 1 < 60 && j - 1 >= 0) {\n                int w = 0;\n                char base1 = seq[i];\n                char base2 = seq[j];\n                if ((base1 == 'A' && base2 == 'U') || (base1 == 'U' && base2 == 'A') ||\n                    (base1 == 'C' && base2 == 'G') || (base1 == 'G' && base2 == 'C')) {\n                    w = 1;\n                }\n                score3 = table[i + 1][j - 1] + w;\n            }\n\n            // Case 4: max_{i < k < j} (table[i][k] + table[k+1][j])\n            if (j - i > 1) {\n                for (k = i + 1; k < j; k++) {\n                    int score = table[i][k] + table[k + 1][j];\n                    if (score > score4) {\n                        score4 = score;\n                    }\n                }\n            }\n\n            // Compute the maximum of the four cases\n            max_score = score1;\n            if (score2 > max_score) max_score = score2;\n            if (score3 > max_score) max_score = score3;\n            if (score4 > max_score) max_score = score4;\n\n            table[i][j] = max_score;\n        }\n    }\n}\n"
+        },
+        "can_parse_output": true,
+        "c_compile_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "",
+                "t0": 25745.312746421,
+                "t1": 25745.74061213,
+                "execution_time": 0.42786570899988874,
+                "timeout": false
+            }
+        },
+        "c_run_out": {
+            "data_execution": {
+                "return_code": 0,
+                "stdout": "",
+                "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: table\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 \nend   dump: table\n==END   DUMP_ARRAYS==\n",
+                "t0": 25745.760502502,
+                "t1": 25745.78735313,
+                "execution_time": 0.0268506280008296,
+                "timeout": false
+            }
+        },
+        "vitis_hls_tool_out": {
+            "data_execution": {
+                "return_code": -99,
+                "stdout": "",
+                "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+                "t0": 25745.793288098,
+                "t1": 25745.793288098,
+                "execution_time": 0.0,
+                "timeout": false
+            },
+            "data_tool": {}
+        }
+    }
+}

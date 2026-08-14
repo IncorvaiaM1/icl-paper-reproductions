@@ -1,0 +1,49 @@
+
+#include "cholesky.h"
+#include <cmath>
+
+void kernel_cholesky(double A[40][40]) {
+    #pragma HLS INTERFACE m_axi port=A depth=1600
+    #pragma HLS INTERFACE s_axilite port=return
+
+    double L[40][40];
+
+    // Initialize L matrix to zero
+    for (int i = 0; i < 40; i++) {
+        for (int j = 0; j < 40; j++) {
+            L[i][j] = 0.0;
+        }
+    }
+
+    // Perform Cholesky decomposition using Cholesky-Banachiewicz algorithm
+    for (int i = 0; i < 40; i++) {
+        for (int j = 0; j <= i; j++) {
+            double sum = 0.0;
+
+            if (i == j) {
+                // Diagonal elements
+                for (int k = 0; k < j; k++) {
+                    sum += L[j][k] * L[j][k];
+                }
+                L[j][j] = sqrt(A[j][j] - sum);
+            } else {
+                // Off-diagonal elements
+                for (int k = 0; k < j; k++) {
+                    sum += L[i][k] * L[j][k];
+                }
+                L[i][j] = (A[i][j] - sum) / L[j][j];
+            }
+        }
+    }
+
+    // Copy the result back to A
+    for (int i = 0; i < 40; i++) {
+        for (int j = 0; j <= i; j++) {
+            A[i][j] = L[i][j];
+        }
+        // Set upper triangular part to zero
+        for (int j = i+1; j < 40; j++) {
+            A[i][j] = 0.0;
+        }
+    }
+}

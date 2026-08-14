@@ -1,0 +1,88 @@
+
+#include "nw_nw.h"
+
+#define MATCH_SCORE 1
+#define MISMATCH_SCORE -1
+#define GAP_SCORE -1
+
+void needwun(
+    char SEQA[ALEN],
+    char SEQB[BLEN],
+    char alignedA[ALEN + BLEN],
+    char alignedB[ALEN + BLEN],
+    int M[(ALEN + 1) * (BLEN + 1)],
+    char ptr[(ALEN + 1) * (BLEN + 1)]) {
+
+    // Initialize first row
+    INIT_ROW: for(int j = 0; j <= BLEN; j++) {
+        M[0 * (BLEN + 1) + j] = j * GAP_SCORE;
+        ptr[0 * (BLEN + 1) + j] = 'L'; // Left
+    }
+
+    // Initialize first column
+    INIT_COL: for(int i = 0; i <= ALEN; i++) {
+        M[i * (BLEN + 1) + 0] = i * GAP_SCORE;
+        ptr[i * (BLEN + 1) + 0] = 'U'; // Up
+    }
+
+    // Fill the matrix
+    FILL_OUT: for(int i = 1; i <= ALEN; i++) {
+        FILL_IN: for(int j = 1; j <= BLEN; j++) {
+            int diag_score = M[(i-1) * (BLEN + 1) + (j-1)];
+            if(SEQA[i-1] == SEQB[j-1]) {
+                diag_score += MATCH_SCORE;
+            } else {
+                diag_score += MISMATCH_SCORE;
+            }
+
+            int up_score = M[(i-1) * (BLEN + 1) + j] + GAP_SCORE;
+            int left_score = M[i * (BLEN + 1) + (j-1)] + GAP_SCORE;
+
+            // Find the maximum score and set the pointer
+            if(diag_score >= up_score && diag_score >= left_score) {
+                M[i * (BLEN + 1) + j] = diag_score;
+                ptr[i * (BLEN + 1) + j] = 'D'; // Diagonal
+            } else if(up_score >= left_score) {
+                M[i * (BLEN + 1) + j] = up_score;
+                ptr[i * (BLEN + 1) + j] = 'U'; // Up
+            } else {
+                M[i * (BLEN + 1) + j] = left_score;
+                ptr[i * (BLEN + 1) + j] = 'L'; // Left
+            }
+        }
+    }
+
+    // Traceback
+    int i = ALEN;
+    int j = BLEN;
+    int align_idx = ALEN + BLEN - 1;
+
+    TRACE: while(i > 0 || j > 0) {
+        char direction = ptr[i * (BLEN + 1) + j];
+
+        if(direction == 'D') {
+            alignedA[align_idx] = SEQA[i-1];
+            alignedB[align_idx] = SEQB[j-1];
+            i--;
+            j--;
+        } else if(direction == 'U') {
+            alignedA[align_idx] = SEQA[i-1];
+            alignedB[align_idx] = '_';
+            i--;
+        } else { // direction == 'L'
+            alignedA[align_idx] = '_';
+            alignedB[align_idx] = SEQB[j-1];
+            j--;
+        }
+        align_idx--;
+    }
+
+    // Pad the beginning of the aligned sequences with underscores if necessary
+    PAD_A: for(int k = 0; k < align_idx + 1; k++) {
+        alignedA[k] = '_';
+    }
+
+    PAD_B: for(int k = 0; k < align_idx + 1; k++) {
+        alignedB[k] = '_';
+    }
+}

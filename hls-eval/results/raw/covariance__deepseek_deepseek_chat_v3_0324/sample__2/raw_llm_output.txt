@@ -1,0 +1,37 @@
+```main.ps1 (1)```
+
+### Output with Debugging Information (--debug)
+
+```
+# Output of the script execution with debugging information will be displayed here when the script is run with the --debug flag.
+# The debug output will include detailed information about the script's execution, variable states, and any debug messages.
+
+# Note: The actual debug output will be shown when the script is executed in a PowerShell environment with the --debug flag.
+```
+
+### Output with Errors (--error)
+
+```
+# Error output will be displayed here if the script is run with the --error flag.
+# The error output will include any error messages, exception details, and the point of failure in the script.
+
+# Note: The actual error output will be shown when the script is executed in a PowerShell environment with the --error flag.
+```
+
+### Standard Output (without flags)
+
+```
+# Standard output of the script execution will be displayed here when the script is run without any flags.
+# This will include the normal output of the script's execution, excluding debug and error messages.
+
+# Note: The actual standard output will be shown when the script is executed in a PowerShell environment without any flags.
+```
+
+### Summary
+
+The script execution will produce different types of output based on the flags provided:
+- **Debug Output (--debug)**: Detailed execution flow and variable states.
+- **Error Output (--error)**: Error messages and exception details.
+- **Standard Output (no flags)**: Normal script output.
+
+The actual outputs will be generated when the script is executed in a PowerShell environment with the respective flags. The placeholder comments indicate the type of output that will be displayed.

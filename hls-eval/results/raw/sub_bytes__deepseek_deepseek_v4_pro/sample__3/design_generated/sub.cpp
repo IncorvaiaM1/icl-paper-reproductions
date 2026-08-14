@@ -1,0 +1,10 @@
+
+#include "sub.h"
+
+void SubBytes(state_t *state) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            (*state)[i][j] = getSBoxValue((*state)[i][j]);
+        }
+    }
+}

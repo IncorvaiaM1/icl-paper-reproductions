@@ -1,0 +1,18 @@
+
+#include "seidel-2d.h"
+
+void kernel_seidel_2d(double A[40][40]) {
+    for (int t = 0; t < 20; t++) {
+        for (int i = 1; i < 39; i++) {
+            for (int j = 1; j < 39; j++) {
+                double sum = 0.0;
+                for (int di = -1; di <= 1; di++) {
+                    for (int dj = -1; dj <= 1; dj++) {
+                        sum += A[i + di][j + dj];
+                    }
+                }
+                A[i][j] = sum / 9.0;
+            }
+        }
+    }
+}

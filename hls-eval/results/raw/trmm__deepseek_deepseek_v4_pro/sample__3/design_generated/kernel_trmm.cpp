@@ -1,0 +1,24 @@
+
+#include "trmm.h"
+
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    // Process rows from bottom to top to allow in-place update
+    // using the original B values for the multiplication.
+    for (int i = 19; i >= 0; i--) {
+        double sum[30];
+        // Initialize accumulation array to zero
+        for (int j = 0; j < 30; j++) {
+            sum[j] = 0.0;
+        }
+        // Compute sum over k for the lower triangular part of A
+        for (int k = 0; k <= i; k++) {
+            for (int j = 0; j < 30; j++) {
+                sum[j] += A[i][k] * B[k][j];
+            }
+        }
+        // Scale by alpha and write back to B
+        for (int j = 0; j < 30; j++) {
+            B[i][j] = alpha * sum[j];
+        }
+    }
+}

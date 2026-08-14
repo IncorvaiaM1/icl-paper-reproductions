@@ -1,0 +1,38 @@
+
+#include "gemm.h"
+
+void kernel_gemm(
+    double alpha,
+    double beta,
+    double C[20][25],
+    double A[20][30],
+    double B[30][25]) {
+    
+    // Compute C = alpha * A * B + beta * C
+    // Dimensions: A is 20x30, B is 30x25, C is 20x25
+    
+    double temp[20][25];
+    
+    // Initialize temp to zero
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 25; j++) {
+            temp[i][j] = 0.0;
+        }
+    }
+    
+    // Compute A * B
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 25; j++) {
+            for (int k = 0; k < 30; k++) {
+                temp[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    
+    // Compute C = alpha * temp + beta * C
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 25; j++) {
+            C[i][j] = alpha * temp[i][j] + beta * C[i][j];
+        }
+    }
+}

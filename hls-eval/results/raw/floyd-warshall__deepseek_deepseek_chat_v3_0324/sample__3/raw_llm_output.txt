@@ -1,0 +1,52 @@
+I'll analyze the inputs and provide a solution for implementing the Floyd-Warshall algorithm based on the given code.
+
+1. **Understanding the Floyd-Warshall Algorithm**:
+   - The algorithm computes shortest paths between all pairs of nodes in a weighted graph
+   - It uses dynamic programming to update path costs by considering all possible intermediate nodes
+   - The recursive formula is clearly defined in the kernel description
+
+2. **Code Implementation Requirements**:
+   - Need to implement the kernel function `kernel_floyd_warshall` that takes a 60x60 matrix as input
+   - The matrix represents path costs between nodes (with infinity for non-adjacent nodes)
+   - The function should modify the input matrix to contain shortest path costs
+
+3. **Solution**:
+
+```cpp
+#include "floyd-warshall.h"
+#include <climits>
+
+void kernel_floyd_warshall(int path[60][60]) {
+    // Implement the Floyd-Warshall algorithm
+    for (int k = 0; k < 60; k++) {
+        for (int i = 0; i < 60; i++) {
+            // Skip if no path exists from i to k
+            if (path[i][k] == INT_MAX) continue;
+            
+            for (int j = 0; j < 60; j++) {
+                // Skip if no path exists from k to j
+                if (path[k][j] == INT_MAX) continue;
+                
+                // Update path if shorter path found through k
+                if (path[i][j] > path[i][k] + path[k][j]) {
+                    path[i][j] = path[i][k] + path[k][j];
+                }
+            }
+        }
+    }
+}
+```
+
+4. **Key Implementation Details**:
+   - Uses 3 nested loops as required by the algorithm (k, i, j)
+   - Handles infinity (INT_MAX) for non-adjacent nodes
+   - Updates path costs in place
+   - Skips unnecessary computations when paths don't exist
+
+5. **Edge Cases Handled**:
+   - Non-adjacent nodes (INT_MAX)
+   - Self paths (i == j)
+   - Paths that can't be improved
+   - The 60x60 matrix size constraint
+
+The implementation follows the algorithm specification exactly and should work with the provided test code. The function modifies the input matrix to contain the shortest path costs between all pairs of nodes.

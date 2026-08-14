@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "ludcmp__deepseek_deepseek_chat_v3_0324",
+    "benchmark_case_name": "ludcmp",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "deepseek/deepseek-chat-v3-0324",
+    "model_name_normalized": "deepseek_deepseek_chat_v3_0324",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThis kernel solves a system of linear equations using LU decomposition followed by forward and backward substitutions. The kernel takes a square matrix A and a vector b as inputs, and outputs the solution vector x. The LU decomposition is performed in-place on the input matrix A, and the forward and backward substitutions are performed using the decomposed matrix and the input vector b.\n\nIt takes the following as inputs,\n\n- $A: N \\times N$ matrix\n- $b$: vector of length $N$\n\nand gives the following as output:\n\n- $x$: vector of length $N$, where $Ax = b$\n\nThe matrix $A$ is first decomposed into $L$ and $U$ using the same algorithm as in `lu`. Then the two triangular systems are solved to find $x$ as follows:\n\n$$\nAx = b \\Rightarrow LUx = b \\Rightarrow\n\\begin{cases}\nLy = b \\\\\nUx = y\n\\end{cases}\n$$\n\nThe forward and backward substitutions are as follows:\n\n$$\ny(i) = \\frac{b(i) - \\sum_{j=0}^{i-1} L(i,j)y(j)}{L(i,i)}\n$$\n\n$$\nx(i) = \\frac{y(i) - \\sum_{j=0}^{i-1} U(i,j)x(j)}{U(i,i)}\n$$\n\n---\n\nTop-Level Function: `kernel_ludcmp`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_ludcmp(double A[40][40], double b[40], double x[40], double y[40]);`\n\nInputs:\n- `A`: a square matrix of size 40x40, represented as a 2D array of doubles, where each element A[i][j] represents the element at the i-th row and j-th column of the matrix.\n- `b`: a vector of length 40, represented as a 1D array of doubles, where each element b[i] represents the i-th element of the vector.\n\nOutputs:\n- `x`: a vector of length 40, represented as a 1D array of doubles, where each element x[i] represents the i-th element of the solution vector.\n- `y`: a temporary vector of length 40, represented as a 1D array of doubles, used for intermediate calculations during the forward and backward substitutions.\n\nImportant Data Structures and Data Types:\n- `double`: a 64-bit floating-point number, used to represent the elements of the input matrix A and vectors b and x.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"ludcmp_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"ludcmp.h\"\n\nvoid init_array(\n    int n,\n    double A[40][40],\n    double b[40],\n    double x[40],\n    double y[40]) {\n    int i, j;\n    double fn = (double)n;\n\n    for (i = 0; i < n; i++) {\n        x[i] = 0;\n        y[i] = 0;\n        b[i] = (i + 1) / fn / 2.0 + 4;\n    }\n\n    for (i = 0; i < n; i++) {\n        for (j = 0; j <= i; j++)\n            A[i][j] = (double)(-j % n) / n + 1;\n        for (j = i + 1; j < n; j++) {\n            A[i][j] = 0;\n        }\n        A[i][i] = 1;\n    }\n\n    int r, s, t;\n    double B[40][40];\n    for (r = 0; r < n; ++r)\n        for (s = 0; s < n; ++s)\n            B[r][s] = 0;\n    for (t = 0; t < n; ++t)\n        for (r = 0; r < n; ++r)\n            for (s = 0; s < n; ++s)\n                B[r][s] += A[r][t] * A[s][t];\n    for (r = 0; r < n; ++r)\n        for (s = 0; s < n; ++s)\n            A[r][s] = B[r][s];\n}\n\nvoid print_array(int n, double x[40])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"x\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", x[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"x\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 40;\n\n    double A[40][40];\n    double b[40];\n    double x[40];\n    double y[40];\n\n    init_array(n, A, b, x, y);\n\n    kernel_ludcmp(A, b, x, y);\n\n    print_array(n, x);\n\n    return 0;\n}\n</INPUT_CODE name=\"ludcmp_tb.cpp\">\n<INPUT_CODE name=\"ludcmp.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_ludcmp(double A[40][40], double b[40], double x[40], double y[40]);\n\n</INPUT_CODE name=\"ludcmp.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 22162.181358148,
+        "t1": 22170.588717036,
+        "execution_time": 8.407358888001909
+    },
+    "response_json": {
+        "id": "gen-1786569228-KoUxDnT0IuiFVQumkdMP",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_ludcmp.cpp\">\n#include \"ludcmp.h\"\n#include <cmath>\n\nvoid kernel_ludcmp(double A[40][40], double b[40], double x[40], double y[40]) {\n    // LU Decomposition (in-place)\n    for (int k = 0; k < 40; k++) {\n        for (int i = k + 1; i < 40; i++) {\n            A[i][k] = A[i][k] / A[k][k];\n            for (int j = k + 1; j < 40; j++) {\n                A[i][j] = A[i][j] - A[i][k] * A[k][j];\n            }\n        }\n    }\n\n    // Forward substitution: Ly = b\n    for (int i = 0; i < 40; i++) {\n        double sum = 0;\n        for (int j = 0; j < i; j++) {\n            sum += A[i][j] * y[j];\n        }\n        y[i] = (b[i] - sum) / A[i][i];\n    }\n\n    // Backward substitution: Ux = y\n    for (int i = 39; i >= 0; i--) {\n        double sum = 0;\n        for (int j = i + 1; j < 40; j++) {\n            sum += A[i][j] * x[j];\n        }\n        x[i] = (y[i] - sum) / A[i][i];\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786569228,
+        "model": "deepseek/deepseek-chat-v3-0324",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 342,
+            "prompt_tokens": 1549,
+            "total_tokens": 1891,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0012875,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0012875,
+                "upstream_inference_prompt_cost": 0.0007745,
+                "upstream_inference_completions_cost": 0.000513
+            }
+        },
+        "provider": "Crusoe"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_ludcmp.cpp\">\n#include \"ludcmp.h\"\n#include <cmath>\n\nvoid kernel_ludcmp(double A[40][40], double b[40], double x[40], double y[40]) {\n    // LU Decomposition (in-place)\n    for (int k = 0; k < 40; k++) {\n        for (int i = k + 1; i < 40; i++) {\n            A[i][k] = A[i][k] / A[k][k];\n            for (int j = k + 1; j < 40; j++) {\n                A[i][j] = A[i][j] - A[i][k] * A[k][j];\n            }\n        }\n    }\n\n    // Forward substitution: Ly = b\n    for (int i = 0; i < 40; i++) {\n        double sum = 0;\n        for (int j = 0; j < i; j++) {\n            sum += A[i][j] * y[j];\n        }\n        y[i] = (b[i] - sum) / A[i][i];\n    }\n\n    // Backward substitution: Ux = y\n    for (int i = 39; i >= 0; i--) {\n        double sum = 0;\n        for (int j = i + 1; j < 40; j++) {\n            sum += A[i][j] * x[j];\n        }\n        x[i] = (y[i] - sum) / A[i][i];\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_ludcmp.cpp": "\n#include \"ludcmp.h\"\n#include <cmath>\n\nvoid kernel_ludcmp(double A[40][40], double b[40], double x[40], double y[40]) {\n    // LU Decomposition (in-place)\n    for (int k = 0; k < 40; k++) {\n        for (int i = k + 1; i < 40; i++) {\n            A[i][k] = A[i][k] / A[k][k];\n            for (int j = k + 1; j < 40; j++) {\n                A[i][j] = A[i][j] - A[i][k] * A[k][j];\n            }\n        }\n    }\n\n    // Forward substitution: Ly = b\n    for (int i = 0; i < 40; i++) {\n        double sum = 0;\n        for (int j = 0; j < i; j++) {\n            sum += A[i][j] * y[j];\n        }\n        y[i] = (b[i] - sum) / A[i][i];\n    }\n\n    // Backward substitution: Ux = y\n    for (int i = 39; i >= 0; i--) {\n        double sum = 0;\n        for (int j = i + 1; j < 40; j++) {\n            sum += A[i][j] * x[j];\n        }\n        x[i] = (y[i] - sum) / A[i][i];\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 22170.911388927,
+            "t1": 22171.376650645,
+            "execution_time": 0.4652617179999652,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: x\n3.999662 -0.000688 -0.000746 -0.000810 -0.000883 -0.000964 -0.001056 -0.001161 -0.001281 -0.001419 -0.001578 -0.001764 -0.001983 -0.002244 -0.002559 -0.002946 -0.003431 -0.004046 -0.004838 -0.005862 \n-0.007183 -0.008866 -0.010958 -0.013469 -0.016345 -0.019434 -0.022465 -0.025043 -0.026662 -0.026748 -0.024733 -0.020145 -0.012704 -0.002401 0.010455 0.025241 0.041081 0.056946 0.071797 0.084732 \nend   dump: x\n==END   DUMP_ARRAYS==\n",
+            "t0": 22171.400675647,
+            "t1": 22171.419803291,
+            "execution_time": 0.019127643998217536,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 22171.438129124,
+            "t1": 22171.438129124,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

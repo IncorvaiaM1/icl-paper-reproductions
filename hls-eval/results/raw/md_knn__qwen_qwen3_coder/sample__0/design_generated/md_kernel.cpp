@@ -1,0 +1,63 @@
+
+#include "md_knn.h"
+
+void md_kernel(
+    TYPE force_x[nAtoms],
+    TYPE force_y[nAtoms],
+    TYPE force_z[nAtoms],
+    TYPE position_x[nAtoms],
+    TYPE position_y[nAtoms],
+    TYPE position_z[nAtoms],
+    int32_t NL[nAtoms * maxNeighbors]) {
+
+    // Iterate over each atom
+    loop_i:
+    for (int i = 0; i < nAtoms; i++) {
+        TYPE fx = 0.0;
+        TYPE fy = 0.0;
+        TYPE fz = 0.0;
+
+        // Iterate over each neighbor of the current atom
+        loop_j:
+        for (int j = 0; j < maxNeighbors; j++) {
+            int neighbor_index = NL[i * maxNeighbors + j];
+
+            // Check if the neighbor index is valid
+            if (neighbor_index >= 0 && neighbor_index < nAtoms) {
+                // Calculate the distance vector
+                TYPE dx = position_x[i] - position_x[neighbor_index];
+                TYPE dy = position_y[i] - position_y[neighbor_index];
+                TYPE dz = position_z[i] - position_z[neighbor_index];
+
+                // Calculate the squared distance
+                TYPE r2 = dx * dx + dy * dy + dz * dz;
+
+                // Avoid division by zero
+                if (r2 > 0.0) {
+                    // Calculate r^2, r^6, and r^12
+                    TYPE r2_inv = 1.0 / r2;
+                    TYPE r6_inv = r2_inv * r2_inv * r2_inv;
+                    TYPE r12_inv = r6_inv * r6_inv;
+
+                    // Calculate the force magnitude using Lennard-Jones potential
+                    TYPE force_mag = lj1 * r12_inv - lj2 * r6_inv;
+
+                    // Calculate the force components
+                    TYPE fx_ij = dx * force_mag;
+                    TYPE fy_ij = dy * force_mag;
+                    TYPE fz_ij = dz * force_mag;
+
+                    // Accumulate the forces
+                    fx += fx_ij;
+                    fy += fy_ij;
+                    fz += fz_ij;
+                }
+            }
+        }
+
+        // Update the forces on the current atom
+        force_x[i] = fx;
+        force_y[i] = fy;
+        force_z[i] = fz;
+    }
+}

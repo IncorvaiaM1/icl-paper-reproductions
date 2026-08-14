@@ -1,0 +1,79 @@
+
+#include "md_knn.h"
+
+void md_kernel(
+    TYPE force_x[nAtoms],
+    TYPE force_y[nAtoms],
+    TYPE force_z[nAtoms],
+    TYPE position_x[nAtoms],
+    TYPE position_y[nAtoms],
+    TYPE position_z[nAtoms],
+    int32_t NL[nAtoms * maxNeighbors])
+{
+    // Temporary force accumulators
+    TYPE local_force_x[nAtoms];
+    TYPE local_force_y[nAtoms];
+    TYPE local_force_z[nAtoms];
+
+    // Initialize local forces to zero
+    loop_init: for (int i = 0; i < nAtoms; i++) {
+        local_force_x[i] = 0;
+        local_force_y[i] = 0;
+        local_force_z[i] = 0;
+    }
+
+    // Main computation loop over all atoms
+    loop_i: for (int i = 0; i < nAtoms; i++) {
+        // Get current atom's position
+        TYPE ix = position_x[i];
+        TYPE iy = position_y[i];
+        TYPE iz = position_z[i];
+
+        // Loop over all neighbors of current atom
+        loop_j: for (int j = 0; j < maxNeighbors; j++) {
+            int neighbor_idx = NL[i * maxNeighbors + j];
+            if (neighbor_idx >= 0 && neighbor_idx < nAtoms) {
+                // Get neighbor's position
+                TYPE jx = position_x[neighbor_idx];
+                TYPE jy = position_y[neighbor_idx];
+                TYPE jz = position_z[neighbor_idx];
+
+                // Calculate distance components
+                TYPE dx = ix - jx;
+                TYPE dy = iy - jy;
+                TYPE dz = iz - jz;
+
+                // Calculate squared distance
+                TYPE r2 = dx*dx + dy*dy + dz*dz;
+
+                // Calculate r2inv = 1/r^2
+                TYPE r2inv = 1.0 / r2;
+
+                // Calculate Lennard-Jones potential terms
+                TYPE r6inv = r2inv * r2inv * r2inv;
+                TYPE r12inv = r6inv * r6inv;
+                TYPE term = (12.0 * lj1 * r12inv - 6.0 * lj2 * r6inv) * r2inv;
+
+                // Calculate force components
+                TYPE fx = term * dx;
+                TYPE fy = term * dy;
+                TYPE fz = term * dz;
+
+                // Accumulate forces (Newton's 3rd law)
+                local_force_x[i] += fx;
+                local_force_y[i] += fy;
+                local_force_z[i] += fz;
+                local_force_x[neighbor_idx] -= fx;
+                local_force_y[neighbor_idx] -= fy;
+                local_force_z[neighbor_idx] -= fz;
+            }
+        }
+    }
+
+    // Update output forces
+    loop_output: for (int i = 0; i < nAtoms; i++) {
+        force_x[i] = local_force_x[i];
+        force_y[i] = local_force_y[i];
+        force_z[i] = local_force_z[i];
+    }
+}

@@ -1,0 +1,1123 @@
+{
+  "compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "std": "c++14",
+  "vitis_include": null,
+  "suites": [
+    "c2hlsc",
+    "chstone",
+    "flowgnn",
+    "gnnbuilder",
+    "machsuite",
+    "polybench",
+    "pp4fpga",
+    "rosetta"
+  ],
+  "summary": {
+    "n": 110,
+    "compiled": 84,
+    "ran": 83,
+    "need_hls_headers": 13
+  },
+  "results": [
+    {
+      "design": "add_round_key",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.09,
+      "run_s": 0.04,
+      "error": ""
+    },
+    {
+      "design": "aes",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.3,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "block",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.91,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "cusums",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.82,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "des",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 2.11,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "mix_columns",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.09,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "monobit",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.84,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "overlapping",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.95,
+      "run_s": 0.09,
+      "error": ""
+    },
+    {
+      "design": "present",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.19,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "quicksort__WIP",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.06,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "runs",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.91,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "sha256__WIP",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.35,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "shift_rows",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.91,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "sub_bytes",
+      "suite": "c2hlsc",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.9,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "adpcm__filtep",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.43,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__filtez",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.49,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__logsch",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.42,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__logscl",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.39,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__quantl",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.4,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__scalel",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.34,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__uppol1",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.39,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__uppol2",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.39,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "adpcm__upzero",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.39,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "df_add128",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.59,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_countLeadingZeros32",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.47,
+      "run_s": 0.05,
+      "error": ""
+    },
+    {
+      "design": "df_countLeadingZeros64",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.44,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_extractFloat64Exp",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.42,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "df_extractFloat64Frac",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.21,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_extractFloat64Sign",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.11,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_float64_abs",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.13,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_float64_ge",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.36,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "df_float64_is_nan",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 3.13,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "df_float64_is_signaling_nan",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.97,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_float64_le",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.28,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_float64_neg",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.23,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_mul64To128",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.12,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "df_packFloat64",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.16,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "df_propagateFloat64NaN",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.07,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_shift64RightJamming",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.1,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "df_sub128",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.83,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "dfadd",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.8,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "dfdiv",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.84,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "dfmul",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.66,
+      "run_s": 0.06,
+      "error": ""
+    },
+    {
+      "design": "dfsin",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.19,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "jpeg__YuvToRgb",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.33,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "motion__decode_motion_vector",
+      "suite": "chstone",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.26,
+      "run_s": null,
+      "error": "collect2: error: ld returned 1 exit status"
+    },
+    {
+      "design": "fgnn_linear",
+      "suite": "flowgnn",
+      "needs_hls_headers": false,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.47,
+      "run_s": null,
+      "error": "    2 |"
+    },
+    {
+      "design": "fgnn_linear_input_stationary",
+      "suite": "flowgnn",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.16,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "fgnn_linear_output_stationary",
+      "suite": "flowgnn",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.15,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "compute_neighbor_tables",
+      "suite": "gnnbuilder",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.48,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "gather_node_neighbors",
+      "suite": "gnnbuilder",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": -6,
+      "compile_s": 0.41,
+      "run_s": 0.16,
+      "error": "nonzero exit -6"
+    },
+    {
+      "design": "global_add_pool",
+      "suite": "gnnbuilder",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.38,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "aes_aes",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.24,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "bfs_bulk",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.17,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "bfs_queue",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.21,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "fft_strided",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.1,
+      "run_s": 0.04,
+      "error": ""
+    },
+    {
+      "design": "fft_transpose__WIP",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 2.06,
+      "run_s": 0.03,
+      "error": ""
+    },
+    {
+      "design": "gemm_blocked",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.13,
+      "run_s": 0.07,
+      "error": ""
+    },
+    {
+      "design": "gemm_ncubed",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.08,
+      "run_s": 0.05,
+      "error": ""
+    },
+    {
+      "design": "kmp_kmp",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.16,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "md_grid",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.46,
+      "run_s": 0.03,
+      "error": ""
+    },
+    {
+      "design": "md_knn",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.12,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "nw_nw",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.18,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "sort_merge",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.4,
+      "run_s": 0.03,
+      "error": ""
+    },
+    {
+      "design": "sort_radix",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.3,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "spmv_crs",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.21,
+      "run_s": 0.04,
+      "error": ""
+    },
+    {
+      "design": "spmv_ellpack",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.19,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "stencil_stencil2d",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.21,
+      "run_s": 0.13,
+      "error": ""
+    },
+    {
+      "design": "stencil_stencil3d",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.31,
+      "run_s": 0.16,
+      "error": ""
+    },
+    {
+      "design": "viterbi_viterbi",
+      "suite": "machsuite",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.29,
+      "run_s": 0.03,
+      "error": ""
+    },
+    {
+      "design": "2mm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.19,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "3mm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.23,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "atax",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.03,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "bicg",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.26,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "cholesky",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.4,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "correlation",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.19,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "covariance",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.15,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "doitgen",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.14,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "durbin",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.1,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "fdtd-2d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.23,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "floyd-warshall",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.03,
+      "run_s": 0.03,
+      "error": ""
+    },
+    {
+      "design": "gemm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.29,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "gemver",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.21,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "gesummv",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.06,
+      "run_s": 0.04,
+      "error": ""
+    },
+    {
+      "design": "gramschmidt",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.32,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "heat-3d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.22,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "jacobi-1d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.98,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "jacobi-2d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.07,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "lu",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.18,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "ludcmp",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.26,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "mvt",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.04,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "nussinov",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.07,
+      "run_s": 0.03,
+      "error": ""
+    },
+    {
+      "design": "seidel-2d",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.14,
+      "run_s": 0.02,
+      "error": ""
+    },
+    {
+      "design": "symm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.14,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "syr2k",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.12,
+      "run_s": 0.01,
+      "error": ""
+    },
+    {
+      "design": "syrk",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 1.06,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "trisolv",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.92,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "trmm",
+      "suite": "polybench",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.88,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "block_mm",
+      "suite": "pp4fpga",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.58,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "parallel_merge_sort",
+      "suite": "pp4fpga",
+      "needs_hls_headers": false,
+      "compile_rc": 0,
+      "run_rc": 0,
+      "compile_s": 0.85,
+      "run_s": 0.0,
+      "error": ""
+    },
+    {
+      "design": "pp4fpga_cordic",
+      "suite": "pp4fpga",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.21,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "digit_recognition__popcount",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.1,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "digit_recognition__update_knn__WIP",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.1,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "optical_flow__outer_product",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.14,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "rendering_3d__check_clockwise",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.27,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "rendering_3d__clockwise_vertices",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.11,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "rendering_3d__pixel_in_triangle",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.25,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "rendering_3d__projection",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.23,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "spam_filter__computeGradient",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.17,
+      "run_s": null,
+      "error": "compilation terminated."
+    },
+    {
+      "design": "spam_filter__dotProduct",
+      "suite": "rosetta",
+      "needs_hls_headers": true,
+      "compile_rc": 1,
+      "run_rc": null,
+      "compile_s": 0.14,
+      "run_s": null,
+      "error": "compilation terminated."
+    }
+  ]
+}

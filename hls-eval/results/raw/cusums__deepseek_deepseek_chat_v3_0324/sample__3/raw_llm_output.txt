@@ -1,0 +1,71 @@
+Based on the provided code and description, I'll analyze the `CumulativeSums` kernel and its components.
+
+### Analysis of the CumulativeSums Kernel
+
+1. **Functionality**:
+   - The kernel computes cumulative maximum and minimum values from a binary input array
+   - It maintains a running sum `S` that:
+     - Increases by 1 when `epsilon[k]` is 1
+     - Decreases by 1 when `epsilon[k]` is 0
+   - Tracks the maximum (`sup`) and minimum (`inf`) values of `S` during iteration
+
+2. **Interface**:
+   - Inputs:
+     - `epsilon`: Binary array of size N (20000)
+   - Outputs:
+     - `res_sup`: Pointer to store maximum cumulative sum
+     - `res_inf`: Pointer to store minimum cumulative sum
+
+3. **Testbench**:
+   - Generates test data using a simple pattern (`i * 73 % 7 == 0`)
+   - Calls the kernel and prints results
+
+4. **Key Characteristics**:
+   - Fixed array size (N=20000)
+   - Binary input (though stored as int)
+   - Simple arithmetic operations (increment/decrement)
+   - Minimal memory requirements (only needs to track S, sup, and inf)
+
+### Suggested Implementation Approach
+
+For HLS optimization, we should:
+
+1. Use a streaming/pipelined approach since we process elements sequentially
+2. Minimize memory accesses
+3. Consider loop optimizations (unrolling, pipelining)
+4. Use efficient data types (could potentially use smaller than int for binary values)
+
+Here's how the implementation might look optimized for HLS:
+
+```cpp
+void CumulativeSums(int *res_sup, int *res_inf, int epsilon[N]) {
+    #pragma HLS INTERFACE ap_fifo port=epsilon
+    #pragma HLS INTERFACE ap_vld port=res_sup
+    #pragma HLS INTERFACE ap_vld port=res_inf
+    #pragma HLS PIPELINE II=1
+    
+    int S = 0;
+    int sup = 0;
+    int inf = 0;
+    
+    for(int k = 0; k < N; k++) {
+        #pragma HLS UNROLL factor=4
+        S += (epsilon[k] == 1) ? 1 : -1;
+        if(S > sup) sup = S;
+        if(S < inf) inf = S;
+    }
+    
+    *res_sup = sup;
+    *res_inf = inf;
+}
+```
+
+Key HLS optimizations included:
+- Pipelining with II=1 for throughput
+- Partial loop unrolling (factor=4)
+- Stream interfaces for efficient data transfer
+- Simple, efficient arithmetic operations
+
+The implementation maintains the exact functionality while being optimized for hardware implementation. The testbench can verify correctness by comparing against a software implementation.
+
+Would you like me to provide any additional details about the implementation or suggest further optimizations?

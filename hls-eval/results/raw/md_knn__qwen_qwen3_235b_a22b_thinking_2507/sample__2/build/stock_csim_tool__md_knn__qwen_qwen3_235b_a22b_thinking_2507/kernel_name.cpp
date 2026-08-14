@@ -1,0 +1,51 @@
+
+#include "md_knn.h"
+
+void md_kernel(TYPE force_x[nAtoms], TYPE force_y[nAtoms], TYPE force_z[nAtoms], 
+               TYPE position_x[nAtoms], TYPE position_y[nAtoms], TYPE position_z[nAtoms],
+               int32_t NL[nAtoms * maxNeighbors]) {
+    
+    for (int i = 0; i < nAtoms; i++) {
+        #pragma HLS PIPELINE II=1
+        TYPE pos_x_i = position_x[i];
+        TYPE pos_y_i = position_y[i];
+        TYPE pos_z_i = position_z[i];
+        TYPE fx_i = 0.0, fy_i = 0.0, fz_i = 0.0;
+        
+        for (int j_index = 0; j_index < maxNeighbors; j_index++) {
+            #pragma HLS UNROLL
+            int j = NL[i * maxNeighbors + j_index];
+            if (j == -1) {
+                break;
+            }
+            
+            TYPE dx = position_x[j] - pos_x_i;
+            TYPE dy = position_y[j] - pos_y_i;
+            TYPE dz = position_z[j] - pos_z_i;
+            TYPE r2 = dx*dx + dy*dy + dz*dz;
+            
+            if (r2 < 1e-6) {
+                continue;
+            }
+            
+            TYPE r2inv = 1.0 / r2;
+            TYPE r6inv = r2inv * r2inv * r2inv;
+            TYPE f = (lj1 * r6inv * r6inv - lj2 * r6inv) * r2inv;
+            TYPE fx = dx * f;
+            TYPE fy = dy * f;
+            TYPE fz = dz * f;
+            
+            fx_i += fx;
+            fy_i += fy;
+            fz_i += fz;
+            
+            force_x[j] -= fx;
+            force_y[j] -= fy;
+            force_z[j] -= fz;
+        }
+        
+        force_x[i] += fx_i;
+        force_y[i] += fy_i;
+        force_z[i] += fz_i;
+    }
+}

@@ -1,0 +1,124 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_seidel_2d` design is an implementation of a Gauss-Seidel style stencil computation over 2D data with a 9-point stencil pattern. The algorithm iteratively updates each element of a 2D array `A` using the average of its nine neighboring elements from the previous time step. The computation is simplified as a stencil operation, where each element is updated using the values of its neighbors.
+
+$$
+\begin{aligned}
+data^{t}_{(i,j)} = \frac{1}{9} \big(
+& data^{t-1}_{(i-1,j-1)} + data^{t-1}_{(i-1,j)} + data^{t-1}_{(i-1,j+1)} \\
+& + data^{t-1}_{(i,j-1)} + data^{t}_{(i,j)} + data^{t-1}_{(i,j+1)} \\
+& + data^{t-1}_{(i+1,j-1)} + data^{t-1}_{(i+1,j)} + data^{t-1}_{(i+1,j+1)}
+\big)
+\end{aligned}
+$$
+
+Note that the design assumes a fixed size of 40x40 for the 2D array `A`, and the number of time steps is fixed at 20. These constants can be modified to accommodate different problem sizes and time steps.
+
+---
+
+Top-Level Function: `kernel_seidel_2d`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_seidel_2d(double A[40][40]);`
+
+Inputs:
+- `A`: a 2D array of size 40x40, representing the input data to be processed.
+
+Outputs:
+- `A`: the updated 2D array, where each element is the result of the Gauss-Seidel style stencil computation.
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point data type used to represent the elements of the 2D array `A`.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="seidel-2d_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "seidel-2d.h"
+
+void init_array(int n, double A[40][40]) {
+    int i, j;
+
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            A[i][j] = ((double)i * (j + 2) + 2) / n;
+}
+
+void print_array(int n, double A[40][40])
+
+{
+    int i, j;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "A");
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++) {
+            if ((i * n + j) % 20 == 0)
+                fprintf(stderr, "\n");
+            fprintf(stderr, "%0.6lf ", A[i][j]);
+        }
+    fprintf(stderr, "\nend   dump: %s\n", "A");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 40;
+    int tsteps = 20;
+
+    double A[40][40];
+
+    init_array(n, A);
+
+    kernel_seidel_2d(A);
+
+    print_array(n, A);
+
+    return 0;
+}
+</INPUT_CODE name="seidel-2d_tb.cpp">
+<INPUT_CODE name="seidel-2d.h">
+#pragma once
+#include <cmath>
+
+void kernel_seidel_2d(double A[40][40]);
+
+</INPUT_CODE name="seidel-2d.h">
+
+
+
+## Task Output
+

@@ -1,0 +1,27 @@
+
+#include "gemm_blocked.h"
+
+void bbgemm(TYPE m1[N], TYPE m2[N], TYPE prod[N]) {
+    int i, j, k;
+    int jj, kk;
+    TYPE temp_sum;
+
+    // Initialize output matrix to zero
+l1:    for (i = 0; i < N; i++) {
+        prod[i] = 0.0;
+    }
+
+    // Blocked matrix multiplication
+l2:    for (jj = 0; jj < col_size; jj += block_size) {
+l3:        for (kk = 0; kk < col_size; kk += block_size) {
+l4:            for (i = 0; i < row_size; i++) {
+l5:                for (k = kk; k < kk + block_size; k++) {
+l6:                    for (j = jj; j < jj + block_size; j++) {
+                        temp_sum = m1[i * col_size + k] * m2[k * col_size + j];
+                        prod[i * col_size + j] += temp_sum;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,177 @@
+{
+  "models": [
+    {
+      "id": "qwen/qwen-2.5-coder-32b-instruct",
+      "n_providers": 1,
+      "providers": [
+        "Cloudflare"
+      ],
+      "quantizations": [
+        "unknown"
+      ],
+      "context": [
+        32768
+      ],
+      "max_completion_tokens": [
+        32768
+      ],
+      "missing_params": []
+    },
+    {
+      "id": "deepseek/deepseek-chat-v3-0324",
+      "n_providers": 4,
+      "providers": [
+        "DeepInfra",
+        "SiliconFlow",
+        "Novita",
+        "Crusoe"
+      ],
+      "quantizations": [
+        "bf16",
+        "fp4",
+        "fp8"
+      ],
+      "context": [
+        163840,
+        163840,
+        163840,
+        163840
+      ],
+      "max_completion_tokens": [
+        16384,
+        163840,
+        65536,
+        163840
+      ],
+      "missing_params": []
+    },
+    {
+      "id": "qwen/qwen3-coder",
+      "n_providers": 5,
+      "providers": [
+        "Google",
+        "DeepInfra",
+        "Venice",
+        "Novita",
+        "Alibaba"
+      ],
+      "quantizations": [
+        "fp4",
+        "fp8",
+        "unknown"
+      ],
+      "context": [
+        262144,
+        262144,
+        256000,
+        262144,
+        262144
+      ],
+      "max_completion_tokens": [
+        65536,
+        65536,
+        65536,
+        65536,
+        65536
+      ],
+      "missing_params": []
+    },
+    {
+      "id": "deepseek/deepseek-v4-pro",
+      "n_providers": 18,
+      "providers": [
+        "Baidu",
+        "DeepSeek",
+        "StreamLake",
+        "GMICloud",
+        "DigitalOcean",
+        "Ionstream",
+        "Cloudflare",
+        "CoreWeave",
+        "Novita",
+        "DeepInfra",
+        "Alibaba",
+        "SiliconFlow",
+        "Venice",
+        "AtlasCloud",
+        "BaseTen",
+        "Parasail",
+        "Together",
+        "Fireworks"
+      ],
+      "quantizations": [
+        "fp4",
+        "fp8",
+        "unknown"
+      ],
+      "context": [
+        1048576,
+        1048576,
+        1024000,
+        1048576,
+        1048576,
+        1048576,
+        1048576,
+        1048576,
+        1048576,
+        1048576,
+        1000000,
+        1048576,
+        1000000,
+        1048576,
+        262144,
+        1048576,
+        512000,
+        1048576
+      ],
+      "max_completion_tokens": [
+        393216,
+        384000,
+        384000,
+        393216,
+        1048576,
+        1048576,
+        393216,
+        16384,
+        393216,
+        393216,
+        32768,
+        393216,
+        262144,
+        1048576
+      ],
+      "missing_params": []
+    },
+    {
+      "id": "qwen/qwen3-235b-a22b-thinking-2507",
+      "n_providers": 4,
+      "providers": [
+        "DeepInfra",
+        "Alibaba",
+        "Novita",
+        "Venice"
+      ],
+      "quantizations": [
+        "fp8",
+        "unknown"
+      ],
+      "context": [
+        262144,
+        131072,
+        131072,
+        128000
+      ],
+      "max_completion_tokens": [
+        32768,
+        32768,
+        16384
+      ],
+      "missing_params": []
+    }
+  ],
+  "problems": [
+    "qwen/qwen-2.5-coder-32b-instruct: single provider (Cloudflare)",
+    "qwen/qwen-2.5-coder-32b-instruct: unknown quantization"
+  ],
+  "quantization_filter_tested": null
+}

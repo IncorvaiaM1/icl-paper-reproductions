@@ -1,0 +1,74 @@
+Based on the provided inputs, I'll create the implementation for the `Overlapping` kernel function. This function performs a statistical analysis on binary data to count pattern matches and compute a chi-square statistic.
+
+Here's the implementation:
+
+```c
+#include "overlapping.h"
+#include <math.h>
+
+void Overlapping(double *result, int epsilon[N]) {
+    // Predefined weights for chi-square calculation
+    const double pi[6] = {0.364091, 0.185659, 0.139381, 0.100571, 0.0704323, 0.139865};
+    
+    // Pattern to match: nine consecutive 1s
+    const char sequence[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    
+    // Initialize count array
+    unsigned int nu[6] = {0};
+    
+    // Total number of windows
+    const int num_windows = N - 8;
+    
+    // Count pattern matches in sliding windows
+    for (int i = 0; i < num_windows; i++) {
+        int match = 1;
+        // Check for pattern match in current window
+        for (int j = 0; j < 9; j++) {
+            if (epsilon[i + j] != sequence[j]) {
+                match = 0;
+                break;
+            }
+        }
+        
+        // Update counts
+        if (match) {
+            // We only count up to 4 matches, 5+ go in the last bin
+            if (nu[4] < 4) {
+                nu[4]++;
+            } else {
+                nu[5]++;
+            }
+        } else {
+            nu[0]++;
+        }
+    }
+    
+    // Calculate chi-square statistic
+    double chi_square = 0.0;
+    for (int i = 0; i < 6; i++) {
+        double expected = num_windows * pi[i];
+        if (expected > 0) {  // Avoid division by zero
+            double diff = nu[i] - expected;
+            chi_square += (diff * diff) / expected;
+        }
+    }
+    
+    // Store the result
+    *result = chi_square;
+}
+```
+
+This implementation:
+
+1. Defines the pattern to match (nine consecutive 1s) and the weights for chi-square calculation
+2. Initializes a count array `nu` to track matches in different categories
+3. Slides a window of size 9 over the input array `epsilon`
+4. For each window:
+   - Checks if it matches the pattern (all 1s)
+   - Updates the count in `nu` (with special handling for 5+ matches)
+5. Computes the chi-square statistic using the observed counts and expected probabilities
+6. Stores the result in the provided `result` pointer
+
+The function follows the statistical analysis described in the kernel description, counting pattern matches and computing a chi-square statistic to measure how well the observed pattern frequencies match the expected probabilities.
+
+The test bench provided will generate a simple test pattern and print the result, allowing for basic verification of the implementation.

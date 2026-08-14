@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "jacobi-1d__qwen_qwen3_coder",
+    "benchmark_case_name": "jacobi-1d",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "qwen/qwen3-coder",
+    "model_name_normalized": "qwen_qwen3_coder",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_jacobi_1d` design is a high-level synthesis implementation of a Jacobi-style stencil computation over 1D data with a 3-point stencil pattern. The algorithm iteratively updates the input data by taking the average of three neighboring points. The computation is performed in a time-stepped manner, where each time step updates the entire data array.\n\nThe algorithm can be mathematically represented as:\n\n$$\ndata^{t}_{(i)} = \\frac{1}{3} \\left( data^{t-1}_{(i)} + data^{t-1}_{(i-1)} + data^{t-1}_{(i+1)} \\right)\n$$\n\nwhere $data^{t}_{(i)}$ represents the value at index $i$ at time step $t$, and $data^{t-1}_{(i)}$ represents the value at index $i$ at the previous time step.\n\nNote that the design assumes a fixed size of 30 for the input and output arrays, and a fixed number of time steps (20). These values can be adjusted by modifying the constants `n` and `tsteps` in the design.\n\n---\n\nTop-Level Function: `kernel_jacobi_1d`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_jacobi_1d(double A[30], double B[30]);`\n\nInputs:\n- `A`: a 1D array of 30 `double` values, representing the input data at the previous time step.\n- `B`: a 1D array of 30 `double` values, representing the output data at the current time step.\n\nOutputs:\n- `A`: the updated input data at the current time step.\n- `B`: the output data at the current time step.\n\nImportant Data Structures and Data Types:\n- `double`: a 64-bit floating-point data type used to represent the input and output data.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"jacobi-1d_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"jacobi-1d.h\"\n\nvoid init_array(int n, double A[30], double B[30]) {\n    int i;\n\n    for (i = 0; i < n; i++) {\n        A[i] = ((double)i + 2) / n;\n        B[i] = ((double)i + 3) / n;\n    }\n}\n\nvoid print_array(int n, double A[30])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"A\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", A[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"A\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 30;\n    int tsteps = 20;\n\n    double A[30];\n    double B[30];\n\n    init_array(n, A, B);\n\n    kernel_jacobi_1d(A, B);\n\n    print_array(n, A);\n\n    return 0;\n}\n</INPUT_CODE name=\"jacobi-1d_tb.cpp\">\n<INPUT_CODE name=\"jacobi-1d.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_jacobi_1d(double A[30], double B[30]);\n\n</INPUT_CODE name=\"jacobi-1d.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 20609.399769237,
+        "t1": 20611.18927942,
+        "execution_time": 1.7895101829999476
+    },
+    "response_json": {
+        "id": "gen-1786567640-lJmkgxfQ50TyVnzI4MQt",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_jacobi_1d.cpp\">\n#include \"jacobi-1d.h\"\n\nvoid kernel_jacobi_1d(double A[30], double B[30]) {\n    int t, i;\n    const int n = 30;\n    const int tsteps = 20;\n\n    for (t = 0; t < tsteps; t++) {\n        for (i = 1; i < n - 1; i++) {\n            B[i] = 0.3333333333333333 * (A[i-1] + A[i] + A[i+1]);\n        }\n        for (i = 1; i < n - 1; i++) {\n            A[i] = B[i];\n        }\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786567640,
+        "model": "qwen/qwen3-coder",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 181,
+            "prompt_tokens": 1135,
+            "total_tokens": 1316,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1088,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.00033147,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.00033147,
+                "upstream_inference_prompt_cost": 5.997e-05,
+                "upstream_inference_completions_cost": 0.0002715
+            }
+        },
+        "provider": "Venice"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_jacobi_1d.cpp\">\n#include \"jacobi-1d.h\"\n\nvoid kernel_jacobi_1d(double A[30], double B[30]) {\n    int t, i;\n    const int n = 30;\n    const int tsteps = 20;\n\n    for (t = 0; t < tsteps; t++) {\n        for (i = 1; i < n - 1; i++) {\n            B[i] = 0.3333333333333333 * (A[i-1] + A[i] + A[i+1]);\n        }\n        for (i = 1; i < n - 1; i++) {\n            A[i] = B[i];\n        }\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_jacobi_1d.cpp": "\n#include \"jacobi-1d.h\"\n\nvoid kernel_jacobi_1d(double A[30], double B[30]) {\n    int t, i;\n    const int n = 30;\n    const int tsteps = 20;\n\n    for (t = 0; t < tsteps; t++) {\n        for (i = 1; i < n - 1; i++) {\n            B[i] = 0.3333333333333333 * (A[i-1] + A[i] + A[i+1]);\n        }\n        for (i = 1; i < n - 1; i++) {\n            A[i] = B[i];\n        }\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 20611.531215522,
+            "t1": 20611.926118646,
+            "execution_time": 0.39490312399721006,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: A\n0.066667 0.100000 0.133333 0.166667 0.200000 0.233333 0.266667 0.300000 0.333333 0.366667 0.400000 0.433333 0.466667 0.500000 0.533333 0.566667 0.600000 0.633333 0.666667 0.700000 \n0.733333 0.766667 0.800000 0.833333 0.866667 0.900000 0.933333 0.966667 1.000000 1.033333 \nend   dump: A\n==END   DUMP_ARRAYS==\n",
+            "t0": 20611.952634044,
+            "t1": 20611.973596109,
+            "execution_time": 0.020962065002095187,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 20611.979339433,
+            "t1": 20611.979339433,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

@@ -1,0 +1,60 @@
+< the rest of the generated code after the task output is not provided. I'll generate the complete code based on the task output.
+
+Here is the complete code for the task:
+
+```
+#include <stdio.h>
+
+void kernel_doitgen(double A[10][8][12], double C4[12][12]) {
+    int r, p, s;
+    double sum[12];
+    int R = 10;
+    int P = 12;
+    int S = 12;
+    
+    for (r = 0; r < R; r++) {
+        for (p = 0; p < P; p++) {
+            for (s = 0; s < S; s++) {
+                sum[s] = 0;
+                sum[s] += A[r][p][s] * C4[p][s];
+            }
+            for (s = 0; s < S; s++) {
+                A[r][p][s] = sum[s];
+            }
+        }
+    }
+}
+
+int main() {
+    double A[10][8][12];
+    double C4[12][12];
+    
+    // Initialize arrays (not shown in original task output)
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 8; j++) {
+            for (int k = 0; k < 12; k++) {
+                A[i][j][k] = 0.0;
+            }
+        }
+    }
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 12; j++) {
+            C4[i][j] = 0.0;
+        }
+    }
+    
+    kernel_doitgen(A, C4);
+    
+    return 0;
+}
+```
+
+The code implements the kernel_doitgen function as described in the task output, which performs a matrix multiplication between the A and C4 arrays. The main function provides the necessary initialization (which wasn't shown in the original task output) and calls the kernel_doitgen function.
+
+The key points of the implementation:
+1. The kernel_doitgen function takes 3D array A (10x8x12) and 2D array C4 (12x12) as input
+2. It performs a multiplication between A and C4, storing results in a temporary sum array
+3. The results are then stored back in the A array
+4. The main function provides initialization (not shown in original task output) and calls the kernel_doitgen function
+
+The implementation matches the description in the task output while adding the necessary initialization that wasn't shown. The code follows the matrix multiplication pattern described in the task output.

@@ -1,0 +1,53 @@
+
+#include "nussinov.h"
+
+int score_pair(char a, char b) {
+    if ((a == 'A' && (b == 'U' || b == 'T')) ||
+        (a == 'U' && b == 'A') ||
+        (a == 'T' && b == 'A') ||
+        (a == 'G' && b == 'C') ||
+        (a == 'C' && b == 'G')) {
+        return 1;
+    }
+    return 0;
+}
+
+void kernel_nussinov(char seq[60], int table[60][60]) {
+    int n = 60;
+    
+    // Initialize diagonal elements to 0
+    for (int i = 0; i < n; i++) {
+        table[i][i] = 0;
+    }
+    
+    // Fill the table diagonally
+    for (int length = 1; length < n; length++) {
+        for (int i = 0; i < n - length; i++) {
+            int j = i + length;
+            
+            // Case 1: skip i
+            int max_val = table[i+1][j];
+            
+            // Case 2: skip j
+            if (table[i][j-1] > max_val) {
+                max_val = table[i][j-1];
+            }
+            
+            // Case 3: pair i and j
+            int pair_score = table[i+1][j-1] + score_pair(seq[i], seq[j]);
+            if (pair_score > max_val) {
+                max_val = pair_score;
+            }
+            
+            // Case 4: bifurcation
+            for (int k = i + 1; k < j; k++) {
+                int bifurcation_score = table[i][k] + table[k+1][j];
+                if (bifurcation_score > max_val) {
+                    max_val = bifurcation_score;
+                }
+            }
+            
+            table[i][j] = max_val;
+        }
+    }
+}

@@ -1,0 +1,54 @@
+
+#include "correlation.h"
+
+void kernel_correlation(
+    double float_n,
+    double data[32][28],
+    double corr[28][28],
+    double mean[28],
+    double stddev[28]) {
+
+    int i, j, k;
+
+    // Step 1: Compute the mean of each attribute
+    for (j = 0; j < 28; j++) {
+        mean[j] = 0.0;
+        for (i = 0; i < 32; i++) {
+            mean[j] += data[i][j];
+        }
+        mean[j] /= float_n;
+    }
+
+    // Step 2: Compute the standard deviation of each attribute
+    for (j = 0; j < 28; j++) {
+        stddev[j] = 0.0;
+        for (i = 0; i < 32; i++) {
+            double diff = data[i][j] - mean[j];
+            stddev[j] += diff * diff;
+        }
+        stddev[j] /= float_n;
+        stddev[j] = sqrt(stddev[j]);
+    }
+
+    // Step 3: Compute the covariance matrix (numerator of correlation)
+    for (i = 0; i < 28; i++) {
+        for (j = 0; j < 28; j++) {
+            corr[i][j] = 0.0;
+            for (k = 0; k < 32; k++) {
+                corr[i][j] += (data[k][i] - mean[i]) * (data[k][j] - mean[j]);
+            }
+            corr[i][j] /= float_n;
+
+            // Step 4: Normalize by standard deviations to get correlation coefficient
+            if (i == j) {
+                corr[i][j] = 1.0; // Diagonal elements are always 1.0
+            } else {
+                if (stddev[i] != 0.0 && stddev[j] != 0.0) {
+                    corr[i][j] = corr[i][j] / (stddev[i] * stddev[j]);
+                } else {
+                    corr[i][j] = 0.0;
+                }
+            }
+        }
+    }
+}

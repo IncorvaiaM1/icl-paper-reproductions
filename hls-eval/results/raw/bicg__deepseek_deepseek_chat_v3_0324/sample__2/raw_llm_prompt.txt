@@ -1,0 +1,147 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The kernel_bicg is an implementation of the BiConjugate Gradient STABilized method (BiCGSTAB) kernel. It takes a matrix A, vectors p and r as inputs, and produces vectors q and s as outputs. The kernel performs two main operations: computing q = Ap and s = A^Tr. The BiCGSTAB method is an iterative method for solving systems of linear equations, and this kernel is a key component of the algorithm.
+
+It takes the following as inputs,
+
+- $A: N \times M$ matrix
+- $p$: vector of length $M$
+- $r$: vector of length $N$
+
+and gives the following as output:
+
+- $q$: vector of length $N$, where $q = Ap$
+- $s$: vector of length $M$, where $s = A^Tr$
+
+---
+
+Top-Level Function: `kernel_bicg`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_bicg(double A[42][38], double s[38], double q[42], double p[38], double r[42]);`
+
+Inputs:
+- `A`: a 42x38 matrix representing the system matrix
+- `p`: a vector of length 38
+- `r`: a vector of length 42
+
+Outputs:
+- `q`: a vector of length 42, where q = Ap
+- `s`: a vector of length 38, where s = A^Tr
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point number used to represent the elements of the matrix A and vectors p, q, r, and s
+- `A`: a 2D array of size 42x38, where each element is a `double` representing the system matrix
+- `p`, `q`, `r`, `s`: 1D arrays of size 38, 42, 42, and 38, respectively, where each element is a `double` representing the vectors p, q, r, and s
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="bicg_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "bicg.h"
+
+void init_array(int m, int n, double A[42][38], double r[42], double p[38]) {
+    int i, j;
+
+    for (i = 0; i < m; i++)
+        p[i] = (double)(i % m) / m;
+    for (i = 0; i < n; i++) {
+        r[i] = (double)(i % n) / n;
+        for (j = 0; j < m; j++)
+            A[i][j] = (double)(i * (j + 1) % n) / n;
+    }
+}
+
+void print_array(int m, int n, double s[38], double q[42])
+
+{
+    int i;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "s");
+    for (i = 0; i < m; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", s[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "s");
+    fprintf(stderr, "begin dump: %s", "q");
+    for (i = 0; i < n; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", q[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "q");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 42;
+    int m = 38;
+
+    double A[42][38];
+    double s[38];
+    double q[42];
+    double p[38];
+    double r[42];
+
+    init_array(m, n, A, r, p);
+
+    kernel_bicg(A, s, q, p, r);
+
+    print_array(m, n, s, q);
+
+    return 0;
+}
+</INPUT_CODE name="bicg_tb.cpp">
+<INPUT_CODE name="bicg.h">
+#pragma once
+#include <cmath>
+
+void kernel_bicg(
+    double A[42][38],
+    double s[38],
+    double q[42],
+    double p[38],
+    double r[42]);
+
+</INPUT_CODE name="bicg.h">
+
+
+
+## Task Output
+

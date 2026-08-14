@@ -1,0 +1,57 @@
+Based on the provided inputs, I'll analyze the GEMM kernel implementation and its testbench. Here's the understanding and the implementation of the `kernel_gemm` function:
+
+1. **Functionality**: The GEMM operation computes C = α * (A * B) + β * C, where A, B, and C are matrices with fixed dimensions (20x30, 30x25, and 20x25 respectively).
+
+2. **Testbench**: The testbench initializes the matrices with specific patterns and prints the output.
+
+3. **Implementation Approach**:
+   - Need to perform matrix multiplication (A * B) first
+   - Scale the result by α
+   - Scale input C by β
+   - Add the two results together
+   - Store the final result in C (in-place)
+
+Here's the implementation:
+
+```c
+void kernel_gemm(
+    double alpha,
+    double beta,
+    double C[20][25],
+    double A[20][30],
+    double B[30][25])
+{
+    // Temporary matrix to store the result of A*B
+    double temp[20][25] = {0.0};
+
+    // Compute A*B and store in temp
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 25; j++) {
+            for (int k = 0; k < 30; k++) {
+                temp[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+
+    // Compute C = alpha*temp + beta*C
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 25; j++) {
+            C[i][j] = alpha * temp[i][j] + beta * C[i][j];
+        }
+    }
+}
+```
+
+Key points about this implementation:
+
+1. It uses a temporary matrix to store the intermediate A*B result to avoid overwriting C too early.
+2. The matrix multiplication uses three nested loops (i, j, k) where k is the common dimension (30).
+3. The final result combines the scaled A*B (α) and scaled C (β) terms.
+4. The operation is done in-place, storing the result back in C.
+
+The testbench will verify this implementation by:
+1. Initializing matrices with known patterns
+2. Calling kernel_gemm
+3. Printing the results for verification
+
+The fixed matrix sizes (20, 25, 30) are used directly in the implementation rather than being parameterized, matching the function signature from the header file.

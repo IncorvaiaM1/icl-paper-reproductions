@@ -1,0 +1,28 @@
+
+#include "atax.h"
+
+void kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {
+    int i, j;
+
+    // Initialize y and tmp to zero
+    for (i = 0; i < 42; i++) {
+        y[i] = 0.0;
+    }
+    for (i = 0; i < 38; i++) {
+        tmp[i] = 0.0;
+    }
+
+    // First computation: tmp = A * x
+    for (i = 0; i < 38; i++) {
+        for (j = 0; j < 42; j++) {
+            tmp[i] += A[i][j] * x[j];
+        }
+    }
+
+    // Second computation: y = A^T * tmp
+    for (i = 0; i < 42; i++) {
+        for (j = 0; j < 38; j++) {
+            y[i] += A[j][i] * tmp[j];
+        }
+    }
+}

@@ -1,0 +1,37 @@
+
+#include "nussinov.h"
+
+inline int w(char a, char b) {
+    char a_norm = (a == 'T') ? 'U' : a;
+    char b_norm = (b == 'T') ? 'U' : b;
+    if ((a_norm == 'A' && b_norm == 'U') ||
+        (a_norm == 'U' && b_norm == 'A') ||
+        (a_norm == 'G' && b_norm == 'C') ||
+        (a_norm == 'C' && b_norm == 'G')) {
+        return 1;
+    }
+    return 0;
+}
+
+void kernel_nussinov(char seq[60], int table[60][60]) {
+    const int n = 60;
+    for (int i = n-1; i >= 0; i--) {
+        for (int j = i+1; j < n; j++) {
+            int candidate1 = table[i+1][j];
+            int candidate2 = table[i][j-1];
+            int candidate3 = table[i+1][j-1] + w(seq[i], seq[j]);
+            int candidate4 = 0;
+            for (int k = i+1; k < j; k++) {
+                int temp = table[i][k] + table[k+1][j];
+                if (temp > candidate4) {
+                    candidate4 = temp;
+                }
+            }
+            int max_val = candidate1;
+            if (candidate2 > max_val) max_val = candidate2;
+            if (candidate3 > max_val) max_val = candidate3;
+            if (candidate4 > max_val) max_val = candidate4;
+            table[i][j] = max_val;
+        }
+    }
+}

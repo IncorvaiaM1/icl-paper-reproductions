@@ -1,0 +1,38 @@
+<OUTPUT_CODE name="kernel_name.cpp">
+#include "stencil_stencil3d.h"
+
+void stencil3d(TYPE C[2], TYPE orig[SIZE], TYPE sol[SIZE]) {
+    int i, j, k;
+    int ind, ind_plus_k, ind_minus_k, ind_plus_j, ind_minus_j, ind_plus_i, ind_minus_i;
+
+    // Iterate over the entire 3D array
+    for (k = 0; k < height_size; k++) {
+        for (j = 0; j < col_size; j++) {
+            for (i = 0; i < row_size; i++) {
+                ind = INDX(row_size, col_size, i, j, k);
+
+                // Check if we are at a boundary
+                if (i == 0 || i == row_size - 1 ||
+                    j == 0 || j == col_size - 1 ||
+                    k == 0 || k == height_size - 1) {
+                    sol[ind] = orig[ind];
+                } else {
+                    // Compute indices for neighbors
+                    ind_plus_k = INDX(row_size, col_size, i, j, k+1);
+                    ind_minus_k = INDX(row_size, col_size, i, j, k-1);
+                    ind_plus_j = INDX(row_size, col_size, i, j+1, k);
+                    ind_minus_j = INDX(row_size, col_size, i, j-1, k);
+                    ind_plus_i = INDX(row_size, col_size, i+1, j, k);
+                    ind_minus_i = INDX(row_size, col_size, i-1, j, k);
+
+                    // Apply stencil computation
+                    sol[ind] = C[0] * orig[ind] +
+                               C[1] * (orig[ind_plus_k] + orig[ind_minus_k] +
+                                       orig[ind_plus_j] + orig[ind_minus_j] +
+                                       orig[ind_plus_i] + orig[ind_minus_i]);
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

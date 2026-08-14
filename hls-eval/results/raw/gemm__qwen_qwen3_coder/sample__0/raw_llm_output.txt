@@ -1,0 +1,28 @@
+<OUTPUT_CODE name="kernel_gemm.cpp">
+#include "gemm.h"
+
+void kernel_gemm(
+    double alpha,
+    double beta,
+    double C[20][25],
+    double A[20][30],
+    double B[30][25]) {
+
+    int i, j, k;
+    double tmp;
+
+    // Iterate over the rows of matrix C (and A)
+    for (i = 0; i < 20; i++) {
+        // Iterate over the columns of matrix C (and B)
+        for (j = 0; j < 25; j++) {
+            tmp = 0.0;
+            // Perform dot product of row i of A with column j of B
+            for (k = 0; k < 30; k++) {
+                tmp += A[i][k] * B[k][j];
+            }
+            // Apply GEMM formula: C[i][j] = alpha * (A*B)[i][j] + beta * C[i][j]
+            C[i][j] = alpha * tmp + beta * C[i][j];
+        }
+    }
+}
+</OUTPUT_CODE>

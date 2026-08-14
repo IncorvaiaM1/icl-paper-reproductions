@@ -1,0 +1,55 @@
+
+#include "bfs_bulk.h"
+
+void bfs(
+    node_t nodes[N_NODES],
+    edge_t edges[N_EDGES],
+    node_index_t starting_node,
+    level_t level[N_NODES],
+    edge_index_t level_counts[N_LEVELS]) {
+
+    // Initialize levels and counts
+    for (node_index_t i = 0; i < N_NODES; i++) {
+        level[i] = MAX_LEVEL;
+    }
+    for (int i = 0; i < N_LEVELS; i++) {
+        level_counts[i] = 0;
+    }
+
+    // Mark starting node
+    level[starting_node] = 0;
+    level_counts[0] = 1;
+
+    // Main BFS loop
+    for (int horizon = 0; horizon < N_LEVELS; horizon++) {
+        edge_index_t frontier_size = 0;
+
+        // Iterate through all nodes
+        for (node_index_t n = 0; n < N_NODES; n++) {
+            // Only process nodes at current level
+            if (level[n] != horizon) continue;
+
+            edge_index_t tmp_begin = nodes[n].edge_begin;
+            edge_index_t tmp_end = nodes[n].edge_end;
+
+            // Iterate through all edges of current node
+            for (edge_index_t e = tmp_begin; e < tmp_end; e++) {
+                node_index_t dst = edges[e].dst;
+
+                // If neighbor hasn't been visited, mark it for next level
+                if (level[dst] == MAX_LEVEL) {
+                    level[dst] = horizon + 1;
+                    frontier_size++;
+                }
+            }
+        }
+
+        // Update level counts for next level
+        if (horizon + 1 < N_LEVELS) {
+            level_counts[horizon + 1] = frontier_size;
+        }
+
+        // Early exit if frontier is empty
+        if (frontier_size == 0) break;
+    }
+}

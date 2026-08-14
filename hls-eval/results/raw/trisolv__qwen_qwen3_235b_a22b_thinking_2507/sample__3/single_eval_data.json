@@ -1,0 +1,109 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "trisolv__qwen_qwen3_235b_a22b_thinking_2507",
+    "benchmark_case_name": "trisolv",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "qwen/qwen3-235b-a22b-thinking-2507",
+    "model_name_normalized": "qwen_qwen3_235b_a22b_thinking_2507",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_trisolv` is a high-level synthesis hardware design that implements a triangular matrix solver using forward substitution. It takes a lower triangular matrix `L` and a vector `b` as inputs and produces a vector `x` as output, where `Lx = b`. The forward substitution is performed using the equation `x(i) = (b(i) - \u2211[j=0 to i-1] L(i, j) \\* x(j)) / L(i, i)`. The design uses a nested loop structure to iterate over the elements of the matrix and vector, performing the necessary computations to solve for `x`.\n\nIt takes the following as inputs,\n\n- $L$: $N \\times N$ lower triangular matrix\n- $b$: vector of length $N$\n\nand gives the following as output:\n\n- $x$: vector of length $N$, where $Lx = b$\n\nThe forward substitution is as follows:\n\n$$\nx(i) = \\frac{b(i) - \\sum_{j=0}^{i-1} L(i, j) \\cdot x(j)}{L(i, i)}\n$$\n\n---\n\nTop-Level Function: `kernel_trisolv`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_trisolv(double L[40][40], double x[40], double b[40]);`\n\nInputs:\n- `L`: a 40x40 lower triangular matrix, where each element is a `double` value.\n- `b`: a vector of length 40, where each element is a `double` value.\n\nOutputs:\n- `x`: a vector of length 40, where each element is a `double` value, representing the solution to the equation `Lx = b`.\n\nImportant Data Structures and Data Types:\n- `double`: a 64-bit floating-point data type used to represent the elements of the matrix and vectors.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"trisolv_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"trisolv.h\"\n\nvoid init_array(int n, double L[40][40], double x[40], double b[40]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        x[i] = -999;\n        b[i] = i;\n        for (j = 0; j <= i; j++)\n            L[i][j] = (double)(i + n - j + 1) * 2 / n;\n    }\n}\n\nvoid print_array(int n, double x[40])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"x\");\n    for (i = 0; i < n; i++) {\n        fprintf(stderr, \"%0.6lf \", x[i]);\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"x\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 40;\n\n    double L[40][40];\n    double x[40];\n    double b[40];\n\n    init_array(n, L, x, b);\n\n    kernel_trisolv(L, x, b);\n\n    print_array(n, x);\n\n    return 0;\n}\n</INPUT_CODE name=\"trisolv_tb.cpp\">\n<INPUT_CODE name=\"trisolv.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]);\n\n</INPUT_CODE name=\"trisolv.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 32408.820058188,
+        "t1": 32486.50638096,
+        "execution_time": 77.68632277199868
+    },
+    "response_json": {
+        "id": "gen-1786579760-633ALCWQ1LVMGkfrxkVr",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_name.cpp\">\n#include \"trisolv.h\"\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant",
+                    "reasoning": "\nOkay, I need to write the C++ implementation for the kernel_trisolv function based on the given description. Let me start by understanding the problem.\n\nThe task is to solve Lx = b using forward substitution for a lower triangular matrix L. The top-level function takes L, x, and b as inputs. The formula provided is x(i) = (b(i) - sum_{j=0 to i-1} L(i,j)*x(j)) / L(i,i). \n\nFirst, let me think about the structure of the loops. Since it's forward substitution, the outer loop should iterate from the first row to the last (i from 0 to N-1). For each i, we compute the sum of L[i][j] * x[j] for j from 0 to i-1, then subtract that sum from b[i], then divide by L[i][i].\n\nWait, the matrix is lower triangular, which means that all entries above the main diagonal are zero. So for each row i, the elements j > i are zero, so in the sum, j only goes up to i-1. So the inner loop should run from j=0 to i-1.\n\nThe function signature is void kernel_trisolv(double L[40][40], double x[40], double b[40]). So the matrix L is passed as a 40x40 array, and the vectors x and b are each 40 elements.\n\nThe testbench initializes x to -999, and then calls kernel_trisolv. The output x should be the solution.\n\nNow, how to implement this in C++. The steps are:\n\nFor each i in 0 to 39:\n   sum = 0\n   for j in 0 to i-1:\n       sum += L[i][j] * x[j]\n   x[i] = (b[i] - sum) / L[i][i]\n\nWait, but in the given description, the matrix is lower triangular. But in the testbench's init_array, L[i][j] is filled for j <= i. That makes sense because it's lower triangular. So in the code, we don't have to worry about accessing invalid elements because the formula already uses only L[i][j] where j <= i.\n\nSo the outer loop runs from 0 to N-1 (since N is 40, i starts from 0 up to 39). For each i, compute x[i] as per the formula.\n\nNow, considering the loops in C++. The outer loop is for i in 0 to 39. For each i, the inner loop runs j from 0 to i-1. If i is 0, then the inner loop doesn't run. Then x[0] = (b[0] - 0)/L[0][0], which is correct.\n\nNow, code structure:\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    // Iterate over each row i\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        // Sum over j from 0 to i-1\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n\nWait, but in the testbench, the init_array initializes x to -999. But in the code, x is written in order. So each x[i] is computed in order, and the inner loop uses x[j] which has already been computed for j < i.\n\nYes, that's correct. Because forward substitution processes the equations in order. For x[i], the previous x[j] (j < i) are already computed.\n\nSo this code should work. But I need to make sure that it's synthesizable with Vitis HLS. What are the common pitfalls?\n\nVitis HLS requires that loops are either unrolled or pipelined. However, the code as written may have loops with variable iteration counts, which can be an issue. Wait, the inner loop runs j up to i (exclusive), which varies for each i. So for i from 0 to 39, j runs 0 to i-1. So for i=0, the loop runs 0 times, for i=1, j runs once, etc.\n\nIn HLS, loops with variable bounds are acceptable, but the tool may unroll them if possible. However, in this case, since the maximum number of iterations for the inner loop is 39 (when i=39, j runs 0-38). However, Vitis might have optimizations here. But the problem states that the code should be synthesizable, so the code as written should be okay.\n\nBut perhaps the code needs to have loops that are pipelined, but the user hasn't specified any directives. So the code should be written in a way that allows HLS to handle it.\n\nAnother thing: data dependencies. Since each x[i] depends on previous x[j], the code can't be pipelined deeply, but it's a loop-carried dependency. But that's inherent to the algorithm.\n\nIn terms of functionality, this code should correctly compute x.\n\nTesting: Let's consider a small example. For N=1, L[0][0] * x[0] = b[0]. So x[0] = b[0]/L[0][0]. Which the code would handle. For i=0, the inner loop doesn't run. Correct.\n\nAnother example: i=1, then j runs from 0 to 0. So x[1] = (b[1] - L[1][0]*x[0])/L[1][1]. Which is correct.\n\nSo the code should be functionally correct.\n\nNow, in the header file, the function is declared as void kernel_trisolv(double L[40][40], double x[40], double b[40]); so the implementation matches.\n\nNow, the testbench uses n=40, initializes the arrays, and calls kernel_trisolv. So the code should process all 40 elements.\n\nPotential issues:\n\n- Division by zero: but the problem states that L is a lower triangular matrix, which is presumably non-singular, so L[i][i] is non-zero. But in practice, the testbench's init_array fills L[i][j] as (i + 40 -j +1)*2/40. Which for j <=i, so when i increases, the value is positive. So no division by zero here.\n\nSo the code as written should work.\n\nNow, code formatting. The output must include the header file. The generated code should include #include \"trisolv.h\". Also, make sure that the loops are written in a way that's acceptable.\n\nPutting it all together:\n\n#include \"trisolv.h\"\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n\nThis should be the code. Let me check the loops again. The inner loop j < i. So when i=0, j starts at 0, which is not less than 0, so the loop doesn't run. Correct.\n\nYes. This code should pass the testbench. The testbench initializes the data, runs the kernel, then prints x. The code should compute x correctly according to forward substitution.\n\nI think this is the correct approach. Now, the code is written in a straightforward way, which Vitis HLS should be able to handle. The loops are nested, and the inner loop's bounds depend on the outer loop variable, which is acceptable as long as the HLS tool can manage the dependencies. But the user hasn't specified any particular optimization directives, so the code as written should suffice.\n",
+                    "reasoning_details": [
+                        {
+                            "type": "reasoning.text",
+                            "text": "\nOkay, I need to write the C++ implementation for the kernel_trisolv function based on the given description. Let me start by understanding the problem.\n\nThe task is to solve Lx = b using forward substitution for a lower triangular matrix L. The top-level function takes L, x, and b as inputs. The formula provided is x(i) = (b(i) - sum_{j=0 to i-1} L(i,j)*x(j)) / L(i,i). \n\nFirst, let me think about the structure of the loops. Since it's forward substitution, the outer loop should iterate from the first row to the last (i from 0 to N-1). For each i, we compute the sum of L[i][j] * x[j] for j from 0 to i-1, then subtract that sum from b[i], then divide by L[i][i].\n\nWait, the matrix is lower triangular, which means that all entries above the main diagonal are zero. So for each row i, the elements j > i are zero, so in the sum, j only goes up to i-1. So the inner loop should run from j=0 to i-1.\n\nThe function signature is void kernel_trisolv(double L[40][40], double x[40], double b[40]). So the matrix L is passed as a 40x40 array, and the vectors x and b are each 40 elements.\n\nThe testbench initializes x to -999, and then calls kernel_trisolv. The output x should be the solution.\n\nNow, how to implement this in C++. The steps are:\n\nFor each i in 0 to 39:\n   sum = 0\n   for j in 0 to i-1:\n       sum += L[i][j] * x[j]\n   x[i] = (b[i] - sum) / L[i][i]\n\nWait, but in the given description, the matrix is lower triangular. But in the testbench's init_array, L[i][j] is filled for j <= i. That makes sense because it's lower triangular. So in the code, we don't have to worry about accessing invalid elements because the formula already uses only L[i][j] where j <= i.\n\nSo the outer loop runs from 0 to N-1 (since N is 40, i starts from 0 up to 39). For each i, compute x[i] as per the formula.\n\nNow, considering the loops in C++. The outer loop is for i in 0 to 39. For each i, the inner loop runs j from 0 to i-1. If i is 0, then the inner loop doesn't run. Then x[0] = (b[0] - 0)/L[0][0], which is correct.\n\nNow, code structure:\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    // Iterate over each row i\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        // Sum over j from 0 to i-1\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n\nWait, but in the testbench, the init_array initializes x to -999. But in the code, x is written in order. So each x[i] is computed in order, and the inner loop uses x[j] which has already been computed for j < i.\n\nYes, that's correct. Because forward substitution processes the equations in order. For x[i], the previous x[j] (j < i) are already computed.\n\nSo this code should work. But I need to make sure that it's synthesizable with Vitis HLS. What are the common pitfalls?\n\nVitis HLS requires that loops are either unrolled or pipelined. However, the code as written may have loops with variable iteration counts, which can be an issue. Wait, the inner loop runs j up to i (exclusive), which varies for each i. So for i from 0 to 39, j runs 0 to i-1. So for i=0, the loop runs 0 times, for i=1, j runs once, etc.\n\nIn HLS, loops with variable bounds are acceptable, but the tool may unroll them if possible. However, in this case, since the maximum number of iterations for the inner loop is 39 (when i=39, j runs 0-38). However, Vitis might have optimizations here. But the problem states that the code should be synthesizable, so the code as written should be okay.\n\nBut perhaps the code needs to have loops that are pipelined, but the user hasn't specified any directives. So the code should be written in a way that allows HLS to handle it.\n\nAnother thing: data dependencies. Since each x[i] depends on previous x[j], the code can't be pipelined deeply, but it's a loop-carried dependency. But that's inherent to the algorithm.\n\nIn terms of functionality, this code should correctly compute x.\n\nTesting: Let's consider a small example. For N=1, L[0][0] * x[0] = b[0]. So x[0] = b[0]/L[0][0]. Which the code would handle. For i=0, the inner loop doesn't run. Correct.\n\nAnother example: i=1, then j runs from 0 to 0. So x[1] = (b[1] - L[1][0]*x[0])/L[1][1]. Which is correct.\n\nSo the code should be functionally correct.\n\nNow, in the header file, the function is declared as void kernel_trisolv(double L[40][40], double x[40], double b[40]); so the implementation matches.\n\nNow, the testbench uses n=40, initializes the arrays, and calls kernel_trisolv. So the code should process all 40 elements.\n\nPotential issues:\n\n- Division by zero: but the problem states that L is a lower triangular matrix, which is presumably non-singular, so L[i][i] is non-zero. But in practice, the testbench's init_array fills L[i][j] as (i + 40 -j +1)*2/40. Which for j <=i, so when i increases, the value is positive. So no division by zero here.\n\nSo the code as written should work.\n\nNow, code formatting. The output must include the header file. The generated code should include #include \"trisolv.h\". Also, make sure that the loops are written in a way that's acceptable.\n\nPutting it all together:\n\n#include \"trisolv.h\"\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n\nThis should be the code. Let me check the loops again. The inner loop j < i. So when i=0, j starts at 0, which is not less than 0, so the loop doesn't run. Correct.\n\nYes. This code should pass the testbench. The testbench initializes the data, runs the kernel, then prints x. The code should compute x correctly according to forward substitution.\n\nI think this is the correct approach. Now, the code is written in a straightforward way, which Vitis HLS should be able to handle. The loops are nested, and the inner loop's bounds depend on the outer loop variable, which is acceptable as long as the HLS tool can manage the dependencies. But the user hasn't specified any particular optimization directives, so the code as written should suffice.\n",
+                            "format": "unknown",
+                            "index": 0
+                        }
+                    ]
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786579760,
+        "model": "qwen/qwen3-235b-a22b-thinking-2507",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 1883,
+            "prompt_tokens": 1167,
+            "total_tokens": 3050,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 1570,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0059991,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0059991,
+                "upstream_inference_prompt_cost": 0.0003501,
+                "upstream_inference_completions_cost": 0.005649
+            }
+        },
+        "provider": "Novita"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_name.cpp\">\n#include \"trisolv.h\"\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_name.cpp": "\n#include \"trisolv.h\"\n\nvoid kernel_trisolv(double L[40][40], double x[40], double b[40]) {\n    for (int i = 0; i < 40; i++) {\n        double sum = 0.0;\n        for (int j = 0; j < i; j++) {\n            sum += L[i][j] * x[j];\n        }\n        x[i] = (b[i] - sum) / L[i][i];\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 32486.783853225,
+            "t1": 32487.179558564,
+            "execution_time": 0.3957053390004148,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: x0.000000 \n0.487805 0.475907 0.464300 0.452975 0.441927 0.431148 0.420633 0.410373 0.400364 0.390599 0.381072 0.371778 0.362710 0.353864 0.345233 0.336812 0.328598 0.320583 0.312764 0.305135 \n0.297693 0.290432 0.283349 0.276438 0.269695 0.263117 0.256700 0.250439 0.244331 0.238371 0.232557 0.226885 0.221351 0.215953 0.210686 0.205547 0.200534 0.195642 0.190871 \nend   dump: x\n==END   DUMP_ARRAYS==\n",
+            "t0": 32487.199431157,
+            "t1": 32487.220330037,
+            "execution_time": 0.02089887999682105,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 32487.224391841,
+            "t1": 32487.224391841,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

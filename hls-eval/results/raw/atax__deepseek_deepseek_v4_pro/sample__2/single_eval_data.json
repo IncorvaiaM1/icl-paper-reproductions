@@ -1,0 +1,109 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "atax__deepseek_deepseek_v4_pro",
+    "benchmark_case_name": "atax",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "deepseek/deepseek-v4-pro",
+    "model_name_normalized": "deepseek_deepseek_v4_pro",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_atax` design is a high-level synthesis kernel that computes the matrix-vector product of a transposed matrix `A` with a vector `x`, and then computes the matrix-vector product of the original matrix `A` with the resulting vector. This is equivalent to computing `A^T(Ax)`, where `A^T` is the transpose of matrix `A`. The kernel takes in a matrix `A` and a vector `x` as inputs, and produces a vector `y` as output.\n\nComputes $A^T$ times $Ax$.\nIt takes the following as inputs,\n\n- $A: M \\times N$ matrix\n- $x$: vector of length $N$\n\nand gives the following as output:\n\n- $y$: vector of length $N$, where $y = A^T(Ax)$\n\n---\n\nTop-Level Function: `kernel_atax`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]);`\n\nInputs:\n- `A`: a 2D matrix of size 38x42, where each element is a `double` precision floating-point number.\n- `x`: a 1D vector of length 42, where each element is a `double` precision floating-point number.\n\nOutputs:\n- `y`: a 1D vector of length 42, where each element is a `double` precision floating-point number, representing the result of the computation `A^T(Ax)`.\n\nImportant Data Structures and Data Types:\n- `double`: a `double` precision floating-point number, used to represent the elements of the matrix `A` and vectors `x` and `y`.\n- `tmp`: a 1D vector of length 38, used as a temporary storage for intermediate results.\n\nSub-Components:\n- None\n\nNote: The kernel uses a temporary vector `tmp` to store intermediate results, which is necessary to avoid overwriting the input vector `x` during the computation.\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"atax_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"atax.h\"\n\nvoid init_array(int m, int n, double A[38][42], double x[42]) {\n    int i, j;\n    double fn;\n    fn = (double)n;\n\n    for (i = 0; i < n; i++)\n        x[i] = 1 + (i / fn);\n    for (i = 0; i < m; i++)\n        for (j = 0; j < n; j++)\n            A[i][j] = (double)((i + j) % n) / (5 * m);\n}\n\nvoid print_array(int n, double y[42])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"y\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", y[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"y\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int m = 38;\n    int n = 42;\n\n    double A[38][42];\n    double x[42];\n    double y[42];\n    double tmp[38];\n\n    init_array(m, n, A, x);\n\n    kernel_atax(A, x, y, tmp);\n\n    print_array(n, y);\n\n    return 0;\n}\n</INPUT_CODE name=\"atax_tb.cpp\">\n<INPUT_CODE name=\"atax.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]);\n\n</INPUT_CODE name=\"atax.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 12035.299762602,
+        "t1": 12058.264215098,
+        "execution_time": 22.964452495998557
+    },
+    "response_json": {
+        "id": "gen-1786558962-pB7Tko4FSRiSkdLOrPv6",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "```\n<OUTPUT_CODE name=\"kernel_atax.cpp\">\n#include \"atax.h\"\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    // Compute tmp = A * x\n    for (int i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Compute y = A^T * tmp\n    for (int j = 0; j < 42; j++) {\n        y[j] = 0.0;\n        for (int i = 0; i < 38; i++) {\n            y[j] += A[i][j] * tmp[i];\n        }\n    }\n}\n</OUTPUT_CODE>\n```",
+                    "role": "assistant",
+                    "reasoning": "We need generate C++ implementation for kernel_atax. Need understand algorithm. Given A MxN (38x42), x length N? Wait kernel description: A: M x N matrix (38x42), x vector length N? Actually signature x[42], y[42], tmp[38]. Compute y = A^T(A x). Standard Polybench atax? Let's recall polybench atax: A is MxN, x is N, y is N, tmp is M. Computation:\nfor i = 0..M-1:\n  tmp[i] = 0\n  for j = 0..N-1:\n    tmp[i] += A[i][j] * x[j]\nfor j = 0..N-1:\n  y[j] = 0\n  for i = 0..M-1:\n    y[j] += A[i][j] * tmp[i]\n\nYes. Need produce HLS synthesizable. Need include header. Need maybe use pragma? Not needed. Function should just implement. Need maybe avoid math? Header includes cmath but no use. Testbench prints.\n\nNeed be careful: arrays passed with sizes: double A[38][42], double x[42], double y[42], double tmp[38]. HLS may prefer loops with constant bounds. We can write nested loops.\n\nNeed maybe add pipeline/unroll pragmas? The user says design should be synthesizable. We can include basic #include \"atax.h\". Implement:\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    // tmp = A * x\n    for (int i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // y = A^T * tmp\n    for (int j = 0; j < 42; j++) {\n        y[j] = 0.0;\n        for (int i = 0; i < 38; i++) {\n            y[j] += A[i][j] * tmp[i];\n        }\n    }\n}\n\nPotential issue: HLS floating point double accumulation and loop order. Fine.\n\nNeed output only XML format. Name \"kernel_atax.cpp\". Need include header.\n\nLet's produce exactly. Ensure no markdown. Could include comments? Fine. Need not omit. Use complete code.\n\nBut maybe consider HLS resource pragmas? Could add #pragma HLS array_partition? But no directive required. We can add for pipeline? HLS can synthesize. Maybe add function-level pipeline pragma? Not necessary. The task: generate code that aligns. It passes C testbench? It will simulate. We need just C++ code.\n\nNeed use double. Include header. Ensure no conflict with cmath. Fine.\n\nBut let's think if the top-level signature uses `double A[38][42]`, `double x[42]`, etc. In C++, array parameters decay to pointers but sizes in brackets except first dimension. But fine.\n\nPotential issue with \"tmp\" being output? In Polybench, tmp is an internal array but listed as argument to avoid allocation? Indeed in signature tmp is provided as output? Actually kernel_atax takes tmp[38] as temporary storage. A top-level HLS synthesis may infer internal RAM? If tmp is an argument, it might be an output? The testbench passes tmp but doesn't print. In HLS, if tmp is a pointer argument, it might be both read/write. Our code writes tmp then reads tmp. It's fine. But for HLS, arrays as arguments may become memory interfaces. If tmp is not initialized before writing, first loop initializes all tmp elements before use, so there is no read-before-write. Good.\n\nCould alternatively declare local tmp array inside so no top-level tmp argument? The signature includes tmp so use it. Good.\n\nNeed maybe initialize y with 0 before accumulating. The second loop sets y[j] = 0.0. Good.\n\nDouble accumulation in loops: HLS if pipelined may create long latency. Fine.\n\nNeed only output code. Let's craft.",
+                    "reasoning_details": [
+                        {
+                            "type": "reasoning.text",
+                            "text": "We need generate C++ implementation for kernel_atax. Need understand algorithm. Given A MxN (38x42), x length N? Wait kernel description: A: M x N matrix (38x42), x vector length N? Actually signature x[42], y[42], tmp[38]. Compute y = A^T(A x). Standard Polybench atax? Let's recall polybench atax: A is MxN, x is N, y is N, tmp is M. Computation:\nfor i = 0..M-1:\n  tmp[i] = 0\n  for j = 0..N-1:\n    tmp[i] += A[i][j] * x[j]\nfor j = 0..N-1:\n  y[j] = 0\n  for i = 0..M-1:\n    y[j] += A[i][j] * tmp[i]\n\nYes. Need produce HLS synthesizable. Need include header. Need maybe use pragma? Not needed. Function should just implement. Need maybe avoid math? Header includes cmath but no use. Testbench prints.\n\nNeed be careful: arrays passed with sizes: double A[38][42], double x[42], double y[42], double tmp[38]. HLS may prefer loops with constant bounds. We can write nested loops.\n\nNeed maybe add pipeline/unroll pragmas? The user says design should be synthesizable. We can include basic #include \"atax.h\". Implement:\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    // tmp = A * x\n    for (int i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // y = A^T * tmp\n    for (int j = 0; j < 42; j++) {\n        y[j] = 0.0;\n        for (int i = 0; i < 38; i++) {\n            y[j] += A[i][j] * tmp[i];\n        }\n    }\n}\n\nPotential issue: HLS floating point double accumulation and loop order. Fine.\n\nNeed output only XML format. Name \"kernel_atax.cpp\". Need include header.\n\nLet's produce exactly. Ensure no markdown. Could include comments? Fine. Need not omit. Use complete code.\n\nBut maybe consider HLS resource pragmas? Could add #pragma HLS array_partition? But no directive required. We can add for pipeline? HLS can synthesize. Maybe add function-level pipeline pragma? Not necessary. The task: generate code that aligns. It passes C testbench? It will simulate. We need just C++ code.\n\nNeed use double. Include header. Ensure no conflict with cmath. Fine.\n\nBut let's think if the top-level signature uses `double A[38][42]`, `double x[42]`, etc. In C++, array parameters decay to pointers but sizes in brackets except first dimension. But fine.\n\nPotential issue with \"tmp\" being output? In Polybench, tmp is an internal array but listed as argument to avoid allocation? Indeed in signature tmp is provided as output? Actually kernel_atax takes tmp[38] as temporary storage. A top-level HLS synthesis may infer internal RAM? If tmp is an argument, it might be an output? The testbench passes tmp but doesn't print. In HLS, if tmp is a pointer argument, it might be both read/write. Our code writes tmp then reads tmp. It's fine. But for HLS, arrays as arguments may become memory interfaces. If tmp is not initialized before writing, first loop initializes all tmp elements before use, so there is no read-before-write. Good.\n\nCould alternatively declare local tmp array inside so no top-level tmp argument? The signature includes tmp so use it. Good.\n\nNeed maybe initialize y with 0 before accumulating. The second loop sets y[j] = 0.0. Good.\n\nDouble accumulation in loops: HLS if pipelined may create long latency. Fine.\n\nNeed only output code. Let's craft.",
+                            "format": "unknown",
+                            "index": 0
+                        }
+                    ]
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786558962,
+        "model": "deepseek/deepseek-v4-pro",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 1107,
+            "prompt_tokens": 1306,
+            "total_tokens": 2413,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 908,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 384,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0018741888,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0018741888,
+                "upstream_inference_prompt_cost": 0.0005643864,
+                "upstream_inference_completions_cost": 0.0013098024
+            }
+        },
+        "provider": "GMICloud"
+    },
+    "raw_output": "```\n<OUTPUT_CODE name=\"kernel_atax.cpp\">\n#include \"atax.h\"\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    // Compute tmp = A * x\n    for (int i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Compute y = A^T * tmp\n    for (int j = 0; j < 42; j++) {\n        y[j] = 0.0;\n        for (int i = 0; i < 38; i++) {\n            y[j] += A[i][j] * tmp[i];\n        }\n    }\n}\n</OUTPUT_CODE>\n```",
+    "generated_code": {
+        "kernel_atax.cpp": "\n#include \"atax.h\"\n\nvoid kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {\n    // Compute tmp = A * x\n    for (int i = 0; i < 38; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 42; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Compute y = A^T * tmp\n    for (int j = 0; j < 42; j++) {\n        y[j] = 0.0;\n        for (int i = 0; i < 38; i++) {\n            y[j] += A[i][j] * tmp[i];\n        }\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 12058.53252863,
+            "t1": 12058.954148837,
+            "execution_time": 0.42162020700016,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: y\n24.432982 25.770789 27.108596 28.446404 29.784211 29.568056 29.369935 29.188684 29.023139 28.872138 28.734515 28.609109 28.494755 28.390291 28.294552 28.206376 28.124598 28.048056 27.975586 27.906025 \n27.838209 27.770974 27.703158 27.633596 27.561127 27.484584 27.402807 27.314631 27.218892 27.114428 27.000074 26.874668 26.737045 26.586043 26.420499 26.239247 26.041127 25.824972 25.589621 25.333910 \n25.056676 24.756754 \nend   dump: y\n==END   DUMP_ARRAYS==\n",
+            "t0": 12058.974379726,
+            "t1": 12058.999301829,
+            "execution_time": 0.02492210300079023,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 12059.004757556,
+            "t1": 12059.004757556,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

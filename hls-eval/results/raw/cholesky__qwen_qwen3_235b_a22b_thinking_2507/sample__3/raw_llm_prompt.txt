@@ -1,0 +1,147 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_cholesky` design is a high-level synthesis implementation of the Cholesky decomposition algorithm, which decomposes a positive-definite matrix into a lower triangular matrix. The algorithm is based on the Cholesky-Banachiewicz algorithm, which computes the lower triangular matrix row by row, starting from the upper-left corner.
+
+It takes the following as input,
+
+- $A: N \times N$ positive-definite matrix
+
+and gives the following as output:
+
+- $L: N \times N$ lower triangular matrix such that $A = LL^T$
+
+The C reference implementation uses Cholesky Banachiewicz algorithm. The algorithm computes the following, where the computation starts from the upper-left corner of $L$ and proceeds row by row.
+
+$$
+L(i,j) =
+\begin{cases}
+\sqrt{A(i, i) - \sum_{k=0}^{i-1} L(i, k)^2} & \text{for } i = j \\
+\frac{1}{L(j, j)} \left( A(i, j) - \sum_{k=0}^{j-1} L(i, k)L(j, k) \right) & \text{for } i > j
+\end{cases}
+$$
+
+---
+
+Top-Level Function: `kernel_cholesky`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_cholesky(double A[40][40]);`
+
+Inputs:
+- `A`: a 40x40 positive-definite matrix, represented as a 2D array of double-precision floating-point numbers.
+
+Outputs:
+- `A`: the lower triangular matrix, represented as a 2D array of double-precision floating-point numbers, such that `A = LL^T`.
+
+Important Data Structures and Data Types:
+- `double[40][40]`: a 2D array of double-precision floating-point numbers, used to represent the input matrix `A` and the output lower triangular matrix `L`.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="cholesky_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "cholesky.h"
+
+void init_array(int n, double A[40][40]) {
+    int i, j;
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j <= i; j++)
+            A[i][j] = (double)(-j % n) / n + 1;
+        for (j = i + 1; j < n; j++) {
+            A[i][j] = 0;
+        }
+        A[i][i] = 1;
+    }
+
+    int r, s, t;
+    double B[40][40];
+    for (r = 0; r < n; ++r)
+        for (s = 0; s < n; ++s)
+            B[r][s] = 0;
+    for (t = 0; t < n; ++t)
+        for (r = 0; r < n; ++r)
+            for (s = 0; s < n; ++s)
+                B[r][s] += A[r][t] * A[s][t];
+    for (r = 0; r < n; ++r)
+        for (s = 0; s < n; ++s)
+            A[r][s] = B[r][s];
+}
+
+void print_array(int n, double A[40][40])
+
+{
+    int i, j;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "A");
+    for (i = 0; i < n; i++)
+        for (j = 0; j <= i; j++) {
+            if ((i * n + j) % 20 == 0)
+                fprintf(stderr, "\n");
+            fprintf(stderr, "%0.6lf ", A[i][j]);
+        }
+    fprintf(stderr, "\nend   dump: %s\n", "A");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 40;
+
+    double A[40][40];
+
+    init_array(n, A);
+
+    kernel_cholesky(A);
+
+    print_array(n, A);
+
+    return 0;
+}
+</INPUT_CODE name="cholesky_tb.cpp">
+<INPUT_CODE name="cholesky.h">
+#pragma once
+#include <cmath>
+
+void kernel_cholesky(double A[40][40]);
+
+</INPUT_CODE name="cholesky.h">
+
+
+
+## Task Output
+

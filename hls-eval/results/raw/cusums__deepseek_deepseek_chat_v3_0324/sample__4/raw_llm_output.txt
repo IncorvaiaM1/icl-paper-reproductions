@@ -1,0 +1,65 @@
+Based on the provided code and description, I'll analyze the `CumulativeSums` kernel and its test bench.
+
+### Analysis of the Kernel
+
+1. **Functionality**:
+   - The kernel computes cumulative sums of a binary sequence (0s and 1s)
+   - It tracks:
+     - Maximum cumulative sum (`res_sup`)
+     - Minimum cumulative sum (`res_inf`)
+   - The cumulative sum (`S`) changes as:
+     - Increment by 1 when `epsilon[k]` is 1
+     - Decrement by 1 when `epsilon[k]` is 0
+
+2. **Interface**:
+   - Input: Binary array `epsilon` of size 20000
+   - Outputs:
+     - `res_sup` (pointer to maximum sum)
+     - `res_inf` (pointer to minimum sum)
+
+3. **Test Bench Analysis**:
+   - Generates test data using `epsilon_test[i] = i * 73 % 7 == 0`
+     - This creates a pseudorandom pattern of 0s and 1s
+     - Approximately 1/7th of values will be 1 (when i*73 is divisible by 7)
+   - Calls the kernel and prints results
+
+4. **Expected Implementation**:
+   The kernel should:
+   - Initialize S, sup, and inf to 0
+   - Iterate through epsilon array
+   - Update S based on epsilon values
+   - Track max and min values of S
+   - Store results in output pointers
+
+5. **Optimization Considerations**:
+   - The description mentions HLS (High-Level Synthesis) optimization
+   - Should focus on:
+     - Efficient dataflow
+     - Minimal resource usage
+     - Pipeline the loop for performance
+
+6. **Potential Implementation** (pseudocode):
+   ```
+   void CumulativeSums(int *res_sup, int *res_inf, int epsilon[N]) {
+       int S = 0;
+       int sup = 0;
+       int inf = 0;
+       
+       for (int k = 0; k < N; k++) {
+           S += (epsilon[k] ? 1 : -1);
+           if (S > sup) sup = S;
+           if (S < inf) inf = S;
+       }
+       
+       *res_sup = sup;
+       *res_inf = inf;
+   }
+   ```
+
+The test bench will verify the kernel by:
+1. Creating a test pattern
+2. Computing expected results manually for small N to verify
+3. Running the kernel
+4. Comparing printed results with expectations
+
+The header file provides the function prototype and defines the constant N (20000) used in both the kernel and test bench.

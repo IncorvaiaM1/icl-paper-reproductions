@@ -1,0 +1,66 @@
+Based on the provided inputs, I'll create a C++ implementation of the Nussinov kernel for RNA folding prediction. The implementation will follow the dynamic programming approach described in the kernel description.
+
+Here's the implementation for `nussinov.cpp`:
+
+```cpp
+#include "nussinov.h"
+#include <algorithm>
+
+bool is_complementary(char a, char b) {
+    return (a == 'A' && (b == 'T' || b == 'U')) ||
+           (a == 'T' && b == 'A') ||
+           (a == 'U' && b == 'A') ||
+           (a == 'G' && b == 'C') ||
+           (a == 'C' && b == 'G');
+}
+
+void kernel_nussinov(char seq[60], int table[60][60]) {
+    const int n = 60;
+    
+    // Fill the table diagonally
+    for (int length = 1; length < n; length++) {
+        for (int i = 0; i < n - length; i++) {
+            int j = i + length;
+            
+            // Case 1: skip i
+            int max_score = table[i+1][j];
+            
+            // Case 2: skip j
+            max_score = std::max(max_score, table[i][j-1]);
+            
+            // Case 3: pair i and j if complementary
+            int pair_score = is_complementary(seq[i], seq[j]) ? 1 : 0;
+            int case3 = (j - i > 1) ? table[i+1][j-1] + pair_score : pair_score;
+            max_score = std::max(max_score, case3);
+            
+            // Case 4: bifurcation - find best k between i and j
+            for (int k = i + 1; k < j; k++) {
+                int bifurcation_score = table[i][k] + table[k+1][j];
+                max_score = std::max(max_score, bifurcation_score);
+            }
+            
+            table[i][j] = max_score;
+        }
+    }
+}
+```
+
+This implementation:
+
+1. Includes a helper function `is_complementary` that checks if two RNA bases can form a pair according to the Nussinov rules (A-T/U, G-C).
+
+2. Implements the `kernel_nussinov` function that:
+   - Takes the RNA sequence and empty table as input
+   - Fills the table using the dynamic programming approach described
+   - Processes the table diagonally, starting from small subsequences and building up
+   - Considers all four cases in the Nussinov algorithm:
+     1. Skipping the left base (i)
+     2. Skipping the right base (j)
+     3. Pairing i and j if complementary
+     4. Considering all possible bifurcations (splits) between i and j
+
+3. Uses the `std::max` function to keep track of the maximum score at each step.
+
+The implementation follows the mathematical formulation provided in the kernel description exactly and should work with the provided test bench (`nussinov_tb.cpp`) and header file (`nussinov.h`).
+
+The algorithm has a time complexity of O(n³) due to the nested loops (two for the diagonal processing and one for the bifurcation case) and space complexity of O(n²) for the DP table.

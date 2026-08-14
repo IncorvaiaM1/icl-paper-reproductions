@@ -1,0 +1,53 @@
+
+#include "sort_merge.h"
+
+static TYPE temp[SIZE];
+
+void merge(TYPE a[SIZE], int start, int m, int stop) {
+    int i, j, k;
+    int n1 = m - start;
+    int n2 = stop - m;
+
+    // Copy the left half into the temporary array
+    merge_label1:
+    for (i = 0; i < n1; i++) {
+        temp[start + i] = a[start + i];
+    }
+
+    // Copy the right half into the temporary array
+    merge_label2:
+    for (j = 0; j < n2; j++) {
+        temp[m + j] = a[m + j];
+    }
+
+    // Merge the two halves from the temporary array back into a
+    i = start;
+    j = m;
+    merge_label3:
+    for (k = start; k < stop; k++) {
+        if (i < m && (j >= stop || temp[i] <= temp[j])) {
+            a[k] = temp[i++];
+        } else {
+            a[k] = temp[j++];
+        }
+    }
+}
+
+void ms_mergesort(TYPE a[SIZE]) {
+    int width, i;
+    
+    // Iterative bottom-up merge sort
+    for (width = 1; width < SIZE; width = width * 2) {
+        for (i = 0; i < SIZE; i = i + 2 * width) {
+            int m = i + width;
+            int stop = i + 2 * width;
+            
+            if (m > SIZE) m = SIZE;
+            if (stop > SIZE) stop = SIZE;
+            
+            if (m < stop) {
+                merge(a, i, m, stop);
+            }
+        }
+    }
+}

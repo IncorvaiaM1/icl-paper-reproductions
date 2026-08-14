@@ -1,0 +1,45 @@
+
+#include "bfs_bulk.h"
+
+void bfs(
+    node_t nodes[N_NODES],
+    edge_t edges[N_EDGES],
+    node_index_t starting_node,
+    level_t level[N_NODES],
+    edge_index_t level_counts[N_LEVELS])
+{
+    // Initialize level_counts to zero
+    for (int i = 0; i < N_LEVELS; i++) {
+        level_counts[i] = 0;
+    }
+
+    // Set the level of the starting node
+    level[starting_node] = 0;
+    level_counts[0] = 1;
+
+    // Main BFS loop: iterate over horizons
+    for (int horizon = 0; horizon < N_LEVELS; horizon++) {
+        // Loop over all nodes to process the current frontier
+        for (node_index_t n = 0; n < N_NODES; n++) {
+            if (level[n] == horizon) {
+                edge_index_t tmp_begin = nodes[n].edge_begin;
+                edge_index_t tmp_end   = nodes[n].edge_end;
+
+                // Loop over the edges of the current node
+                for (edge_index_t e = tmp_begin; e < tmp_end; e++) {
+                    node_index_t dst = edges[e].dst;
+
+                    // If the neighbor hasn't been visited yet
+                    if (level[dst] == MAX_LEVEL) {
+                        level[dst] = (level_t)(horizon + 1);
+
+                        // Update the level count, making sure not to exceed the array bounds
+                        if ((horizon + 1) < N_LEVELS) {
+                            level_counts[horizon + 1]++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

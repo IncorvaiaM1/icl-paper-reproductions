@@ -1,0 +1,85 @@
+<OUTPUT_CODE name="md_grid.cpp">
+#include "md_grid.h"
+
+void md(
+    int32_t n_points[blockSide][blockSide][blockSide],
+    dvector_t force[blockSide][blockSide][blockSide][densityFactor],
+    dvector_t position[blockSide][blockSide][blockSide][densityFactor]) {
+    
+    // Zero out forces
+    for (int i = 0; i < blockSide; i++) {
+        for (int j = 0; j < blockSide; j++) {
+            for (int k = 0; k < blockSide; k++) {
+                for (int d = 0; d < densityFactor; d++) {
+                    force[i][j][k][d].x = 0.0;
+                    force[i][j][k][d].y = 0.0;
+                    force[i][j][k][d].z = 0.0;
+                }
+            }
+        }
+    }
+
+    // Loop over all blocks in the grid
+    for (int bx = 0; bx < blockSide; bx++) {
+        for (int by = 0; by < blockSide; by++) {
+            for (int bz = 0; bz < blockSide; bz++) {
+                
+                // Loop over the 3x3x3 neighborhood of blocks
+                for (int nx = -1; nx <= 1; nx++) {
+                    for (int ny = -1; ny <= 1; ny++) {
+                        for (int nz = -1; nz <= 1; nz++) {
+                            
+                            // Calculate neighbor block coordinates with periodic boundary conditions
+                            int neighbor_x = (bx + nx + blockSide) % blockSide;
+                            int neighbor_y = (by + ny + blockSide) % blockSide;
+                            int neighbor_z = (bz + nz + blockSide) % blockSide;
+                            
+                            // Loop over all points in current block
+                            for (int p = 0; p < n_points[bx][by][bz]; p++) {
+                                // Loop over all points in neighbor block
+                                for (int q = 0; q < n_points[neighbor_x][neighbor_y][neighbor_z]; q++) {
+                                    
+                                    // Skip if same point in same block
+                                    if (nx == 0 && ny == 0 && nz == 0 && p == q) {
+                                        continue;
+                                    }
+                                    
+                                    // Calculate distance vector
+                                    dvector_t dr;
+                                    dr.x = position[bx][by][bz][p].x - position[neighbor_x][neighbor_y][neighbor_z][q].x;
+                                    dr.y = position[bx][by][bz][p].y - position[neighbor_x][neighbor_y][neighbor_z][q].y;
+                                    dr.z = position[bx][by][bz][p].z - position[neighbor_x][neighbor_y][neighbor_z][q].z;
+                                    
+                                    // Calculate squared distance
+                                    TYPE r2 = dr.x * dr.x + dr.y * dr.y + dr.z * dr.z;
+                                    
+                                    // Skip if too close to avoid numerical issues
+                                    if (r2 < 1e-12) continue;
+                                    
+                                    // Calculate r^2 powers
+                                    TYPE r2inv = 1.0 / r2;
+                                    TYPE r4inv = r2inv * r2inv;
+                                    TYPE r6inv = r4inv * r2inv;
+                                    TYPE r12inv = r6inv * r6inv;
+                                    
+                                    // Calculate force magnitude
+                                    TYPE force_mag = (12.0 * lj1 * r12inv - 6.0 * lj2 * r6inv) * r2inv;
+                                    
+                                    // Update forces on both particles
+                                    force[bx][by][bz][p].x += force_mag * dr.x;
+                                    force[bx][by][bz][p].y += force_mag * dr.y;
+                                    force[bx][by][bz][p].z += force_mag * dr.z;
+                                    
+                                    force[neighbor_x][neighbor_y][neighbor_z][q].x -= force_mag * dr.x;
+                                    force[neighbor_x][neighbor_y][neighbor_z][q].y -= force_mag * dr.y;
+                                    force[neighbor_x][neighbor_y][neighbor_z][q].z -= force_mag * dr.z;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

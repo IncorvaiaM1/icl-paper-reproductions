@@ -1,0 +1,24 @@
+<OUTPUT_CODE name="kernel_syrk.cpp">
+#include "syrk.h"
+
+void kernel_syrk(double alpha, double beta, double C[30][30], double A[30][20]) {
+    #pragma HLS INTERFACE ap_memory port=C
+    #pragma HLS INTERFACE ap_memory port=A
+    #pragma HLS INTERFACE s_axilite port=alpha bundle=control
+    #pragma HLS INTERFACE s_axilite port=beta bundle=control
+    #pragma HLS INTERFACE s_axilite port=return bundle=control
+
+    // Compute lower triangular part of C = alpha * A * A^T + beta * C
+    for (int i = 0; i < 30; i++) {
+        for (int j = 0; j <= i; j++) {
+            #pragma HLS PIPELINE II=1
+            double sum = 0.0;
+            for (int k = 0; k < 20; k++) {
+                #pragma HLS UNROLL factor=5
+                sum += A[i][k] * A[j][k];
+            }
+            C[i][j] = alpha * sum + beta * C[i][j];
+        }
+    }
+}
+</OUTPUT_CODE>

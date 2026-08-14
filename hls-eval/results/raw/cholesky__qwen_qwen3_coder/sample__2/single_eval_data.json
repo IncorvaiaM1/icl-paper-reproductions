@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "cholesky__qwen_qwen3_coder",
+    "benchmark_case_name": "cholesky",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "qwen/qwen3-coder",
+    "model_name_normalized": "qwen_qwen3_coder",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_cholesky` design is a high-level synthesis implementation of the Cholesky decomposition algorithm, which decomposes a positive-definite matrix into a lower triangular matrix. The algorithm is based on the Cholesky-Banachiewicz algorithm, which computes the lower triangular matrix row by row, starting from the upper-left corner.\n\nIt takes the following as input,\n\n- $A: N \\times N$ positive-definite matrix\n\nand gives the following as output:\n\n- $L: N \\times N$ lower triangular matrix such that $A = LL^T$\n\nThe C reference implementation uses Cholesky Banachiewicz algorithm. The algorithm computes the following, where the computation starts from the upper-left corner of $L$ and proceeds row by row.\n\n$$\nL(i,j) =\n\\begin{cases}\n\\sqrt{A(i, i) - \\sum_{k=0}^{i-1} L(i, k)^2} & \\text{for } i = j \\\\\n\\frac{1}{L(j, j)} \\left( A(i, j) - \\sum_{k=0}^{j-1} L(i, k)L(j, k) \\right) & \\text{for } i > j\n\\end{cases}\n$$\n\n---\n\nTop-Level Function: `kernel_cholesky`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_cholesky(double A[40][40]);`\n\nInputs:\n- `A`: a 40x40 positive-definite matrix, represented as a 2D array of double-precision floating-point numbers.\n\nOutputs:\n- `A`: the lower triangular matrix, represented as a 2D array of double-precision floating-point numbers, such that `A = LL^T`.\n\nImportant Data Structures and Data Types:\n- `double[40][40]`: a 2D array of double-precision floating-point numbers, used to represent the input matrix `A` and the output lower triangular matrix `L`.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"cholesky_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"cholesky.h\"\n\nvoid init_array(int n, double A[40][40]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        for (j = 0; j <= i; j++)\n            A[i][j] = (double)(-j % n) / n + 1;\n        for (j = i + 1; j < n; j++) {\n            A[i][j] = 0;\n        }\n        A[i][i] = 1;\n    }\n\n    int r, s, t;\n    double B[40][40];\n    for (r = 0; r < n; ++r)\n        for (s = 0; s < n; ++s)\n            B[r][s] = 0;\n    for (t = 0; t < n; ++t)\n        for (r = 0; r < n; ++r)\n            for (s = 0; s < n; ++s)\n                B[r][s] += A[r][t] * A[s][t];\n    for (r = 0; r < n; ++r)\n        for (s = 0; s < n; ++s)\n            A[r][s] = B[r][s];\n}\n\nvoid print_array(int n, double A[40][40])\n\n{\n    int i, j;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"A\");\n    for (i = 0; i < n; i++)\n        for (j = 0; j <= i; j++) {\n            if ((i * n + j) % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%0.6lf \", A[i][j]);\n        }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"A\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 40;\n\n    double A[40][40];\n\n    init_array(n, A);\n\n    kernel_cholesky(A);\n\n    print_array(n, A);\n\n    return 0;\n}\n</INPUT_CODE name=\"cholesky_tb.cpp\">\n<INPUT_CODE name=\"cholesky.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_cholesky(double A[40][40]);\n\n</INPUT_CODE name=\"cholesky.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 14434.065964404,
+        "t1": 14437.964179607,
+        "execution_time": 3.898215202998472
+    },
+    "response_json": {
+        "id": "gen-1786561365-S0rrWJrVy4aCiprAWWtk",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_cholesky.cpp\">\n#include \"cholesky.h\"\n\nvoid kernel_cholesky(double A[40][40]) {\n    int i, j, k;\n    double sum;\n\n    for (i = 0; i < 40; i++) {\n        // Compute diagonal element A[i][i]\n        sum = 0.0;\n        for (k = 0; k < i; k++) {\n            sum += A[i][k] * A[i][k];\n        }\n        A[i][i] = sqrt(A[i][i] - sum);\n\n        // Compute elements below diagonal in column i\n        for (j = i + 1; j < 40; j++) {\n            sum = 0.0;\n            for (k = 0; k < i; k++) {\n                sum += A[j][k] * A[i][k];\n            }\n            A[j][i] = (A[j][i] - sum) / A[i][i];\n        }\n    }\n\n    // Zero out upper triangular part\n    for (i = 0; i < 40; i++) {\n        for (j = i + 1; j < 40; j++) {\n            A[i][j] = 0.0;\n        }\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786561365,
+        "model": "qwen/qwen3-coder",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 288,
+            "prompt_tokens": 1351,
+            "total_tokens": 1639,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 320,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.00080565,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.00080565,
+                "upstream_inference_prompt_cost": 0.00037365,
+                "upstream_inference_completions_cost": 0.000432
+            }
+        },
+        "provider": "Venice"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_cholesky.cpp\">\n#include \"cholesky.h\"\n\nvoid kernel_cholesky(double A[40][40]) {\n    int i, j, k;\n    double sum;\n\n    for (i = 0; i < 40; i++) {\n        // Compute diagonal element A[i][i]\n        sum = 0.0;\n        for (k = 0; k < i; k++) {\n            sum += A[i][k] * A[i][k];\n        }\n        A[i][i] = sqrt(A[i][i] - sum);\n\n        // Compute elements below diagonal in column i\n        for (j = i + 1; j < 40; j++) {\n            sum = 0.0;\n            for (k = 0; k < i; k++) {\n                sum += A[j][k] * A[i][k];\n            }\n            A[j][i] = (A[j][i] - sum) / A[i][i];\n        }\n    }\n\n    // Zero out upper triangular part\n    for (i = 0; i < 40; i++) {\n        for (j = i + 1; j < 40; j++) {\n            A[i][j] = 0.0;\n        }\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_cholesky.cpp": "\n#include \"cholesky.h\"\n\nvoid kernel_cholesky(double A[40][40]) {\n    int i, j, k;\n    double sum;\n\n    for (i = 0; i < 40; i++) {\n        // Compute diagonal element A[i][i]\n        sum = 0.0;\n        for (k = 0; k < i; k++) {\n            sum += A[i][k] * A[i][k];\n        }\n        A[i][i] = sqrt(A[i][i] - sum);\n\n        // Compute elements below diagonal in column i\n        for (j = i + 1; j < 40; j++) {\n            sum = 0.0;\n            for (k = 0; k < i; k++) {\n                sum += A[j][k] * A[i][k];\n            }\n            A[j][i] = (A[j][i] - sum) / A[i][i];\n        }\n    }\n\n    // Zero out upper triangular part\n    for (i = 0; i < 40; i++) {\n        for (j = i + 1; j < 40; j++) {\n            A[i][j] = 0.0;\n        }\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 14438.220074846,
+            "t1": 14438.597133756,
+            "execution_time": 0.37705891000041447,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: A\n1.000000 \n1.000000 1.000000 \n1.000000 0.975000 1.000000 \n1.000000 0.975000 0.950000 1.000000 \n1.000000 0.975000 0.950000 0.925000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 0.175000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 0.175000 0.150000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 0.175000 0.150000 0.125000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 0.175000 0.150000 0.125000 0.100000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 0.175000 0.150000 0.125000 0.100000 0.075000 1.000000 \n1.000000 0.975000 0.950000 0.925000 0.900000 0.875000 0.850000 0.825000 0.800000 0.775000 0.750000 0.725000 0.700000 0.675000 0.650000 0.625000 0.600000 0.575000 0.550000 0.525000 \n0.500000 0.475000 0.450000 0.425000 0.400000 0.375000 0.350000 0.325000 0.300000 0.275000 0.250000 0.225000 0.200000 0.175000 0.150000 0.125000 0.100000 0.075000 0.050000 1.000000 \nend   dump: A\n==END   DUMP_ARRAYS==\n",
+            "t0": 14438.617589344,
+            "t1": 14438.633777048,
+            "execution_time": 0.016187704000913072,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 14438.639375231,
+            "t1": 14438.639375231,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

@@ -1,0 +1,29 @@
+<OUTPUT_CODE name="kernel_trmm.cpp">
+#include "trmm.h"
+
+void kernel_trmm(double alpha, double A[20][20], double B[20][30]) {
+    int i, j, k;
+    double temp;
+
+    // Perform B = alpha * A * B
+    // A is a lower triangular matrix (UPLO = 'L'), SIDE = 'L', TRANSA = 'T', DIAG = 'U'
+    // This means we compute B = alpha * A * B where A is lower triangular and unit diagonal
+
+    // Loop over columns of B
+    for (j = 0; j < 30; j++) {
+        // Loop over rows of A (and B)
+        for (i = 0; i < 20; i++) {
+            temp = 0.0;
+            // Compute dot product of row i of A with column j of B
+            // Since A is lower triangular with unit diagonal, only iterate up to i
+            for (k = 0; k < i; k++) {
+                temp += A[i][k] * B[k][j];
+            }
+            // Add the contribution from the diagonal element (which is 1.0 due to DIAG = 'U')
+            temp += B[i][j];
+            // Scale by alpha and store back in B
+            B[i][j] = alpha * temp;
+        }
+    }
+}
+</OUTPUT_CODE>

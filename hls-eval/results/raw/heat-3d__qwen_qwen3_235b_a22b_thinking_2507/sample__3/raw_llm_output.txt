@@ -1,0 +1,31 @@
+<OUTPUT_CODE name="kernel_heat_3d.cpp">
+#include "heat-3d.h"
+
+void kernel_heat_3d(double A[10][10][10], double B[10][10][10]) {
+    for (int t = 0; t < 20; t++) {
+        if (t % 2 == 0) {
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    for (int k = 1; k < 9; k++) {
+                        double lapx = A[i+1][j][k] - 2.0 * A[i][j][k] + A[i-1][j][k];
+                        double lapy = A[i][j+1][k] - 2.0 * A[i][j][k] + A[i][j-1][k];
+                        double lapz = A[i][j][k+1] - 2.0 * A[i][j][k] + A[i][j][k-1];
+                        B[i][j][k] = A[i][j][k] + 0.125 * (lapx + lapy + lapz);
+                    }
+                }
+            }
+        } else {
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    for (int k = 1; k < 9; k++) {
+                        double lapx = B[i+1][j][k] - 2.0 * B[i][j][k] + B[i-1][j][k];
+                        double lapy = B[i][j+1][k] - 2.0 * B[i][j][k] + B[i][j-1][k];
+                        double lapz = B[i][j][k+1] - 2.0 * B[i][j][k] + B[i][j][k-1];
+                        A[i][j][k] = B[i][j][k] + 0.125 * (lapx + lapy + lapz);
+                    }
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

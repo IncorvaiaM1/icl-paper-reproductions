@@ -1,0 +1,154 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_gemm` design is a high-level synthesis implementation of the Generalized Matrix Multiply (GEMM) algorithm from the Basic Linear Algebra Subprograms (BLAS) library. It performs a matrix multiplication operation between two input matrices `A` and `B`, and accumulates the result in a third matrix `C`. The operation is defined as `C_out = alpha * A * B + beta * C`, where `alpha` and `beta` are scalar values.
+
+It takes the following as inputs,
+
+- $\alpha, \beta$: scalars
+- $A$: $P \times Q$ matrix
+- $B$: $Q \times R$ matrix
+- $C$: $P \times R$ matrix
+
+and gives the following as output:
+
+- $C_{out}$: $P \times R$ array, where $C_{out} = \alpha AB + \beta C$
+
+Note that the output $C_{out}$ is to be stored in place of the input array $C$. The BLAS parameters used are `TRANSA = TRANSB = ‘N’`, meaning both $A$ and $B$ are not transposed.
+
+---
+
+Top-Level Function: `kernel_gemm`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_gemm(double alpha, double beta, double C[20][25], double A[20][30], double B[30][25]);`
+
+Inputs:
+- `alpha`: a scalar value of type `double` that represents the scaling factor for the matrix product `A * B`.
+- `beta`: a scalar value of type `double` that represents the scaling factor for the matrix `C`.
+- `C`: a 2D matrix of size `20 x 25` of type `double`, which is the output matrix that stores the result of the GEMM operation.
+- `A`: a 2D matrix of size `20 x 30` of type `double`, which is the first input matrix.
+- `B`: a 2D matrix of size `30 x 25` of type `double`, which is the second input matrix.
+
+Outputs:
+- `C_out`: a 2D matrix of size `20 x 25` of type `double`, which is the output matrix that stores the result of the GEMM operation. Note that the output `C_out` is stored in place of the input matrix `C`.
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point data type used to represent the elements of the input and output matrices.
+- `2D matrix`: a data structure used to represent the input and output matrices, where each element is a `double` value.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="gemm_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "gemm.h"
+
+void init_array(
+    int ni,
+    int nj,
+    int nk,
+    double *alpha,
+    double *beta,
+    double C[20][25],
+    double A[20][30],
+    double B[30][25]) {
+    int i, j;
+
+    *alpha = 1.5;
+    *beta = 1.2;
+    for (i = 0; i < ni; i++)
+        for (j = 0; j < nj; j++)
+            C[i][j] = (double)((i * j + 1) % ni) / ni;
+    for (i = 0; i < ni; i++)
+        for (j = 0; j < nk; j++)
+            A[i][j] = (double)(i * (j + 1) % nk) / nk;
+    for (i = 0; i < nk; i++)
+        for (j = 0; j < nj; j++)
+            B[i][j] = (double)(i * (j + 2) % nj) / nj;
+}
+
+void print_array(int ni, int nj, double C[20][25]) {
+    int i, j;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "C");
+    for (i = 0; i < ni; i++)
+        for (j = 0; j < nj; j++) {
+            if ((i * ni + j) % 20 == 0)
+                fprintf(stderr, "\n");
+            fprintf(stderr, "%0.6lf ", C[i][j]);
+        }
+    fprintf(stderr, "\nend   dump: %s\n", "C");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int ni = 20;
+    int nj = 25;
+    int nk = 30;
+
+    double alpha;
+    double beta;
+    double C[20][25];
+    double A[20][30];
+    double B[30][25];
+
+    init_array(ni, nj, nk, &alpha, &beta, C, A, B);
+
+    kernel_gemm(alpha, beta, C, A, B);
+
+    print_array(ni, nj, C);
+
+    return 0;
+}
+</INPUT_CODE name="gemm_tb.cpp">
+<INPUT_CODE name="gemm.h">
+#pragma once
+#include <cmath>
+
+void kernel_gemm(
+    double alpha,
+    double beta,
+    double C[20][25],
+    double A[20][30],
+    double B[30][25]);
+
+</INPUT_CODE name="gemm.h">
+
+
+
+## Task Output
+

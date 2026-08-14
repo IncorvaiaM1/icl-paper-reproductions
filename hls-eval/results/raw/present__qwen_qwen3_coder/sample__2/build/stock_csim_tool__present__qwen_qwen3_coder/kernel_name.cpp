@@ -1,0 +1,111 @@
+
+#include "present.h"
+
+void copyKey(present_key_t *from, present_key_t *to) {
+    for (int i = 0; i < PRESENT_80_KEY_SIZE_BYTES; i++) {
+        (*to)[i] = (*from)[i];
+    }
+}
+
+void copyBlock(block_t *from, block_t *to) {
+    for (int i = 0; i < PRESENT_BLOCK_SIZE_BYTES; i++) {
+        (*to)[i] = (*from)[i];
+    }
+}
+
+void addRoundKey(block_t *block, round_key_t *roundKey) {
+    for (int i = 0; i < PRESENT_BLOCK_SIZE_BYTES; i++) {
+        (*block)[i] ^= (*roundKey)[i];
+    }
+}
+
+void generateRoundKeys80(present_key_t *suppliedKey, keys_t *keys) {
+    present_key_t key;
+    copyKey(suppliedKey, &key);
+
+    for (int i = 0; i < ROUNDS; i++) {
+        // Copy the current key to the round key (first 64 bits)
+        for (int j = 0; j < ROUND_KEY_SIZE_BYTES; j++) {
+            (*keys)[i][j] = key[j];
+        }
+
+        // Key schedule: rotate left by 61 bits
+        unsigned char temp[PRESENT_80_KEY_SIZE_BYTES];
+        // Rotate by 61 bits (equivalent to right by 19 bits in 80-bit word)
+        for (int j = 0; j < PRESENT_80_KEY_SIZE_BYTES; j++) {
+            int src_index = (j + 2) % PRESENT_80_KEY_SIZE_BYTES;
+            unsigned char left_bits = key[src_index] << 3;
+            unsigned char right_bits = key[(j + 3) % PRESENT_80_KEY_SIZE_BYTES] >> 5;
+            temp[j] = left_bits | right_bits;
+        }
+
+        // Apply S-box to bits 76-79 (last 4 bits of byte 9) and bits 0-3 (first 4 bits of byte 0)
+        temp[0] = (sBox[temp[0] >> 4] << 4) | (temp[0] & 0x0F);
+        temp[9] = (temp[9] & 0xF0) | sBox[temp[9] & 0x0F];
+
+        // XOR with round counter (i+1) in bits 15-20 (bits 4-7 of byte 1 and bits 0-3 of byte 2)
+        unsigned int round_counter = i + 1;
+        temp[1] ^= (round_counter & 0x07) << 5;
+        temp[2] ^= (round_counter >> 3) & 0x01;
+
+        // Copy back to key
+        for (int j = 0; j < PRESENT_80_KEY_SIZE_BYTES; j++) {
+            key[j] = temp[j];
+        }
+    }
+}
+
+void sBoxLayer(block_t *block) {
+    for (int i = 0; i < PRESENT_BLOCK_SIZE_BYTES; i++) {
+        unsigned char byte = (*block)[i];
+        unsigned char low_nibble = sBox[byte & 0x0F];
+        unsigned char high_nibble = sBox[(byte >> 4) & 0x0F];
+        (*block)[i] = (high_nibble << 4) | low_nibble;
+    }
+}
+
+void pLayer(block_t *block) {
+    block_t temp_block = {0};
+    
+    for (int i = 0; i < 64; i++) {
+        int bit_pos = (i * 16 + i / 4) % 63;
+        if (i * 16 + i / 4 >= 63) {
+            bit_pos = 63;
+        }
+        
+        // Extract bit i from block
+        int src_byte = i / 8;
+        int src_bit = 7 - (i % 8);
+        unsigned char bit = ((*block)[src_byte] >> src_bit) & 0x01;
+        
+        // Put bit in position bit_pos in temp_block
+        int dst_byte = bit_pos / 8;
+        int dst_bit = 7 - (bit_pos % 8);
+        temp_block[dst_byte] |= (bit << dst_bit);
+    }
+    
+    copyBlock(&temp_block, block);
+}
+
+void present80_encryptBlock(block_t *block, present_key_t *key) {
+    keys_t roundKeys;
+    generateRoundKeys80(key, &roundKeys);
+
+    // Add initial round key
+    addRoundKey(block, (round_key_t*)&roundKeys[0]);
+
+    // Main rounds
+    for (int i = 1; i < ROUNDS; i++) {
+        // S-box layer
+        sBoxLayer(block);
+
+        // Permutation layer
+        pLayer(block);
+
+        // Add round key
+        addRoundKey(block, (round_key_t*)&roundKeys[i]);
+    }
+
+    // Add final round key
+    addRoundKey(block, (round_key_t*)&roundKeys[ROUNDS]);
+}

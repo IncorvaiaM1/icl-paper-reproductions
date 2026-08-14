@@ -1,0 +1,36 @@
+<OUTPUT_CODE name="kernel_2mm.cpp">
+#include "2mm.h"
+
+void kernel_2mm(
+    double alpha,
+    double beta,
+    double tmp[16][18],
+    double A[16][22],
+    double B[22][18],
+    double C[18][24],
+    double D[16][24]) {
+    int i, j, k;
+
+    // tmp = A * B
+    for (i = 0; i < 16; i++) {
+        for (j = 0; j < 18; j++) {
+            double sum = 0.0;
+            for (k = 0; k < 22; k++) {
+                sum += A[i][k] * B[k][j];
+            }
+            tmp[i][j] = sum;
+        }
+    }
+
+    // D = alpha * tmp * C + beta * D
+    for (i = 0; i < 16; i++) {
+        for (j = 0; j < 24; j++) {
+            double sum = 0.0;
+            for (k = 0; k < 18; k++) {
+                sum += tmp[i][k] * C[k][j];
+            }
+            D[i][j] = alpha * sum + beta * D[i][j];
+        }
+    }
+}
+</OUTPUT_CODE>

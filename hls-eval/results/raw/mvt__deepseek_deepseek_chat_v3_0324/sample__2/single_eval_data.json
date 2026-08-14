@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "mvt__deepseek_deepseek_chat_v3_0324",
+    "benchmark_case_name": "mvt",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "deepseek/deepseek-chat-v3-0324",
+    "model_name_normalized": "deepseek_deepseek_chat_v3_0324",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_mvt` design is a high-level synthesis kernel that performs a matrix-vector multiplication (MVT) composed with another MVT but with a transposed matrix. The kernel takes five inputs: two vectors `y1` and `y2` of length `N`, and a square matrix `A` of size `N x N`. The kernel outputs two vectors `x1` and `x2` of length `N`, where `x1` is the result of the MVT of `A` and `y1`, and `x2` is the result of the MVT of the transposed matrix `A` and `y2`.\n\nIt takes the following as inputs,\n\n- $A: N \\times N$ matrix\n- $y1, y2$: vectors of length $N$\n\nand gives the following as outputs:\n\n- $x1$: vector of length $N$, where $x1 = x1 + Ay1$\n- $x2$: vector of length $N$, where $x2 = x2 + A^Ty2$\n\n---\n\nTop-Level Function: `kernel_mvt`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_mvt(double x1[40], double x2[40], double y_1[40], double y_2[40], double A[40][40]);`\n\nInputs:\n- `x1`: an input vector of length `N` (40 in this implementation) that will be updated with the result of the MVT of `A` and `y1`.\n- `x2`: an input vector of length `N` (40 in this implementation) that will be updated with the result of the MVT of the transposed matrix `A` and `y2`.\n- `y_1`: an input vector of length `N` (40 in this implementation) that is one of the operands of the MVT.\n- `y_2`: an input vector of length `N` (40 in this implementation) that is one of the operands of the MVT.\n- `A`: an input square matrix of size `N x N` (40 x 40 in this implementation) that is one of the operands of the MVT.\n\nOutputs:\n- `x1`: an output vector of length `N` (40 in this implementation) that is the result of the MVT of `A` and `y1`.\n- `x2`: an output vector of length `N` (40 in this implementation) that is the result of the MVT of the transposed matrix `A` and `y2`.\n\nImportant Data Structures and Data Types:\n- `double`: a 64-bit floating-point data type used to represent the elements of the input vectors and matrix.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"mvt_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"mvt.h\"\n\nvoid init_array(\n    int n,\n    double x1[40],\n    double x2[40],\n    double y_1[40],\n    double y_2[40],\n    double A[40][40]) {\n    int i, j;\n\n    for (i = 0; i < n; i++) {\n        x1[i] = (double)(i % n) / n;\n        x2[i] = (double)((i + 1) % n) / n;\n        y_1[i] = (double)((i + 3) % n) / n;\n        y_2[i] = (double)((i + 4) % n) / n;\n        for (j = 0; j < n; j++)\n            A[i][j] = (double)(i * j % n) / n;\n    }\n}\n\nvoid print_array(int n, double x1[40], double x2[40])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"x1\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", x1[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"x1\");\n\n    fprintf(stderr, \"begin dump: %s\", \"x2\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", x2[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"x2\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 40;\n\n    double A[40][40];\n    double x1[40];\n    double x2[40];\n    double y_1[40];\n    double y_2[40];\n\n    init_array(n, x1, x2, y_1, y_2, A);\n\n    kernel_mvt(x1, x2, y_1, y_2, A);\n\n    print_array(n, x1, x2);\n\n    return 0;\n}\n</INPUT_CODE name=\"mvt_tb.cpp\">\n<INPUT_CODE name=\"mvt.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_mvt(\n    double x1[40],\n    double x2[40],\n    double y_1[40],\n    double y_2[40],\n    double A[40][40]);\n\n</INPUT_CODE name=\"mvt.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 24901.257087837,
+        "t1": 24914.435148526,
+        "execution_time": 13.17806068900245
+    },
+    "response_json": {
+        "id": "gen-1786572023-g9bupM4S5vPgdSUKltry",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_mvt.cpp\">\n#include \"mvt.h\"\n\nvoid kernel_mvt(\n    double x1[40],\n    double x2[40],\n    double y_1[40],\n    double y_2[40],\n    double A[40][40])\n{\n    // Compute x1 = x1 + A * y1\n    for (int i = 0; i < 40; i++) {\n        double sum = x1[i];\n        for (int j = 0; j < 40; j++) {\n            sum += A[i][j] * y_1[j];\n        }\n        x1[i] = sum;\n    }\n\n    // Compute x2 = x2 + A^T * y2\n    for (int i = 0; i < 40; i++) {\n        double sum = x2[i];\n        for (int j = 0; j < 40; j++) {\n            sum += A[j][i] * y_2[j];\n        }\n        x2[i] = sum;\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786572023,
+        "model": "deepseek/deepseek-chat-v3-0324",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 234,
+            "prompt_tokens": 1581,
+            "total_tokens": 1815,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.00068895,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.00068895,
+                "upstream_inference_prompt_cost": 0.00042687,
+                "upstream_inference_completions_cost": 0.00026208
+            }
+        },
+        "provider": "Novita"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_mvt.cpp\">\n#include \"mvt.h\"\n\nvoid kernel_mvt(\n    double x1[40],\n    double x2[40],\n    double y_1[40],\n    double y_2[40],\n    double A[40][40])\n{\n    // Compute x1 = x1 + A * y1\n    for (int i = 0; i < 40; i++) {\n        double sum = x1[i];\n        for (int j = 0; j < 40; j++) {\n            sum += A[i][j] * y_1[j];\n        }\n        x1[i] = sum;\n    }\n\n    // Compute x2 = x2 + A^T * y2\n    for (int i = 0; i < 40; i++) {\n        double sum = x2[i];\n        for (int j = 0; j < 40; j++) {\n            sum += A[j][i] * y_2[j];\n        }\n        x2[i] = sum;\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_mvt.cpp": "\n#include \"mvt.h\"\n\nvoid kernel_mvt(\n    double x1[40],\n    double x2[40],\n    double y_1[40],\n    double y_2[40],\n    double A[40][40])\n{\n    // Compute x1 = x1 + A * y1\n    for (int i = 0; i < 40; i++) {\n        double sum = x1[i];\n        for (int j = 0; j < 40; j++) {\n            sum += A[i][j] * y_1[j];\n        }\n        x1[i] = sum;\n    }\n\n    // Compute x2 = x2 + A^T * y2\n    for (int i = 0; i < 40; i++) {\n        double sum = x2[i];\n        for (int j = 0; j < 40; j++) {\n            sum += A[j][i] * y_2[j];\n        }\n        x2[i] = sum;\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 24914.804171732,
+            "t1": 24915.298230457,
+            "execution_time": 0.49405872499846737,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: x1\n0.000000 11.475000 9.700000 9.550000 8.650000 8.375000 9.350000 9.750000 7.800000 10.075000 7.500000 10.350000 9.450000 9.675000 9.750000 8.750000 8.000000 9.875000 9.900000 9.950000 \n5.250000 10.475000 9.950000 10.550000 8.400000 9.375000 10.100000 10.750000 9.250000 10.075000 7.750000 10.350000 8.600000 10.675000 10.500000 9.750000 10.050000 10.875000 10.150000 8.950000 \nend   dump: x1\nbegin dump: x2\n0.025000 11.087500 9.400000 9.362500 8.525000 8.337500 9.450000 9.962500 8.025000 10.487500 7.900000 9.962500 9.125000 9.487500 9.650000 8.712500 8.025000 10.087500 10.200000 10.362500 \n5.525000 10.087500 9.650000 10.362500 8.225000 9.337500 10.200000 10.962500 9.525000 10.487500 8.150000 9.962500 8.225000 10.487500 10.400000 9.712500 10.125000 11.087500 10.450000 8.362500 \nend   dump: x2\n==END   DUMP_ARRAYS==\n",
+            "t0": 24915.323368126,
+            "t1": 24915.343431726,
+            "execution_time": 0.020063600000867154,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 24915.349763361,
+            "t1": 24915.349763361,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

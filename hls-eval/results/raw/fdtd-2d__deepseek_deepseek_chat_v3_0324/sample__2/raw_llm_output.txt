@@ -1,0 +1,79 @@
+Based on the provided inputs, I'll analyze the `kernel_fdtd_2d` implementation and provide a complete implementation of the FDTD 2D kernel according to the given mathematical equations.
+
+The kernel implements the Finite-Difference Time-Domain method for 2D electromagnetic field simulation with TEz polarization. The mathematical equations show how the fields (Hz, Ex, Ey) are updated at each time step based on their previous values and spatial derivatives.
+
+Here's the implementation:
+
+```c
+#include "fdtd-2d.h"
+
+void kernel_fdtd_2d(
+    double ex[20][30],
+    double ey[20][30],
+    double hz[20][30],
+    double _fict_[20])
+{
+    // Simplified coefficients as per PolyBench's approach
+    const double C_hzh = 0.5;
+    const double C_hze = 0.5;
+    const double C_exe = 0.5;
+    const double C_exh = 0.5;
+    const double C_eye = 0.5;
+    const double C_eyh = 0.5;
+
+    int t, i, j;
+    int tmax = 20;
+    int nx = 20;
+    int ny = 30;
+
+    for (t = 0; t < tmax; t++) {
+        // First update the magnetic field Hz
+        for (i = 0; i < nx - 1; i++) {
+            for (j = 0; j < ny - 1; j++) {
+                hz[i][j] = C_hzh * hz[i][j] + 
+                           C_hze * (ex[i][j+1] - ex[i][j] - 
+                                   ey[i+1][j] + ey[i][j]);
+            }
+        }
+
+        // Then update the electric fields Ex and Ey
+        for (i = 0; i < nx; i++) {
+            for (j = 1; j < ny; j++) {
+                ex[i][j] = C_exe * ex[i][j] + 
+                            C_exh * (hz[i][j] - hz[i][j-1]);
+            }
+        }
+
+        for (i = 1; i < nx; i++) {
+            for (j = 0; j < ny; j++) {
+                ey[i][j] = C_eye * ey[i][j] + 
+                            C_eyh * (hz[i][j] - hz[i-1][j]);
+            }
+        }
+
+        // Apply the fictitious source term to the first row of Ex
+        for (j = 0; j < ny; j++) {
+            ex[0][j] = _fict_[t];
+        }
+    }
+}
+```
+
+Key points about this implementation:
+
+1. The kernel processes 20 time steps (tmax) as specified in the testbench.
+
+2. The field updates follow the given mathematical equations:
+   - First updates the magnetic field Hz
+   - Then updates the electric fields Ex and Ey
+   - The updates are done in a specific order to maintain numerical stability
+
+3. Boundary conditions:
+   - The first row of Ex is set to the fictitious source term at each time step
+   - The loops have appropriate bounds to avoid out-of-bounds access (nx-1 and ny-1 for Hz updates)
+
+4. Simplified coefficients (all set to 0.5) are used as per PolyBench's approach, though in a real implementation these would vary based on material properties.
+
+5. The array dimensions (20x30) match the testbench specifications.
+
+The implementation maintains the stencil computation pattern described in the mathematical equations while handling the boundary conditions and time-stepping appropriately.

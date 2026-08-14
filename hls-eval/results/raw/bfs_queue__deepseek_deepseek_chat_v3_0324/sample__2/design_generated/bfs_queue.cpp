@@ -1,0 +1,57 @@
+
+#include "bfs_queue.h"
+
+void bfs(
+    node_t nodes[N_NODES],
+    edge_t edges[N_EDGES],
+    node_index_t starting_node,
+    level_t level[N_NODES],
+    edge_index_t level_counts[N_LEVELS]) {
+
+    // Initialize level array with MAX_LEVEL
+    for (node_index_t i = 0; i < N_NODES; i++) {
+        level[i] = MAX_LEVEL;
+    }
+    level[starting_node] = 0;
+
+    // Initialize level_counts array with zeros
+    for (edge_index_t i = 0; i < N_LEVELS; i++) {
+        level_counts[i] = 0;
+    }
+    level_counts[0] = 1;  // Starting node is at level 0
+
+    // Circular queue implementation
+    node_index_t queue[N_NODES];
+    node_index_t queue_front = 0;
+    node_index_t queue_rear = 0;
+
+    // Enqueue the starting node
+    queue[queue_rear] = starting_node;
+    queue_rear = (queue_rear + 1) % N_NODES;
+
+    while (queue_front != queue_rear) {
+        // Dequeue a node
+        node_index_t current_node = queue[queue_front];
+        queue_front = (queue_front + 1) % N_NODES;
+
+        level_t current_level = level[current_node];
+        edge_index_t next_level = current_level + 1;
+
+        // Process all neighbors of the current node
+        for (edge_index_t edge_idx = nodes[current_node].edge_begin;
+             edge_idx < nodes[current_node].edge_end;
+             edge_idx++) {
+            node_index_t neighbor = edges[edge_idx].dst;
+
+            // If we haven't visited this node yet
+            if (level[neighbor] == MAX_LEVEL) {
+                level[neighbor] = next_level;
+                level_counts[next_level]++;
+
+                // Enqueue the neighbor
+                queue[queue_rear] = neighbor;
+                queue_rear = (queue_rear + 1) % N_NODES;
+            }
+        }
+    }
+}

@@ -1,0 +1,81 @@
+<OUTPUT_CODE name="kernel_name.cpp">
+#include "nw_nw.h"
+
+void needwun(
+    char SEQA[ALEN],
+    char SEQB[BLEN],
+    char alignedA[ALEN + BLEN],
+    char alignedB[ALEN + BLEN],
+    int M[(ALEN + 1) * (BLEN + 1)],
+    char ptr[(ALEN + 1) * (BLEN + 1)]) 
+{
+    const int MATCH_SCORE = 1;
+    const int MISMATCH_SCORE = -1;
+    const int GAP_SCORE = -1;
+
+    for (int k = 0; k < ALEN + BLEN; k++) {
+        alignedA[k] = '_';
+        alignedB[k] = '_';
+    }
+
+    for (int j = 0; j <= BLEN; j++) {
+        M[j] = j * GAP_SCORE;
+        if (j > 0) {
+            ptr[j] = 'l';
+        }
+    }
+
+    for (int i = 1; i <= ALEN; i++) {
+        M[i * (BLEN + 1)] = i * GAP_SCORE;
+        ptr[i * (BLEN + 1)] = 'u';
+    }
+
+    for (int i = 1; i <= ALEN; i++) {
+        for (int j = 1; j <= BLEN; j++) {
+            int idx = i * (BLEN + 1) + j;
+            int idx_diag = (i-1) * (BLEN + 1) + (j-1);
+            int idx_up = (i-1) * (BLEN + 1) + j;
+            int idx_left = i * (BLEN + 1) + (j-1);
+
+            int match_score = (SEQA[i-1] == SEQB[j-1]) ? MATCH_SCORE : MISMATCH_SCORE;
+            int diag = M[idx_diag] + match_score;
+            int up = M[idx_up] + GAP_SCORE;
+            int left = M[idx_left] + GAP_SCORE;
+
+            if (diag >= up && diag >= left) {
+                M[idx] = diag;
+                ptr[idx] = 'd';
+            } else if (up >= diag && up >= left) {
+                M[idx] = up;
+                ptr[idx] = 'u';
+            } else {
+                M[idx] = left;
+                ptr[idx] = 'l';
+            }
+        }
+    }
+
+    int i_trace = ALEN;
+    int j_trace = BLEN;
+    int pos = ALEN + BLEN - 1;
+
+    while (i_trace > 0 || j_trace > 0) {
+        char p = ptr[i_trace * (BLEN + 1) + j_trace];
+        if (p == 'd') {
+            alignedA[pos] = SEQA[i_trace - 1];
+            alignedB[pos] = SEQB[j_trace - 1];
+            i_trace--;
+            j_trace--;
+        } else if (p == 'u') {
+            alignedA[pos] = SEQA[i_trace - 1];
+            alignedB[pos] = '_';
+            i_trace--;
+        } else if (p == 'l') {
+            alignedA[pos] = '_';
+            alignedB[pos] = SEQB[j_trace - 1];
+            j_trace--;
+        }
+        pos--;
+    }
+}
+</OUTPUT_CODE>

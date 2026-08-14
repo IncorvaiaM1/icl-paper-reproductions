@@ -1,0 +1,23 @@
+<OUTPUT_CODE name="kernel_name.cpp">
+#include "spmv_ellpack.h"
+
+void ellpack(TYPE nzval[N * L], int32_t cols[N * L], TYPE vec[N], TYPE out[N]) {
+    // Iterate over each row of the sparse matrix
+    ellpack_1:
+    for (int i = 0; i < N; i++) {
+        TYPE sum = 0.0;
+
+        // Iterate over the non-zero elements in the current row
+        ellpack_2:
+        for (int j = 0; j < L; j++) {
+            int index = i * L + j;
+            int col_index = cols[index];
+            TYPE val = nzval[index];
+            sum += val * vec[col_index];
+        }
+
+        // Store the result for the current row
+        out[i] = sum;
+    }
+}
+</OUTPUT_CODE>

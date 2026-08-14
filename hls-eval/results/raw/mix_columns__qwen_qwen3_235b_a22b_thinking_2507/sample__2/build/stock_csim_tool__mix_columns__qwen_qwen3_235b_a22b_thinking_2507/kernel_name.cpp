@@ -1,0 +1,42 @@
+
+#include "mix_cols.h"
+
+static uint8_t xtime(uint8_t x) {
+    if (x & 0x80) {
+        return (x << 1) ^ 0x1b;
+    } else {
+        return x << 1;
+    }
+}
+
+void MixColumns(state_t *state) {
+    for (int j = 0; j < 4; j++) {
+        uint8_t s0 = (*state)[j][0];
+        uint8_t s1 = (*state)[j][1];
+        uint8_t s2 = (*state)[j][2];
+        uint8_t s3 = (*state)[j][3];
+
+        uint8_t Tmp = s0;
+        s0 = s0 ^ s1 ^ s2 ^ s3;
+        uint8_t Tm = s0 ^ s1;
+        uint8_t t = xtime(Tm);
+        s0 = s0 ^ t;
+        s1 = s1 ^ t;
+        Tm = s1 ^ s2;
+        t = xtime(Tm);
+        s1 = s1 ^ t;
+        s2 = s2 ^ t;
+        Tm = s2 ^ s3;
+        t = xtime(Tm);
+        s2 = s2 ^ t;
+        s3 = s3 ^ t;
+        Tm = s3 ^ Tmp;
+        t = xtime(Tm);
+        s3 = s3 ^ t;
+
+        (*state)[j][0] = s0;
+        (*state)[j][1] = s1;
+        (*state)[j][2] = s2;
+        (*state)[j][3] = s3;
+    }
+}

@@ -1,0 +1,65 @@
+<OUTPUT_CODE name="kernel_nussinov.cpp">
+#include "nussinov.h"
+
+void kernel_nussinov(char seq[60], int table[60][60]) {
+    int i, j, k;
+    int max_score, score1, score2, score3, score4;
+
+    // Initialize the diagonal and upper triangle of the table
+    for (i = 0; i < 60; i++) {
+        for (j = 0; j < 60; j++) {
+            if (i >= j) {
+                table[i][j] = 0;
+            }
+        }
+    }
+
+    // Fill the table in a bottom-up manner
+    for (int gap = 1; gap < 60; gap++) {
+        for (i = 0; i < 60 - gap; i++) {
+            j = i + gap;
+            score1 = score2 = score3 = score4 = 0;
+
+            // Case 1: table[i+1][j]
+            if (i + 1 < 60) {
+                score1 = table[i + 1][j];
+            }
+
+            // Case 2: table[i][j-1]
+            if (j - 1 >= 0) {
+                score2 = table[i][j - 1];
+            }
+
+            // Case 3: table[i+1][j-1] + w(i,j)
+            if (i + 1 < 60 && j - 1 >= 0) {
+                int w = 0;
+                char base1 = seq[i];
+                char base2 = seq[j];
+                if ((base1 == 'A' && base2 == 'U') || (base1 == 'U' && base2 == 'A') ||
+                    (base1 == 'C' && base2 == 'G') || (base1 == 'G' && base2 == 'C')) {
+                    w = 1;
+                }
+                score3 = table[i + 1][j - 1] + w;
+            }
+
+            // Case 4: max_{i < k < j} (table[i][k] + table[k+1][j])
+            if (j - i > 1) {
+                for (k = i + 1; k < j; k++) {
+                    int score = table[i][k] + table[k + 1][j];
+                    if (score > score4) {
+                        score4 = score;
+                    }
+                }
+            }
+
+            // Compute the maximum of the four cases
+            max_score = score1;
+            if (score2 > max_score) max_score = score2;
+            if (score3 > max_score) max_score = score3;
+            if (score4 > max_score) max_score = score4;
+
+            table[i][j] = max_score;
+        }
+    }
+}
+</OUTPUT_CODE>

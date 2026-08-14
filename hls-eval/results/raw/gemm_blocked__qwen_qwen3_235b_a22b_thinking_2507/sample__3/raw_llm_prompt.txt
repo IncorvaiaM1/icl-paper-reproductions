@@ -1,0 +1,378 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `bbgemm` kernel implements the General Matrix-Matrix Multiplication (GEMM) algorithm, optimized for cache performance using a blocked algorithm. The design takes advantage of spatial locality by dividing the input matrices into smaller blocks, reducing memory access patterns and improving data reuse. The kernel performs a matrix-matrix multiplication operation, computing the product of two input matrices `m1` and `m2` and storing the result in the output matrix `prod`. The blocked algorithm is based on the paper "The cache performance and optimizations of blocked algorithms" by M. D. Lam, E. E. Rothberg, and M. E. Wolf, presented at ASPLOS 1991. The algorithm can be represented by the following equation: 
+\[ C = AB \]
+where $C$ is the output matrix, $A$ and $B$ are the input matrices, and the multiplication is performed element-wise. The blocked algorithm can be further represented as:
+\[ C_{ij} = \sum_{k=0}^{N-1} A_{ik}B_{kj} \]
+where $N$ is the number of elements in the matrices, and $i$, $j$, and $k$ are the row, column, and block indices, respectively.
+
+The kernel uses four nested loops to iterate over the blocks of the input matrices: `loopjj` and `loopkk` iterate over the blocks of the input matrices, while `loopi` and `loopk` perform the actual matrix-matrix multiplication operation. The innermost loop, `loopj`, accumulates the partial products of the matrix-matrix multiplication operation. The kernel uses a block size of 8, which is defined by the `block_size` constant. The input matrices are divided into blocks of size `block_size x block_size`, and the kernel performs the matrix-matrix multiplication operation on each block.
+
+The kernel uses the following data structures and data types:
+- `TYPE`: a double precision floating-point data type, used to represent the elements of the input and output matrices.
+- `block_size`: an integer constant defining the size of the blocks used in the blocked algorithm.
+- `row_size` and `col_size`: integer constants defining the size of the input matrices.
+- `N`: an integer constant representing the total number of elements in the input matrices.
+
+The kernel does not have any sub-components that are explicitly listed as separate C++ functions in the code.
+
+---
+
+Top-Level Function: `bbgemm`
+
+Complete Function Signature of the Top-Level Function:
+`void bbgemm(TYPE m1[N], TYPE m2[N], TYPE prod[N]);`
+
+Inputs:
+- `m1`: a 2D matrix of size `N x N` (where `N = row_size * col_size`) containing the first input matrix, stored in row-major order with each element of type `TYPE` (double precision floating-point).
+- `m2`: a 2D matrix of size `N x N` containing the second input matrix, stored in row-major order with each element of type `TYPE` (double precision floating-point).
+
+Outputs:
+- `prod`: a 2D matrix of size `N x N` containing the product of the input matrices, stored in row-major order with each element of type `TYPE` (double precision floating-point).
+
+Important Data Structures and Data Types:
+- `TYPE`: a double precision floating-point data type, used to represent the elements of the input and output matrices.
+- `block_size`: an integer constant defining the size of the blocks used in the blocked algorithm, set to 8.
+- `row_size` and `col_size`: integer constants defining the size of the input matrices, set to 64.
+- `N`: an integer constant representing the total number of elements in the input matrices, calculated as `row_size * col_size`.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="gemm_blocked_tb.cpp">
+#include <assert.h>
+#include <fcntl.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include "gemm_blocked.h"
+
+static inline int fd_printf(int fd, const char *format, ...) {
+    va_list args;
+    int buffered, written, status;
+    char buffer[256];
+    va_start(args, format);
+    buffered = vsnprintf(buffer, 256, format, args);
+    va_end(args);
+    assert(
+        buffered < 256 && "Overran fd_printf buffer---output possibly corrupt");
+    written = 0;
+    while (written < buffered) {
+        status = write(fd, &buffer[written], buffered - written);
+        assert(status >= 0 && "Write failed");
+        written += status;
+    }
+    assert(written == buffered && "Wrote more data than given");
+    return written;
+}
+
+char *readfile(int fd) {
+    char *p;
+    struct stat s;
+    off_t len;
+    ssize_t bytes_read, status;
+
+    assert(fd > 1 && "Invalid file descriptor");
+    assert(0 == fstat(fd, &s) && "Couldn't determine file size");
+    len = s.st_size;
+    assert(len > 0 && "File is empty");
+    p = (char *)malloc(len + 1);
+    bytes_read = 0;
+    while (bytes_read < len) {
+        status = read(fd, &p[bytes_read], len - bytes_read);
+        assert(status >= 0 && "read() failed");
+        bytes_read += status;
+    }
+    p[len] = (char)0;
+    close(fd);
+    return p;
+}
+
+char *find_section_start(char *s, int n) {
+    int i = 0;
+
+    assert(n >= 0 && "Invalid section number");
+    if (n == 0)
+        return s;
+
+    while (i < n && (*s) != (char)0) {
+
+        if (s[0] == '%' && s[1] == '%' && s[2] == '\n') {
+            i++;
+        }
+        s++;
+    }
+    if (*s != (char)0)
+        return s + 2;
+    return s;
+}
+
+int write_section_header(int fd) {
+    assert(fd > 1 && "Invalid file descriptor");
+    fd_printf(fd, "%%%%\n");
+    return 0;
+}
+
+int parse_double_array(char *s, double *arr, int n) {
+    char *line, *endptr;
+    int i = 0;
+    double v;
+    assert(s != NULL && "Invalid input string");
+    line = strtok(s, "\n");
+    while (line != NULL && i < n) {
+        endptr = line;
+        v = (double)(strtod(line, &endptr));
+        if ((*endptr) != (char)0) {
+            fprintf(stderr, "Invalid input: line %d of section\n", i);
+        }
+        arr[i] = v;
+        i++;
+        line[strlen(line)] = '\n';
+        line = strtok(NULL, "\n");
+    }
+    if (line != NULL) {
+        line[strlen(line)] = '\n';
+    }
+    return 0;
+}
+
+int write_double_array(int fd, double *arr, int n) {
+    int i;
+    assert(fd > 1 && "Invalid file descriptor");
+    for (i = 0; i < n; i++) {
+        fd_printf(
+            fd,
+            "%"
+            ".16f"
+            "\n",
+            arr[i]);
+    }
+    return 0;
+}
+
+struct bench_args_t {
+    TYPE m1[N];
+    TYPE m2[N];
+    TYPE prod[N];
+};
+
+int INPUT_SIZE = sizeof(struct bench_args_t);
+
+#define EPSILON ((TYPE)1.0e-6)
+
+void run_benchmark(void *vargs) {
+    struct bench_args_t *args = (struct bench_args_t *)vargs;
+    bbgemm(args->m1, args->m2, args->prod);
+}
+
+/* Input format:
+%% Section 1
+TYPE[N]: matrix 1
+%% Section 2
+TYPE[N]: matrix 2
+*/
+
+void input_to_data(int fd, void *vdata) {
+    struct bench_args_t *data = (struct bench_args_t *)vdata;
+    char *p, *s;
+    // Zero-out everything.
+    memset(vdata, 0, sizeof(struct bench_args_t));
+    // Load input string
+    p = readfile(fd);
+
+    s = find_section_start(p, 1);
+    parse_double_array(s, data->m1, N);
+
+    s = find_section_start(p, 2);
+    parse_double_array(s, data->m2, N);
+    free(p);
+}
+
+void data_to_input(int fd, void *vdata) {
+    struct bench_args_t *data = (struct bench_args_t *)vdata;
+
+    write_section_header(fd);
+    write_double_array(fd, data->m1, N);
+
+    write_section_header(fd);
+    write_double_array(fd, data->m2, N);
+}
+
+/* Output format:
+%% Section 1
+TYPE[N]: output matrix
+*/
+
+void output_to_data(int fd, void *vdata) {
+    struct bench_args_t *data = (struct bench_args_t *)vdata;
+    char *p, *s;
+    // Load input string
+    p = readfile(fd);
+
+    s = find_section_start(p, 1);
+    parse_double_array(s, data->prod, N);
+    free(p);
+}
+
+void data_to_output(int fd, void *vdata) {
+    struct bench_args_t *data = (struct bench_args_t *)vdata;
+
+    write_section_header(fd);
+    write_double_array(fd, data->prod, N);
+}
+
+int check_data(void *vdata, void *vref) {
+    struct bench_args_t *data = (struct bench_args_t *)vdata;
+    struct bench_args_t *ref = (struct bench_args_t *)vref;
+    int has_errors = 0;
+    int r, c;
+    TYPE diff;
+
+    // for (r = 0; r < row_size; r++) {
+    //     for (c = 0; c < col_size; c++) {
+    //         diff = data->prod[r * row_size + c] - ref->prod[r * row_size +
+    //         c]; has_errors |= (diff < -EPSILON) || (EPSILON < diff);
+    //     }
+    // }
+
+    for (r = 0; r < row_size; r++) {
+        for (c = 0; c < col_size; c++) {
+            diff = data->prod[r * row_size + c] - ref->prod[r * row_size + c];
+            if ((diff < -EPSILON) || (EPSILON < diff)) {
+                printf(
+                    "Output data mismatch at index %d: (actual) %f != %f "
+                    "(expected), row = %d, col = %d\n",
+                    r * row_size + c,
+                    data->prod[r * row_size + c],
+                    ref->prod[r * row_size + c],
+                    r,
+                    c);
+                has_errors = 1;
+            }
+        }
+    }
+
+    // Return true if it's correct.
+    return !has_errors;
+}
+
+int main() {
+    // Parse command line.
+    char *in_file;
+    char *check_file;
+
+    in_file = "input.data";
+    check_file = "check.data";
+
+    // Load input data
+    int in_fd;
+    char *data;
+    data = (char *)malloc(INPUT_SIZE);
+    assert(data != NULL && "Out of memory");
+    in_fd = open(in_file, O_RDONLY);
+    assert(in_fd > 0 && "Couldn't open input data file");
+    input_to_data(in_fd, data);
+
+    // Unpack and call
+    run_benchmark(data);
+
+    int out_fd;
+    out_fd = open(
+        "output.data",
+        O_WRONLY | O_CREAT | O_TRUNC,
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    assert(out_fd > 0 && "Couldn't open output data file");
+    data_to_output(out_fd, data);
+    close(out_fd);
+
+    int check_fd;
+    char *ref;
+    ref = (char *)malloc(INPUT_SIZE);
+    assert(ref != NULL && "Out of memory");
+    check_fd = open(check_file, O_RDONLY);
+    assert(check_fd > 0 && "Couldn't open check data file");
+    output_to_data(check_fd, ref);
+
+    if (!check_data(data, ref)) {
+        fprintf(stderr, "Benchmark results are incorrect\n");
+        return -1;
+    }
+
+    free(data);
+    free(ref);
+
+    printf("Success.\n");
+    return 0;
+}
+
+</INPUT_CODE name="gemm_blocked_tb.cpp">
+<INPUT_CODE name="gemm_blocked.h">
+#include <stdint.h>
+
+/*
+Implementation based on algorithm described in:
+The cache performance and optimizations of blocked algorithms
+M. D. Lam, E. E. Rothberg, and M. E. Wolf
+ASPLOS 1991
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Data Type
+#define TYPE double
+
+// Algorithm Parameters
+#define row_size 64
+#define col_size 64
+#define N row_size *col_size
+#define block_size 8
+#define NUMOFBLOCKS N / block_size / block_size
+
+// Define the input range to operate over
+#define MIN 0.
+#define MAX 1.0
+
+// Set number of iterations to execute
+#define MAX_ITERATION 1
+
+void bbgemm(TYPE m1[N], TYPE m2[N], TYPE prod[N]);
+
+</INPUT_CODE name="gemm_blocked.h">
+
+
+
+## Task Output
+

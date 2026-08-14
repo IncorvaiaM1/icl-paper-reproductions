@@ -1,0 +1,35 @@
+
+#include "seidel-2d.h"
+
+void kernel_seidel_2d(double A[40][40]) {
+    const int TSTEPS = 20;
+    const int N = 40;
+    
+    double A_new[40][40];
+
+    // Copy initial values
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            A_new[i][j] = A[i][j];
+        }
+    }
+
+    // Perform Gauss-Seidel iterations
+    for (int t = 0; t < TSTEPS; t++) {
+        for (int i = 1; i < N-1; i++) {
+            for (int j = 1; j < N-1; j++) {
+                // 9-point stencil computation
+                A_new[i][j] = (A[i-1][j-1] + A[i-1][j] + A[i-1][j+1] +
+                              A[i][j-1]   + A[i][j]   + A[i][j+1] +
+                              A[i+1][j-1] + A[i+1][j] + A[i+1][j+1]) / 9.0;
+            }
+        }
+
+        // Update A for next iteration
+        for (int i = 1; i < N-1; i++) {
+            for (int j = 1; j < N-1; j++) {
+                A[i][j] = A_new[i][j];
+            }
+        }
+    }
+}

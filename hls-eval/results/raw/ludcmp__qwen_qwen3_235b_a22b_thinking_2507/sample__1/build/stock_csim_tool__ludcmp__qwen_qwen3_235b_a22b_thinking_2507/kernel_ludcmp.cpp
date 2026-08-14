@@ -1,0 +1,44 @@
+
+#include "ludcmp.h"
+
+void kernel_ludcmp(double A[40][40], double b[40], double x[40], double y[40]) {
+    const int N = 40;
+    
+    // LU decomposition (Doolittle algorithm without pivoting)
+    for (int k = 0; k < N; k++) {
+        // Compute upper triangular part (U)
+        for (int j = k; j < N; j++) {
+            double sum = 0.0;
+            for (int s = 0; s < k; s++) {
+                sum += A[k][s] * A[s][j];
+            }
+            A[k][j] -= sum;
+        }
+        
+        // Compute lower triangular part (L)
+        for (int i = k+1; i < N; i++) {
+            double sum = 0.0;
+            for (int s = 0; s < k; s++) {
+                sum += A[i][s] * A[s][k];
+            }
+            A[i][k] = (A[i][k] - sum) / A[k][k];
+        }
+    }
+    
+    // Forward substitution: solve L * y = b
+    for (int i = 0; i < N; i++) {
+        y[i] = b[i];
+        for (int j = 0; j < i; j++) {
+            y[i] -= A[i][j] * y[j];
+        }
+    }
+    
+    // Backward substitution: solve U * x = y
+    for (int i = N-1; i >= 0; i--) {
+        x[i] = y[i];
+        for (int j = i+1; j < N; j++) {
+            x[i] -= A[i][j] * x[j];
+        }
+        x[i] = x[i] / A[i][i];
+    }
+}

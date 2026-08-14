@@ -1,0 +1,86 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `Runs` kernel is designed to analyze a binary array `epsilon` of size 65535 and compute two metrics: the number of ones (`S`) and the number of runs (`V`). A "run" is defined as a contiguous sequence of identical values (either all zeros or all ones). The kernel iterates through the `epsilon` array to count the number of ones and the number of transitions between zeros and ones. The results are returned through pointer references to `res_S` and `res_V`.
+
+---
+
+Top-Level Function: `Runs`
+
+Complete Function Signature of the Top-Level Function:
+`void Runs(int *res_S, int *res_V, int epsilon[N]);`
+
+Inputs:
+- `res_S`: A pointer to an integer where the number of ones in the `epsilon` array will be stored.
+- `res_V`: A pointer to an integer where the number of runs in the `epsilon` array will be stored.
+- `epsilon`: An array of integers of size 65535, where each element is either 0 or 1.
+
+Outputs:
+- `res_S`: The number of ones in the `epsilon` array.
+- `res_V`: The number of runs in the `epsilon` array.
+
+Important Data Structures and Data Types:
+- `epsilon`: An array of integers of size 65535, where each element is either 0 or 1. This array is used as input to the kernel to compute the number of ones and runs.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="runs_tb.cpp">
+#include "runs.h"
+
+int main() {
+    int i;
+    int epsilon_test[N];
+    for (i = 0; i < N; i++) {
+        epsilon_test[i] = i * 73 % 7 == 0;
+    }
+    int result_S, result_V;
+    Runs(&result_S, &result_V, epsilon_test);
+
+    printf("result S = %d\n", result_S);
+    printf("result S = %d\n", result_V);
+}
+
+</INPUT_CODE name="runs_tb.cpp">
+<INPUT_CODE name="runs.h">
+#pragma once
+
+#include <stdio.h>
+
+#define N 65535
+// static int epsilon[N]; // array of 0s and 1s
+
+void Runs(int *res_S, int *res_V, int epsilon[N]);
+</INPUT_CODE name="runs.h">
+
+
+
+## Task Output
+

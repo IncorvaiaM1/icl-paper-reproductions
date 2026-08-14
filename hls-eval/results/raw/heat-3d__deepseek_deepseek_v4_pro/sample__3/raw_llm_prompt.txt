@@ -1,0 +1,129 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_heat_3d` design is a high-level synthesis implementation of the 3D heat equation algorithm. The algorithm updates the value of a 3D grid point based on the values of its neighboring points in the previous time step. The update equation is a discretized version of the heat equation, which describes how heat diffuses through a 3D space. The design consists of a nested loop structure that iterates over the 3D grid, updating the values of each point based on the values of its neighbors.
+
+The main update is as follows:
+
+$$
+\begin{align*}
+data^{t}_{(i,j,k)} = & \ data^{t-1}_{(i,j,k)} \\
+& + 0.125 \cdot \left( data^{t-1}_{(i+1,j,k)} - 2 \cdot data^{t-1}_{(i,j,k)} + data^{t-1}_{(i-1,j,k)} \right) \\
+& + 0.125 \cdot \left( data^{t-1}_{(i,j+1,k)} - 2 \cdot data^{t-1}_{(i,j,k)} + data^{t-1}_{(i,j-1,k)} \right) \\
+& + 0.125 \cdot \left( data^{t-1}_{(i,j,k+1)} - 2 \cdot data^{t-1}_{(i,j,k)} + data^{t-1}_{(i,j,k-1)} \right)
+\end{align*}
+$$
+
+The design assumes a fixed grid size of 10x10x10, and uses a fixed number of time steps (20). The input and output grids are represented as 3D arrays of doubles, with a size of 10x10x10. The design does not use any explicit data structures or sub-components beyond the top-level function.
+
+---
+
+Top-Level Function: `kernel_heat_3d`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_heat_3d(double A[10][10][10], double B[10][10][10]);`
+
+Inputs:
+- `A`: a 3D array of doubles, representing the input grid at the previous time step
+- `B`: a 3D array of doubles, representing the output grid at the current time step
+
+Outputs:
+- `B`: the updated 3D grid at the current time step
+
+Important Data Structures and Data Types:
+- `double[10][10][10]`: a 3D array of doubles, representing the input and output grids
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="heat-3d_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "heat-3d.h"
+
+void init_array(int n, double A[10][10][10], double B[10][10][10]) {
+    int i, j, k;
+
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            for (k = 0; k < n; k++)
+                A[i][j][k] = B[i][j][k] = (double)(i + j + (n - k)) * 10 / (n);
+}
+
+void print_array(int n, double A[10][10][10])
+
+{
+    int i, j, k;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "A");
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            for (k = 0; k < n; k++) {
+                if ((i * n * n + j * n + k) % 20 == 0)
+                    fprintf(stderr, "\n");
+                fprintf(stderr, "%0.6lf ", A[i][j][k]);
+            }
+    fprintf(stderr, "\nend   dump: %s\n", "A");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 10;
+    int tsteps = 20;
+
+    double A[10][10][10];
+    double B[10][10][10];
+
+    init_array(n, A, B);
+
+    kernel_heat_3d(A, B);
+
+    print_array(n, A);
+
+    return 0;
+}
+</INPUT_CODE name="heat-3d_tb.cpp">
+<INPUT_CODE name="heat-3d.h">
+#pragma once
+#include <cmath>
+
+void kernel_heat_3d(double A[10][10][10], double B[10][10][10]);
+
+</INPUT_CODE name="heat-3d.h">
+
+
+
+## Task Output
+

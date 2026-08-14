@@ -1,0 +1,30 @@
+
+#include "gesummv.h"
+
+void kernel_gesummv(
+    double alpha,
+    double beta,
+    double A[30][30],
+    double B[30][30],
+    double tmp[30],
+    double x[30],
+    double y[30]) {
+
+    int i, j;
+    
+    loop_j: for (j = 0; j < 30; j++) {
+        y[j] = 0.0;
+        tmp[j] = 0.0;
+    }
+
+    loop_i: for (i = 0; i < 30; i++) {
+        loop_k: for (j = 0; j < 30; j++) {
+            y[i] += A[i][j] * x[j];
+            tmp[i] += B[i][j] * x[j];
+        }
+    }
+
+    loop_l: for (i = 0; i < 30; i++) {
+        y[i] = alpha * y[i] + beta * tmp[i];
+    }
+}

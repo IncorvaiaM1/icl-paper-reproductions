@@ -1,0 +1,63 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "covariance__deepseek_deepseek_chat_v3_0324",
+    "benchmark_case_name": "covariance",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "deepseek/deepseek-chat-v3-0324",
+    "model_name_normalized": "deepseek_deepseek_chat_v3_0324",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_covariance` design computes the covariance, a measure from statistics that shows how linearly related two variables are. It takes a 2D matrix `data` as input, representing `N` data points, each with `M` attributes, and computes the covariance between each pair of attributes. The covariance is defined as the mean of the product of deviations for each pair of attributes.\n\nIt takes the following as input,\n\n- `data`: $N \\times M$ matrix that represents $N$ data points, each with $M$ attributes,\n\nand gives the following output:\n\n- `cov`: $M \\times M$ matrix where the $i,j$-th element is the covariance between $i$ and $j$. The matrix is symmetric.\n\nCovariance is defined to be the mean of the product of deviations for $i$ and $j$:\n\n$$\n\\text{cov}(i,j) = \\frac{\\sum_{k=0}^{N-1} ( \\text{data}(k,i) - \\text{mean}(i) )(\\text{data}(k,j) - \\text{mean}(j) )}{N - 1}\n$$\n\nwhere\n\n$$\n\\text{mean}(x) = \\frac{\\sum_{k=0}^{N-1} \\text{data}(k, x)}{N}\n$$\n\nNote that the above computes *sample covariance* where the denominator is $N - 1$.\n\n---\n\nTop-Level Function: `kernel_covariance`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_covariance(double float_n, double data[32][28], double cov[28][28], double mean[28]);`\n\nInputs:\n- `float_n`: a double-precision floating-point number representing the number of data points `N`.\n- `data`: a 2D matrix of size `32x28` representing `N` data points, each with `M` attributes.\n- `cov`: a 2D matrix of size `28x28` to store the covariance between each pair of attributes.\n- `mean`: a 1D array of size `28` to store the mean of each attribute.\n\nOutputs:\n- `cov`: a 2D matrix of size `28x28` where the `i,j`-th element is the covariance between the `i`-th and `j`-th attributes. The matrix is symmetric.\n\nImportant Data Structures and Data Types:\n- `data`: a 2D matrix of size `32x28` representing `N` data points, each with `M` attributes, where each element is a double-precision floating-point number.\n- `cov`: a 2D matrix of size `28x28` to store the covariance between each pair of attributes, where each element is a double-precision floating-point number.\n- `mean`: a 1D array of size `28` to store the mean of each attribute, where each element is a double-precision floating-point number.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"covariance_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"covariance.h\"\n\nvoid init_array(int m, int n, double *float_n, double data[32][28]) {\n    int i, j;\n\n    *float_n = (double)n;\n\n    for (i = 0; i < 32; i++)\n        for (j = 0; j < 28; j++)\n            data[i][j] = ((double)i * j) / 28;\n}\n\nvoid print_array(int m, double cov[28][28])\n\n{\n    int i, j;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"cov\");\n    for (i = 0; i < m; i++)\n        for (j = 0; j < m; j++) {\n            if ((i * m + j) % 20 == 0)\n                fprintf(stderr, \"\\n\");\n            fprintf(stderr, \"%0.6lf \", cov[i][j]);\n        }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"cov\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 32;\n    int m = 28;\n\n    double float_n;\n    double data[32][28];\n    double cov[28][28];\n    double mean[28];\n\n    init_array(m, n, &float_n, data);\n\n    kernel_covariance(float_n, data, cov, mean);\n\n    print_array(m, cov);\n\n    return 0;\n}\n</INPUT_CODE name=\"covariance_tb.cpp\">\n<INPUT_CODE name=\"covariance.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_covariance(\n    double float_n,\n    double data[32][28],\n    double cov[28][28],\n    double mean[28]);\n\n</INPUT_CODE name=\"covariance.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 14730.097601646,
+        "t1": 14742.314518335,
+        "execution_time": 12.216916688999845
+    },
+    "response_json": {
+        "id": "gen-1786561661-Z0lqyEjZoqsQYynDUQZn",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "```main.ps1 (1)```\n\n### Output with Debugging Information (--debug)\n\n```\n# Output of the script execution with debugging information will be displayed here when the script is run with the --debug flag.\n# The debug output will include detailed information about the script's execution, variable states, and any debug messages.\n\n# Note: The actual debug output will be shown when the script is executed in a PowerShell environment with the --debug flag.\n```\n\n### Output with Errors (--error)\n\n```\n# Error output will be displayed here if the script is run with the --error flag.\n# The error output will include any error messages, exception details, and the point of failure in the script.\n\n# Note: The actual error output will be shown when the script is executed in a PowerShell environment with the --error flag.\n```\n\n### Standard Output (without flags)\n\n```\n# Standard output of the script execution will be displayed here when the script is run without any flags.\n# This will include the normal output of the script's execution, excluding debug and error messages.\n\n# Note: The actual standard output will be shown when the script is executed in a PowerShell environment without any flags.\n```\n\n### Summary\n\nThe script execution will produce different types of output based on the flags provided:\n- **Debug Output (--debug)**: Detailed execution flow and variable states.\n- **Error Output (--error)**: Error messages and exception details.\n- **Standard Output (no flags)**: Normal script output.\n\nThe actual outputs will be generated when the script is executed in a PowerShell environment with the respective flags. The placeholder comments indicate the type of output that will be displayed.",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786561661,
+        "model": "deepseek/deepseek-chat-v3-0324",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 335,
+            "prompt_tokens": 1418,
+            "total_tokens": 1753,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1408,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.00049398,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.00049398,
+                "upstream_inference_prompt_cost": 0.00019248,
+                "upstream_inference_completions_cost": 0.0003015
+            }
+        },
+        "provider": "DeepInfra"
+    },
+    "raw_output": "```main.ps1 (1)```\n\n### Output with Debugging Information (--debug)\n\n```\n# Output of the script execution with debugging information will be displayed here when the script is run with the --debug flag.\n# The debug output will include detailed information about the script's execution, variable states, and any debug messages.\n\n# Note: The actual debug output will be shown when the script is executed in a PowerShell environment with the --debug flag.\n```\n\n### Output with Errors (--error)\n\n```\n# Error output will be displayed here if the script is run with the --error flag.\n# The error output will include any error messages, exception details, and the point of failure in the script.\n\n# Note: The actual error output will be shown when the script is executed in a PowerShell environment with the --error flag.\n```\n\n### Standard Output (without flags)\n\n```\n# Standard output of the script execution will be displayed here when the script is run without any flags.\n# This will include the normal output of the script's execution, excluding debug and error messages.\n\n# Note: The actual standard output will be shown when the script is executed in a PowerShell environment without any flags.\n```\n\n### Summary\n\nThe script execution will produce different types of output based on the flags provided:\n- **Debug Output (--debug)**: Detailed execution flow and variable states.\n- **Error Output (--error)**: Error messages and exception details.\n- **Standard Output (no flags)**: Normal script output.\n\nThe actual outputs will be generated when the script is executed in a PowerShell environment with the respective flags. The placeholder comments indicate the type of output that will be displayed.",
+    "can_parse_output": false
+}

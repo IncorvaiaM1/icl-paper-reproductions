@@ -1,0 +1,28 @@
+
+#include "bicg.h"
+
+void kernel_bicg(
+    double A[42][38],
+    double s[38],
+    double q[42],
+    double p[38],
+    double r[42]) {
+
+    int i, j;
+
+    // Compute q = A * p
+    for (i = 0; i < 42; i++) {
+        q[i] = 0.0;
+        for (j = 0; j < 38; j++) {
+            q[i] += A[i][j] * p[j];
+        }
+    }
+
+    // Compute s = A^T * r
+    for (i = 0; i < 38; i++) {
+        s[i] = 0.0;
+        for (j = 0; j < 42; j++) {
+            s[i] += A[j][i] * r[j];
+        }
+    }
+}

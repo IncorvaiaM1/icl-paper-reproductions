@@ -1,0 +1,140 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_doitgen` is a high-level synthesis kernel that implements a multiresolution adaptive numerical scientific simulation (MADNESS) algorithm. It takes three inputs, `A`, `C4`, and `sum`, and performs a matrix multiplication-like operation to produce an output `A_out`. The kernel is designed to operate on 3D arrays, where `A` is a 3D array of size `R x Q x S`, `C4` is a 2D array of size `S x S`, and `sum` is a 1D array of size `S`. The output `A_out` is a 3D array of size `R x Q x P`, where `P` is equal to `S`. The kernel performs the following computation: `A_out(r, q, p) = \sum_{s=0}^{S-1} A(r, q, s) x(p, s)`, where `x` is a 2D array of size `P x S` that is not explicitly provided as an input.
+
+It takes the following as inputs,
+
+- $A: R \times Q \times S$ array
+- $x: P \times S$ array
+
+and gives the following as output:
+
+- $A_{out}: R \times Q \times P$ array
+
+where $A_{out}(r, q, p) = \sum_{s=0}^{S-1} A(r, q, s) x(p, s)$
+
+Note that the output $A_{out}$ is to be stored in place of the input array $A$ in the original code. Although it is not mentioned anywhere, the computation does not make sense if $P \neq S$.
+
+---
+
+Top-Level Function: `kernel_doitgen`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_doitgen(double A[10][8][12], double C4[12][12], double sum[12]);`
+
+Inputs:
+- `A`: a 3D array of size `R x Q x S`, where `R=10`, `Q=8`, and `S=12`, representing the input data.
+- `C4`: a 2D array of size `S x S`, where `S=12`, representing the coefficient matrix.
+- `sum`: a 1D array of size `S`, where `S=12`, used as a temporary storage for the sum of products.
+
+Outputs:
+- `A_out`: a 3D array of size `R x Q x P`, where `P=S=12`, representing the output data, stored in place of the input array `A`.
+
+Important Data Structures and Data Types:
+- `A`: a 3D array of size `R x Q x S`, where each element is a `double` precision floating-point number.
+- `C4`: a 2D array of size `S x S`, where each element is a `double` precision floating-point number.
+- `sum`: a 1D array of size `S`, where each element is a `double` precision floating-point number.
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="doitgen_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "doitgen.h"
+
+void init_array(
+    int nr,
+    int nq,
+    int np,
+    double A[10][8][12],
+    double C4[12][12]) {
+    int i, j, k;
+
+    for (i = 0; i < nr; i++)
+        for (j = 0; j < nq; j++)
+            for (k = 0; k < np; k++)
+                A[i][j][k] = (double)((i * j + k) % np) / np;
+    for (i = 0; i < np; i++)
+        for (j = 0; j < np; j++)
+            C4[i][j] = (double)(i * j % np) / np;
+}
+
+void print_array(int nr, int nq, int np, double A[10][8][12]) {
+    int i, j, k;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "A");
+    for (i = 0; i < nr; i++)
+        for (j = 0; j < nq; j++)
+            for (k = 0; k < np; k++) {
+                if ((i * nq * np + j * np + k) % 20 == 0)
+                    fprintf(stderr, "\n");
+                fprintf(stderr, "%0.6lf ", A[i][j][k]);
+            }
+    fprintf(stderr, "\nend   dump: %s\n", "A");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int nr = 10;
+    int nq = 8;
+    int np = 12;
+
+    double A[10][8][12];
+    double sum[12];
+    double C4[12][12];
+
+    init_array(nr, nq, np, A, C4);
+
+    kernel_doitgen(A, C4, sum);
+
+    print_array(nr, nq, np, A);
+
+    return 0;
+}
+</INPUT_CODE name="doitgen_tb.cpp">
+<INPUT_CODE name="doitgen.h">
+#pragma once
+#include <cmath>
+
+void kernel_doitgen(double A[10][8][12], double C4[12][12], double sum[12]);
+
+</INPUT_CODE name="doitgen.h">
+
+
+
+## Task Output
+

@@ -1,0 +1,22 @@
+
+#include "runs.h"
+
+void Runs(int *res_S, int *res_V, int epsilon[N]) {
+    int prev = epsilon[0];
+    int S = prev;
+    int V = 1;
+
+    for (int i = 1; i < N; i++) {
+        int cur = epsilon[i];
+        S += cur;
+
+        if (cur != prev) {
+            V++;
+        }
+
+        prev = cur;
+    }
+
+    *res_S = S;
+    *res_V = V;
+}

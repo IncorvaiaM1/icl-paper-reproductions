@@ -1,0 +1,32 @@
+{
+  "labels": [
+    "yes",
+    "no",
+    "up",
+    "down"
+  ],
+  "n_bands": 16,
+  "n_stages": 3,
+  "n_train": 600,
+  "n_test": 200,
+  "accuracy": 0.7,
+  "chance": 0.25,
+  "ci95": [
+    0.6364887411556029,
+    0.763511258844397
+  ],
+  "cab_cost": {
+    "cabs": 68.92307692307692,
+    "parts": {
+      "AmplitudeBPF": 16.0,
+      "LadderFM": 48.0,
+      "VMMWTA": 4.923076923076923,
+      "M2V": 0.0
+    },
+    "notes": [
+      "LadderFM costed as 1 CAB/stage/channel (Fig 18 LadderF rate; LadderFM itself is a pointer to [75]).",
+      "VMMWTA SoC: 1 out/CAB, 13 in/CAB -> max(4, 64/13)."
+    ]
+  },
+  "program": "y1=AmplitudeBPF(In,center=f1,Q=Q1,fpeak=f2); y2=M2V(LadderFM(y1,Ibias1,Ibias2)); Out=VMMWTA(y2,W=W1,Thresh=theta1,freq=100)"
+}

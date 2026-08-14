@@ -1,0 +1,62 @@
+
+#include "viterbi_viterbi.h"
+
+int viterbi(
+    tok_t obs[N_OBS],
+    prob_t init[N_STATES],
+    prob_t transition[N_STATES * N_STATES],
+    prob_t emission[N_STATES * N_TOKENS],
+    state_t path[N_OBS]) {
+
+    // Declare the likelihood array to store probabilities for each state at each time step
+    prob_t llike[N_OBS][N_STATES];
+    // Declare an array to store the most likely previous state for backtracking
+    state_t prev[N_OBS][N_STATES];
+
+    // L_init: Initialize the likelihood for the first observation
+    L_init: for (state_t state = 0; state < N_STATES; state++) {
+        llike[0][state] = init[state] + emission[state * N_TOKENS + obs[0]];
+    }
+
+    // L_timestep: Iterate through each time step starting from the second observation
+    L_timestep: for (step_t t = 1; t < N_OBS; t++) {
+        // L_curr_state: For each current state
+        L_curr_state: for (state_t curr_state = 0; curr_state < N_STATES; curr_state++) {
+            prob_t min_prob = 1e30; // Initialize with a large value
+            state_t min_state = 0;
+
+            // L_prev_state: Find the most likely previous state that leads to the current state
+            L_prev_state: for (state_t prev_state = 0; prev_state < N_STATES; prev_state++) {
+                prob_t p = llike[t-1][prev_state] + transition[prev_state * N_STATES + curr_state];
+                if (p < min_prob) {
+                    min_prob = p;
+                    min_state = prev_state;
+                }
+            }
+
+            // Store the minimum probability and the corresponding previous state
+            llike[t][curr_state] = min_prob + emission[curr_state * N_TOKENS + obs[t]];
+            prev[t][curr_state] = min_state;
+        }
+    }
+
+    // L_end: Find the state with the highest probability at the final time step
+    prob_t min_prob = 1e30;
+    state_t min_state = 0;
+    L_end: for (state_t state = 0; state < N_STATES; state++) {
+        if (llike[N_OBS-1][state] < min_prob) {
+            min_prob = llike[N_OBS-1][state];
+            min_state = state;
+        }
+    }
+
+    // Store the final state in the path
+    path[N_OBS-1] = min_state;
+
+    // L_backtrack: Backtrack to find the most likely sequence of states
+    L_backtrack: for (step_t t = N_OBS-2; t >= 0; t--) {
+        path[t] = prev[t+1][path[t+1]];
+    }
+
+    return 0;
+}

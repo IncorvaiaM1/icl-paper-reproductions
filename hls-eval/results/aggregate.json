@@ -1,0 +1,166 @@
+{
+  "deepseek_deepseek_chat_v3_0324": {
+    "n_designs": 57,
+    "metrics": {
+      "parse": {
+        "pass@1": {
+          "mean": 0.6316,
+          "ci95_low": 0.5404,
+          "ci95_high": 0.7228
+        },
+        "pass@5": {
+          "mean": 0.8772,
+          "ci95_low": 0.7895,
+          "ci95_high": 0.9474
+        }
+      },
+      "compile": {
+        "pass@1": {
+          "mean": 0.614,
+          "ci95_low": 0.5228,
+          "ci95_high": 0.7018
+        },
+        "pass@5": {
+          "mean": 0.8596,
+          "ci95_low": 0.7719,
+          "ci95_high": 0.9474
+        }
+      },
+      "run": {
+        "pass@1": {
+          "mean": 0.4632,
+          "ci95_low": 0.3579,
+          "ci95_high": 0.5684
+        },
+        "pass@5": {
+          "mean": 0.6316,
+          "ci95_low": 0.5088,
+          "ci95_high": 0.7544
+        }
+      }
+    }
+  },
+  "deepseek_deepseek_v4_pro": {
+    "n_designs": 57,
+    "metrics": {
+      "parse": {
+        "pass@1": {
+          "mean": 0.5228,
+          "ci95_low": 0.4246,
+          "ci95_high": 0.6246
+        },
+        "pass@5": {
+          "mean": 0.7895,
+          "ci95_low": 0.6842,
+          "ci95_high": 0.8947
+        }
+      },
+      "compile": {
+        "pass@1": {
+          "mean": 0.4947,
+          "ci95_low": 0.4,
+          "ci95_high": 0.593
+        },
+        "pass@5": {
+          "mean": 0.7895,
+          "ci95_low": 0.6842,
+          "ci95_high": 0.8947
+        }
+      },
+      "run": {
+        "pass@1": {
+          "mean": 0.3895,
+          "ci95_low": 0.2912,
+          "ci95_high": 0.4912
+        },
+        "pass@5": {
+          "mean": 0.614,
+          "ci95_low": 0.4912,
+          "ci95_high": 0.7368
+        }
+      }
+    }
+  },
+  "qwen_qwen3_235b_a22b_thinking_2507": {
+    "n_designs": 57,
+    "metrics": {
+      "parse": {
+        "pass@1": {
+          "mean": 0.7368,
+          "ci95_low": 0.6667,
+          "ci95_high": 0.8035
+        },
+        "pass@5": {
+          "mean": 1.0,
+          "ci95_low": 1.0,
+          "ci95_high": 1.0
+        }
+      },
+      "compile": {
+        "pass@1": {
+          "mean": 0.7088,
+          "ci95_low": 0.6281,
+          "ci95_high": 0.786
+        },
+        "pass@5": {
+          "mean": 0.9825,
+          "ci95_low": 0.9474,
+          "ci95_high": 1.0
+        }
+      },
+      "run": {
+        "pass@1": {
+          "mean": 0.5228,
+          "ci95_low": 0.414,
+          "ci95_high": 0.6316
+        },
+        "pass@5": {
+          "mean": 0.6842,
+          "ci95_low": 0.5614,
+          "ci95_high": 0.7895
+        }
+      }
+    }
+  },
+  "qwen_qwen3_coder": {
+    "n_designs": 57,
+    "metrics": {
+      "parse": {
+        "pass@1": {
+          "mean": 0.9965,
+          "ci95_low": 0.9895,
+          "ci95_high": 1.0
+        },
+        "pass@5": {
+          "mean": 1.0,
+          "ci95_low": 1.0,
+          "ci95_high": 1.0
+        }
+      },
+      "compile": {
+        "pass@1": {
+          "mean": 0.9684,
+          "ci95_low": 0.9298,
+          "ci95_high": 0.9965
+        },
+        "pass@5": {
+          "mean": 1.0,
+          "ci95_low": 1.0,
+          "ci95_high": 1.0
+        }
+      },
+      "run": {
+        "pass@1": {
+          "mean": 0.6737,
+          "ci95_low": 0.5544,
+          "ci95_high": 0.786
+        },
+        "pass@5": {
+          "mean": 0.7018,
+          "ci95_low": 0.5789,
+          "ci95_high": 0.807
+        }
+      }
+    }
+  }
+}

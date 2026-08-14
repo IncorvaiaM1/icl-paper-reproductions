@@ -1,0 +1,32 @@
+<OUTPUT_CODE name="needwun.cpp">
+#include "nw_nw.h"
+
+void needwun(char SEQA[ALEN], char SEQB[BLEN], char alignedA[ALEN + BLEN], char alignedB[ALEN + BLEN], int M[(ALEN + 1) * (BLEN + 1)], char ptr[(ALEN + 1) * (BLEN + 1)]) {
+    const int MATCH_SCORE = 1;
+    const int MISMATCH_SCORE = -1;
+    const int GAP_SCORE = -1;
+    
+    // Initialize base case
+    M[0] = 0;
+    ptr[0] = 'D';
+    
+    // Initialize first row (j from 1 to BLEN)
+    for (int j = 1; j <= BLEN; j++) {
+        M[j] = M[j-1] + GAP_SCORE;
+        ptr[j] = 'L';
+    }
+    
+    // Initialize first column (i from 1 to ALEN)
+    for (int i = 1; i <= ALEN; i++) {
+        M[i*(BLEN+1)] = M[(i-1)*(BLEN+1)] + GAP_SCORE;
+        ptr[i*(BLEN+1)] = 'U';
+    }
+    
+    // Fill the matrix
+    for (int i = 1; i <= ALEN; i++) {
+        for (int j = 1; j <= BLEN; j++) {
+            int diag = M[(i-1)*(BLEN+1) + (j-1)] + (SEQA[i-1] == SEQB[j-1] ? MATCH_SCORE : MISMATCH_SCORE);
+            int up = M[(i-1)*(BLEN+1) + j] + GAP_SCORE;
+            int left = M[i*(BLEN+1) + (j-1)] + GAP_SCORE;
+            
+            if (diag >=

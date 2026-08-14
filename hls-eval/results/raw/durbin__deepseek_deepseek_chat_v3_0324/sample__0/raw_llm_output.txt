@@ -1,0 +1,81 @@
+Given the input files, I'll analyze the Durbin kernel and provide a complete implementation based on the description and the test bench.
+
+### Analysis:
+
+1. **Kernel Description**:
+   - The Durbin kernel solves Yule-Walker equations (a special Toeplitz system)
+   - Input: vector `r` of length N (40 in this case)
+   - Output: vector `y` of length N such that `Ty = -r` where T is a symmetric, unit-diagonal Toeplitz matrix
+   - Based on the algorithm from Golub and Van Loan
+
+2. **Test Bench**:
+   - Initializes `r` with values from n+1 down to 2 (n=40)
+   - Calls `kernel_durbin(r, y)`
+   - Prints the resulting `y` vector
+
+3. **Implementation Requirements**:
+   - Need to implement `kernel_durbin()` function
+   - Should follow the Durbin algorithm as described
+
+### Implementation:
+
+Here's the C++ implementation of the Durbin kernel:
+
+```cpp
+#pragma once
+#include <cmath>
+
+void kernel_durbin(double r[40], double y[40]) {
+    double z[40];
+    double alpha;
+    double beta;
+    double sum;
+    
+    y[0] = -r[0];
+    beta = 1.0;
+    alpha = -r[0];
+    
+    for (int k = 1; k < 40; k++) {
+        beta = (1.0 - alpha * alpha) * beta;
+        sum = 0.0;
+        
+        for (int i = 0; i < k; i++) {
+            sum += r[k - i - 1] * y[i];
+        }
+        
+        alpha = - (r[k] + sum) / beta;
+        
+        for (int i = 0; i < k; i++) {
+            z[i] = y[i] + alpha * y[k - i - 1];
+        }
+        
+        for (int i = 0; i < k; i++) {
+            y[i] = z[i];
+        }
+        
+        y[k] = alpha;
+    }
+}
+```
+
+### Explanation:
+
+1. **Initialization**:
+   - `y[0]` is initialized to `-r[0]`
+   - `beta` starts at 1.0
+   - `alpha` starts at `-r[0]`
+
+2. **Main Loop** (k from 1 to N-1):
+   - Update `beta` using the formula `(1 - α²) * β`
+   - Compute the sum of products `r[k-i-1] * y[i]`
+   - Update `alpha` using the sum and beta
+   - Compute intermediate `z` values
+   - Copy `z` back to `y`
+   - Set `y[k]` to `alpha`
+
+3. **Algorithm Properties**:
+   - Solves the Yule-Walker equations efficiently in O(N²) time
+   - Uses the symmetric Toeplitz structure for optimization
+   - Follows the Durbin algorithm as described in Golub and Van Loan
+
+The implementation matches the mathematical description and should work with the provided test bench to solve the Toeplitz system defined by the input vector `r`.

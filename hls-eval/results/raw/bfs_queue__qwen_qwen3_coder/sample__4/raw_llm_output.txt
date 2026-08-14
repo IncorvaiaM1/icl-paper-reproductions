@@ -1,0 +1,69 @@
+<OUTPUT_CODE name="bfs_queue.cpp">
+#include "bfs_queue.h"
+
+void bfs(
+    node_t nodes[N_NODES],
+    edge_t edges[N_EDGES],
+    node_index_t starting_node,
+    level_t level[N_NODES],
+    edge_index_t level_counts[N_LEVELS]) {
+    
+    // Queue implementation using circular buffer
+    node_index_t queue[N_NODES];
+    int head = 0;
+    int tail = 0;
+    int queue_size = 0;
+    
+    // Initialize levels to MAX_LEVEL
+    INIT_LEVELS: for (int i = 0; i < N_NODES; i++) {
+        level[i] = MAX_LEVEL;
+    }
+    
+    // Initialize level_counts to 0
+    INIT_HORIZONS: for (int i = 0; i < N_LEVELS; i++) {
+        level_counts[i] = 0;
+    }
+    
+    // Set starting node level to 0 and add to queue
+    level[starting_node] = 0;
+    queue[tail] = starting_node;
+    tail = (tail + 1) % N_NODES;
+    queue_size++;
+    level_counts[0] = 1;
+    
+    level_t current_level = 0;
+    
+    // Process nodes in queue
+    LOOP_QUEUE: while (queue_size > 0) {
+        // Get node from front of queue
+        node_index_t current_node = queue[head];
+        head = (head + 1) % N_NODES;
+        queue_size--;
+        
+        // Get the level of current node
+        current_level = level[current_node];
+        level_t next_level = current_level + 1;
+        
+        // Process neighbors of current node
+        edge_index_t edge_begin = nodes[current_node].edge_begin;
+        edge_index_t edge_end = nodes[current_node].edge_end;
+        
+        LOOP_NEIGHBORS: for (edge_index_t i = edge_begin; i < edge_end; i++) {
+            node_index_t neighbor = edges[i].dst;
+            
+            // If neighbor hasn't been visited yet
+            if (level[neighbor] == MAX_LEVEL) {
+                level[neighbor] = next_level;
+                
+                // Add neighbor to queue if within level bounds
+                if (next_level < N_LEVELS) {
+                    queue[tail] = neighbor;
+                    tail = (tail + 1) % N_NODES;
+                    queue_size++;
+                    level_counts[next_level]++;
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

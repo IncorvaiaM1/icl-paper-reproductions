@@ -1,0 +1,555 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{amsmath}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{\textbf{Reproducing HLS-Eval and Analog System Benchmarks\\
+from Cong Hao's Group}\\[0.4em]
+\large Results, what broke, and a proposed first project}
+\author{Michael Incorvaia}
+\date{August 14, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This note reports two reproductions of work co-authored by Cong (Callie)
+Hao, intended as a concrete reading of the lab rather than a survey.
+First, I reproduced the zero-shot HLS generation baseline from
+\emph{HLS-Eval} (Abi-Karam \& Hao, ICLAD 2025) on 57 designs without
+Vitis HLS, then re-ran the same harness on three post-paper models.
+DeepSeek-V3 lands at 46.3\% run@1 versus the paper's 63.3\%, but
+63.2\% versus 65.9\% at run@5; the pass@1 gap is largely a fixed
+\code{max\_tokens=8192} cap. Under that same cap, Qwen3-Coder reaches
+67.4\% run@1. Second, I treated Hasler \& Hao's TRETS 2024 analog
+benchmark paper and the Ige/Hasler/Hao JLPEA 2023 analog-HLS paper as
+one project: re-derived the Fig.~3/11 scaling anchors and the Fig.~17--18
+Case~II CAB arithmetic (128 WTA CABs / 98 SoC CABs $= 1.31$ chips ---
+the ``barely more than one SoC FPAA, fits in two'' claim holds), and
+executed TRETS Fig.~16's acoustic program as a digital macromodel.
+On a 4-word Speech Commands subset the VMM+WTA classifier reaches 70\%
+held-out accuracy (chance 25\%). The AnalogBenchmarks artifact URL cited
+in TRETS footnote~1 was already 404 on the Wayback Machine in November
+2023. I did not reproduce SmartPAF or CRYPTONITE; both are discussed as
+future work, as is AMS-Eval --- an HLS-Eval-style LLM harness on the
+Fig.~15 analog block library, which is the project I would want to start
+in the group.
+\end{abstract}
+
+\tableofcontents
+\vspace{0.8em}
+
+\section{What this note is}
+
+I read several of your papers with the aim of reproducing what can be
+reproduced from outside the lab, without proprietary EDA or an FPAA
+board, and saying plainly what cannot. Two threads are finished:
+
+\begin{enumerate}
+\item \textbf{HLS-Eval}~\cite{hlseval} --- a measurement paper. There is
+a pass@$k$ table to match. Done 2026-08-12.
+\item \textbf{TRETS 2024 analog benchmarks}~\cite{trets} folded with
+\textbf{JLPEA 2023 analog HLS}~\cite{jlpea} --- a benchmark-definition
+paper plus its predecessor. There is no pass@$k$ table. The reproducible
+claims are arithmetic (scaling curves, CAB costs) and making Fig.~16
+executable. Done 2026-08-14.
+\end{enumerate}
+
+A third thread is a \emph{proposal}, not a result: \textbf{AMS-Eval},
+the HLS-Eval metric ladder applied to analog block programs. SmartPAF
+and CRYPTONITE were read and are interesting; they were not run.
+Nothing below is a silicon measurement, and synthesis (Vitis / FPAA
+place-and-route) is out of scope throughout.
+
+%----------------------------------------------------------------------
+\section{HLS-Eval: zero-shot generation, one year later}
+\label{sec:hls}
+
+\subsection{What was reproduced}
+
+The task is the paper's: given a natural-language kernel description, a
+header, and a testbench, generate C++. I score three of four staged
+metrics --- parseable, compilable, runnable --- at
+$n_{\text{samples}}=5$, $T=0.7$. Synthesizable is skipped, not failed:
+Vitis HLS is not installed. Every synthesis cell is recorded as
+skipped.
+
+\textbf{Scope.} 57 designs from PolyBench, MachSuite, and C2HLSC, the
+three suites that compile and run at 100\% under stock \code{clang++}
+with no Xilinx software. (A prior audit counted 60 such designs; the
+sweep used 57. That 3-design gap was not chased.) CHStone and Rosetta
+are excluded for missing testbenches and Xilinx-header reasons
+documented in \code{FINDINGS.md}.
+
+\textbf{Provenance.} Upstream \code{hls-eval} @ \code{adea9ff}
+(2026-07-30), evaluated 2026-08-12, WSL2 Ubuntu, \code{clang++} 18.1.3,
+OpenRouter. The paper used Together AI. OpenRouter load-balances across
+providers and quantizations, so numeric precision is uncontrolled here
+in a way it was not for the paper. 1{,}140 LLM calls; 2 provider errors,
+both retried; 0 unrecovered.
+
+The paper's other anchor, Qwen2.5-Coder-32B, was dropped before the
+sweep: every real HLS-Eval prompt to its sole OpenRouter provider
+(Cloudflare) returned \code{finish\_reason: error}, while a short
+synthetic \code{curl} succeeded. DeepSeek-V3 is the sole paper anchor
+in this run.
+
+\subsection{Paper vs.\ this run}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Model} & \textbf{parse@1} & \textbf{parse@5} & \textbf{compile@1} & \textbf{compile@5} & \textbf{run@1} & \textbf{run@5} \\
+\midrule
+DeepSeek V3 (paper, 94 dsn) & 100.0\% & 100.0\% & 94.1\% & 97.6\% & \textbf{63.3\%} & \textbf{65.9\%} \\
+Qwen2.5-Coder-32B (paper) & 95.5\% & 97.6\% & 90.8\% & 92.9\% & 57.6\% & 58.8\% \\
+\midrule
+deepseek-chat-v3-0324 (this run, 57 dsn)
+  & 63.2\% & 87.7\% & 61.4\% & 86.0\% & 46.3\% & \textbf{63.2\%} \\
+\emph{95\% CI}
+  & \scriptsize{[54.0, 72.3]}
+  & \scriptsize{[79.0, 94.7]}
+  & \scriptsize{[52.3, 70.2]}
+  & \scriptsize{[77.2, 94.7]}
+  & \scriptsize{[35.8, 56.8]}
+  & \scriptsize{[50.9, 75.4]} \\
+\bottomrule
+\end{tabular}
+\caption{Paper Table~III (Together AI, 94 designs, Vitis included) vs.\
+this run (OpenRouter, 57 designs, no synthesis). Bootstrap CIs over
+designs, 10{,}000 resamples.}
+\label{tab:hls-repro}
+\end{table}
+
+The pass@1 gap is real; the pass@5 gap on runnable nearly vanishes
+(63.2\% vs.\ 65.9\%). A model that recovers by the fifth sample but
+fails the first is a budget or formatting problem, not a capability
+gap. \code{max\_tokens=8192} is not in the paper's stated methodology
+and terminated 21\% of this run's calls with
+\code{finish\_reason=length}. Pass@1 numbers here are a \textbf{lower
+bound} on model capability.
+
+Three confounds, stated plainly: (i)~57 designs vs.\ 94; (ii)~OpenRouter
+vs.\ Together AI; (iii)~the token cap.
+
+\subsection{Extension: models that postdate the paper}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{parse@1} & \textbf{compile@1} & \textbf{run@1} & \textbf{run@5} \\
+\midrule
+deepseek-chat-v3-0324 (2025 anchor) & 63.2\% & 61.4\% & 46.3\% & 63.2\% \\
+qwen3-235b-thinking-2507 & 73.7\% & 70.9\% & 52.3\% & 68.4\% \\
+deepseek-v4-pro & 52.3\% & 49.5\% & 39.0\% & 61.4\% \\
+\textbf{qwen3-coder} & \textbf{99.7\%} & \textbf{96.8\%} & \textbf{67.4\%} & \textbf{70.2\%} \\
+\bottomrule
+\end{tabular}
+\caption{Same harness and 57 designs. Qwen3-Coder is 21 points above the
+2025 anchor at run@1. DeepSeek-v4-pro is weaker at pass@1 because it is
+the model hit hardest by the token cap (47.7\% parse-failure rate), not
+because the newer checkpoint is less capable.}
+\label{tab:hls-ext}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.82\textwidth]{repro_vs_paper.png}
+\caption{HLS-Eval pass@1 by model and metric, bootstrap 95\% CIs over
+designs. Synthesis is omitted (no Vitis).}
+\label{fig:hls}
+\end{figure}
+
+Qwen3-Coder saturates parse and compile, so the harness --- not the
+model --- is now the bottleneck at those rungs. One year of model
+progress did not translate uniformly under a fixed 8k token ceiling;
+the newer, more verbose models are more exposed to it.
+
+\subsection{What broke, independent of any model}
+
+Found by compiling the reference designs with a stock compiler, before
+any LLM call:
+
+\begin{itemize}
+\item 12 of 32 CHStone designs ship with no testbench. Runnable is
+undefined for them, not failed. Scoring them as failures understates
+CHStone runnability by 37.5\%.
+\item \code{flowgnn/fgnn\_linear}'s testbench calls \code{printf} without
+\code{<cstdio>}. Builds under Vitis's bundled clang; fails under GCC and
+modern Clang.
+\item \code{gnnbuilder/gather\_node\_neighbors}'s testbench writes out of
+bounds. GCC's stack protector aborts; Vitis clang does not enable it.
+\item The upstream harness has no execution timeout and inherits the
+parent cwd, so generated infinite loops hang a worker and relative-path
+testbench I/O reads the wrong directory. The Vitis-free backend used
+here sets both.
+\item The published leaderboard JSON in the upstream repo is still the
+dummy payload. This run emits a real payload in their schema.
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{Improvements I considered and did not run}
+\label{sec:improvements}
+
+The gaps above are specific enough that I could have spent another
+round of API credits (and a Vitis install) chasing a closer match to
+the published tables. I did not. The harness was frozen once the HLS
+sweep started, and the analog cut stopped at an executable Fig.~16
+rather than at a silicon-matching accuracy. What follows is the
+improvement list I would actually run --- in the group, or if someone
+re-runs these artifacts --- not a claim that the current numbers are
+the best the models can do.
+
+\subsection{HLS-Eval}
+
+\begin{enumerate}
+\item \textbf{Raise \code{max\_tokens} to 12k--16k and re-sweep.}
+This is the single highest-leverage change. 21\% of calls in this run
+ended with \code{finish\_reason=length}; DeepSeek-v4-pro's 47.7\%
+parse-failure rate and the 46\% vs.\ 63\% run@1 gap versus the paper
+are both consistent with truncation, not with a weaker model. A
+second $n=5$ pass on the same 57 designs would likely lift pass@1
+toward the paper and toward Qwen3-Coder's already-saturated parse
+rate. I left it undone so the reported numbers stay tied to one
+frozen harness, and so the token cap itself remains a finding rather
+than something I patched away.
+
+\item \textbf{Re-test Qwen2.5-Coder-32B on Together AI}, the paper's
+actual provider. The Cloudflare/OpenRouter failure may be
+provider-specific. A Together key would tell us whether the second
+paper anchor is reproducible at all. I did not add that key.
+
+\item \textbf{Pin provider and quantization} (or disable OpenRouter
+load-balancing). The paper used one serving stack. This run did not.
+That confound sits underneath every numeric comparison in
+\S\ref{sec:hls} even with an unlimited token budget.
+
+\item \textbf{Install Vitis HLS} and restore synthesizable, the fourth
+metric. Three of four was a deliberate Vitis-free choice, not a
+claim that synthesis does not matter. The stock-compiler backend
+already showed that 60 reference designs need no Xilinx software for
+parse/compile/run.
+
+\item \textbf{Bring CHStone and Rosetta back} once the 12 testbench-less
+CHStone kernels and Rosetta's Xilinx-header designs are handled, to
+reach the paper's 94-design scope. The 57-vs-60-design gap inside the
+already-clean suites should be closed in the same pass.
+\end{enumerate}
+
+None of those change the qualitative result: Qwen3-Coder is ahead of
+the 2025 DeepSeek-V3 anchor under identical constraints, and the
+harness --- not the student --- is now the thing to fix first.
+
+\subsection{Analog macromodel}
+
+The 70\% Case~I number is a digital stand-in. The obvious lifts, not
+taken:
+
+\begin{itemize}
+\item Replace the integer LadderFM delay with a gm-C ladder from
+TRETS ref.~[75] / the FPAA VM Xcos code.
+\item Train on the full Speech Commands v2 4-word split (this run used
+the mini subset) and, if licensed, compare against TIMIT/TI-digits as
+the paper does.
+\item Add the filter benchmark (ripple / stopband on a chirp) --- fully
+specified in TRETS \S3.4, no dataset, cheap --- and Case~II 32-word.
+\item Run the same Fig.~16 program on the lab's SoC FPAA, which is the
+only way 70\% becomes a hardware number.
+\end{itemize}
+
+AMS-Eval (\S\ref{sec:amseval}) is the improvement I actually want to
+build, not another accuracy chase on the macromodel.
+
+%----------------------------------------------------------------------
+\section{Analog benchmarks: TRETS 2024 and JLPEA 2023}
+\label{sec:ams}
+
+TRETS~\cite{trets} defines analog/mixed-signal benchmarks (acoustic,
+vision, comm, filter) the way CHStone/MachSuite/Rosetta defined digital
+HLS ones. JLPEA~\cite{jlpea} is the direct predecessor: same FPAA
+analog-HLS flow, with a worked acoustic classifier (subbanded C$^4$ BPF,
+ladder delays, VMM $+$ winner-take-all). I folded them. There is no
+experimental table to match. What can be checked without an FPAA is
+(i)~the scaling and CAB arithmetic, and (ii)~running Fig.~16's
+level-1 program on a public dataset.
+
+\subsection{The artifact URL was already dead at publication}
+
+TRETS footnote~1: designs and numbers ``openly available'' at
+\url{https://hasler.ece.gatech.edu/AnalogBenchmarks}. Live check
+2026-08-14: 404. Wayback CDX has two captures, both 2023-11-19 (six
+weeks after TRETS acceptance): HTTP 301, then HTTPS \textbf{404}. There
+is no archived suite. Authority for this reproduction is the PDFs
+(NSF PAR 10504737 and 10504736).
+
+Afolabi Ige later open-sourced the \emph{synthesis} tool
+(\href{https://github.com/a-folabi/ashes}{a-folabi/ashes}). That is
+Python/XCOS $\to$ FPAA switch list / GDS, not the missing benchmark
+files. I did not clone it.
+
+\subsection{Scaling (Figs.~3 and 11)}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth]{scaling_check.png}
+\caption{TRETS Figs.~3 and 11 re-derived from stated anchors, not from
+digitized pixels. Bandwidth interpolates the four caption points
+exactly. CAB/FG/MAC counts scale as $1/\lambda^2$ from the 350\,nm SoC
+FPAA (600k FG parameters, $\approx$1~TMAC/s, 98 CABs on a 25\,mm$^2$
+reference die). If Fig.~11's drawn lines are shallower than
+$\lambda^{-2}$, that is a later overlay, not a fit.}
+\label{fig:scaling}
+\end{figure}
+
+Bandwidth anchors, by construction: 350\,nm $\to$ 60\,MHz, 130\,nm $\to$
+500\,MHz, 40\,nm $\to$ 6\,GHz, 14\,nm $\to$ 50\,GHz. Comm Case~III
+(2\,GHz on a $2\times 3$\,mm 40\,nm FPAA~\cite{trets}) is consistent
+with the 6\,GHz 40\,nm anchor --- 3$\times$ margin. I did not re-read
+the 40\,nm FPAA measurement paper.
+
+\subsection{Case~II CAB arithmetic (Figs.~17--18)}
+
+The worked example is a 12-band AmplitudeBPF, three ladder delay stages
+$\to$ 48 lines, and a $48\times 128$ VMM+WTA (32 words $+$ 96 nulls)
+with a 6{,}144-weight matrix. Fig.~18 costs, SoC FPAA units:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lrl@{}}
+\toprule
+\textbf{Block} & \textbf{CABs} & \textbf{Rule} \\
+\midrule
+AmplitudeBPF $\times$ 12 & 12 & Fig.~18: 1 CAB each \\
+LadderFM, 12 ch $\times$ 3 stages & 36 & Fig.~18 LadderF rate (1 CAB/stage). LadderFM itself points at~\cite{ladder}. \\
+VMMWTA $48\to 128$ & 128 & 1 WTA output / CAB on the SoC (body text) \\
+\midrule
+WTA only & 128 & the sentence the paper actually writes \\
+Full Fig.~17 program & 176 & \\
+\bottomrule
+\end{tabular}
+\caption{Case~II acoustic resource count. Weights $48\times 128=6144$
+match the paper exactly.}
+\label{tab:cab}
+\end{table}
+
+TRETS never reprints how many CABs the SoC FPAA has. Fig.~18 is
+``baselined to the CABs in the SoC FPAA~\cite{socfpaa}.'' That chip has
+\textbf{98 CABs}. Then 128/98 $= \mathbf{1.31}$ chips --- greater than
+one, less than two. The claim ``more WTA stages than would fit on an
+SoC FPAA (barely)\ldots two SoC FPAAs'' \textbf{holds}, but only if
+that 98 is granted. If someone assumed $\sim$128 CABs on the SoC, WTA
+would be exactly one chip and ``barely'' would not hold. The full
+program is 176/98 $= 1.80$ chips, still two. The 130\,nm standard-cell
+area ($250\,\mu\mathrm{m}\times 300\,\mu\mathrm{m}$) was not
+re-derived.
+
+Fig.~17 uses 12 bands. Body text elsewhere says ``16 to 32 bands.'' I
+costed the figure.
+
+\subsection{Executable Fig.~16, acoustic Case~I}
+
+JLPEA Fig.~3 is Case~I: 16 subbands, ladder taps, VMM+WTA, 2--5 word
+vocabulary. TRETS Fig.~16 is the three-line program:
+
+\begin{verbatim}
+y1  = AmplitudeBPF(In, center=f1, Q=Q1, fpeak=f2)
+y2  = M2V(LadderFM(input=y1, Ibias1=Ib1, Ibias2=Ib2))
+Out = VMMWTA(input=y2, W=W1, Thresh=theta1, freq=100)
+\end{verbatim}
+
+(Fig.~17's Case~II listing writes \code{freq=400}; Case~I follows
+Fig.~16.) I implemented those blocks as discrete-time macromodels
+(numpy/scipy; no ODEs, no FPAA VM). BPF is an RBJ biquad stand-in for
+the C$^4$; AmplitudeBPF is BPF $+$ rectify $+$ envelope LPF; LadderFM
+is an \textbf{integer sample delay} (25\,ms/stage) --- \code{Ibias1} and
+\code{Ibias2} are accepted and ignored. That is not a gm-C ladder.
+VMMWTA trains with a softmax surrogate and evaluates with hard WTA.
+
+Dataset: TensorFlow mini Speech Commands, labels yes/no/up/down. TIMIT
+is LDC-licensed and was not used. 16 log-spaced bands, 50\,Hz--4\,kHz
+(Nyquist-limited relative to the paper's 10\,kHz). Case~I CAB cost is
+68.9, which fits one 98-CAB SoC FPAA, consistent with ``Case~I already
+demonstrated on the SoC FPAA.''
+
+Held-out, $n=200$ test / 600 train: \textbf{accuracy 0.70} (chance 0.25;
+normal-approx 95\% interval $[0.64, 0.76]$). Per class: yes 0.78, no
+0.57, up 0.89, down 0.53. This is not 90\%, and it is not a silicon
+number. The paper's demonstrated classifier is analog, on
+TIMIT/TI-digits, with ladder dynamics this macromodel does not have.
+The deliverable is that Fig.~16 runs, not that the accuracy matches
+hardware.
+
+Eight unit tests pass, including the 6{,}144-weight / 1.31-chip Case~II
+arithmetic.
+
+%----------------------------------------------------------------------
+\section{A first project: AMS-Eval}
+\label{sec:amseval}
+
+HLS-Eval's contribution is a metric ladder (parseable $\to$ compilable
+$\to$ runnable $\to$ synthesizable) plus a harness other people can
+re-run. TRETS asks for the analog analogue and then 404s the files.
+The obvious next step --- and the one I would want to do in the group
+--- is to reuse that harness shape on Fig.~15's block library:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{HLS-Eval} & \textbf{AMS-Eval} & \textbf{Grade} \\
+\midrule
+parseable & parseable & AST; calls restricted to the Fig.~15 whitelist \\
+compilable & simulatable & runs under the tier-F macromodel, bounded time \\
+runnable & functional & accuracy / filter spec on held-out data \\
+synthesizable & resource-feasible & \code{cab\_cost(program)} $\le$ Fig.~18 budget \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The macromodels and CAB cost function from \S\ref{sec:ams} are the
+grading backend. I did not run an LLM sweep on analog programs. If
+frontier models score near zero, that is itself the result (``they
+cannot compose analog block programs yet''). The six HLS-Eval harness
+fixes (timeout, cwd, pinned generation options, provider preflight,
+retry, larger \code{max\_tokens}) would be baked in from day one rather
+than discovered mid-sweep.
+
+This sits on the Hasler--Hao intersection: her digital HLS/benchmark
+methodology, his FPAA block library, an evaluation story the lab
+already knows how to read.
+
+%----------------------------------------------------------------------
+\section{Papers read, not reproduced}
+\label{sec:other}
+
+\textbf{SmartPAF} (Tong, Dang, Golder, Raychowdhury, Hao, Krishna;
+MLSys 2024)~\cite{smartpaf} replaces ReLU/softmax/etc.\ with tuned
+low-degree polynomials for FHE inference, with claimed
+$1.42$--$13.64\times$ accuracy and $6.79$--$14.9\times$ speedup on
+ResNet-18 / ImageNet-1k. Public code was promised. This is the closest
+\emph{numeric} analogue to HLS-Eval --- standard model, standard
+dataset, concrete factors --- but it is not analog/neuromorphic and
+ImageNet$+$FHE is a multi-day environment. I read it; I did not run it.
+Worth doing if the group cares about private inference, not as a second
+weekend project beside analog.
+
+\textbf{CRYPTONITE}~\cite{cryptonite} auto-generates HLS accelerators
+for Fiat Cryptography primitives (88.88\% resource reduction / 54.31\%
+latency vs.\ naive synthesis) and is open-sourced. It wants Vitis HLS
+2023.1 plus SVF/GiNaC/egg/LLVM. I went Vitis-free on HLS-Eval
+specifically to avoid that dependency. Interesting as an HLS
+compiler-stack paper; not AI/NN-flavored; not started.
+
+\textbf{TODAES survey} of ML for software-assisted hardware
+verification~\cite{survey} is background reading. Nothing to
+reproduce.
+
+Two IEEE Xplore links from an earlier scan did not resolve (empty
+document ID; 418 on \code{11240893}).
+
+%----------------------------------------------------------------------
+\section{What I am not claiming}
+
+\begin{itemize}
+\item I did not match HLS-Eval's 94-design, 4-metric, Together AI
+setup. Three metrics, 57 designs, OpenRouter, token-capped.
+\item I did not run analog programs on an FPAA, and 70\% is not a
+reproduction of a published accuracy. It is evidence that Fig.~16 has
+executable semantics.
+\item I did not digitize Fig.~11's pixels. CAB scaling is $1/\lambda^2$
+from stated anchors.
+\item I did not implement AMS-Eval, SmartPAF, or CRYPTONITE.
+\end{itemize}
+
+The analog work is the same genre as the HLS-Eval work: run the
+benchmark definition as code, check the numbers that can be checked,
+write down what broke. The proposed first project is to put an LLM in
+front of the analog blocks the way HLS-Eval put one in front of C++
+kernels.
+
+%----------------------------------------------------------------------
+\section*{Appendix: where the files are}
+
+\begin{itemize}
+\item HLS-Eval: \code{hls-eval/} --- report, \code{FINDINGS.md},
+\code{results/leaderboard.json} (real payload, their schema), raw
+per-design output, Vitis-free backend in \code{ext/stock\_tools.py}.
+\item Analog: \code{analog-benchmarks/ams-bench/} ---
+\code{amsblocks/}, \code{analysis/scaling.py},
+\code{examples/acoustic\_case1.py}, \code{FINDINGS\_ams.md}.
+\item This PDF's figures: \code{report/figures/}.
+\end{itemize}
+
+\begin{thebibliography}{9}
+
+\bibitem{hlseval}
+S.~Abi-Karam and C.~Hao,
+``HLS-Eval: A Benchmark and Framework for Evaluating LLMs on High-Level
+Synthesis Design Tasks,''
+ICLAD 2025.
+\url{https://arxiv.org/abs/2504.12268}
+
+\bibitem{trets}
+J.~Hasler and C.~Hao,
+``Programmable Analog System Benchmarks Leading to Efficient Analog
+Computation Synthesis,''
+\emph{ACM TRETS}, vol.~17, no.~1, Art.~12, Jan.~2024.
+\url{https://doi.org/10.1145/3625298}
+
+\bibitem{jlpea}
+A.~Ige, L.~Yang, H.~Yang, J.~Hasler, and C.~Hao,
+``Analog System High-Level Synthesis for Energy-Efficient Reconfigurable
+Computing,''
+\emph{J.\ Low Power Electron.\ Appl.}, vol.~13, no.~4, p.~58, 2023.
+\url{https://www.mdpi.com/2079-9268/13/4/58}
+
+\bibitem{socfpaa}
+J.~Hasler,
+``A SoC FPAA with RISC microcontroller,''
+\emph{IEEE JETCAS}, 2016.
+TRETS ref.~[31]. 98 CABs.
+
+\bibitem{ladder}
+Ladder-filter delay paper, TRETS ref.~[75] / TCAS-I.
+Not re-implemented; LadderFM is an integer delay in this run.
+
+\bibitem{smartpaf}
+J.~Tong, T.~Dang, A.~Golder, A.~Raychowdhury, C.~Hao, and T.~Krishna,
+``Accurate Low-Degree Polynomial Approximation of Non-Polynomial Operators
+for Fast Private Inference in Homomorphic Encryption,''
+MLSys 2024.
+
+\bibitem{cryptonite}
+K.~Sharma et al.,
+``CRYPTONITE: Scalable Accelerator Design for Cryptographic Primitives
+and Algorithms,''
+arXiv:2505.14657.
+\url{https://github.com/KarthikeyaSharma16/Cryptonite}
+
+\bibitem{survey}
+Wu, Li, et al.\ (incl.\ C.~Hao),
+``A Survey of Machine Learning for Software-Assisted Hardware Design
+Verification,''
+\emph{ACM TODAES}, 10.1145/3661308.
+
+\end{thebibliography}
+
+\end{document}

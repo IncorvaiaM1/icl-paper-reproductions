@@ -1,0 +1,56 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{hlseval}
+\citation{trets}
+\citation{jlpea}
+\@writefile{toc}{\contentsline {section}{\numberline {1}What this note is}{2}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}HLS-Eval: zero-shot generation, one year later}{2}{section.2}\protected@file@percent }
+\newlabel{sec:hls}{{2}{2}{HLS-Eval: zero-shot generation, one year later}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}What was reproduced}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Paper vs.\ this run}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Paper Table~III (Together AI, 94 designs, Vitis included) vs.\ this run (OpenRouter, 57 designs, no synthesis). Bootstrap CIs over designs, 10{,}000 resamples.}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:hls-repro}{{1}{3}{Paper Table~III (Together AI, 94 designs, Vitis included) vs.\^^Mthis run (OpenRouter, 57 designs, no synthesis). Bootstrap CIs over designs, 10{,}000 resamples}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Extension: models that postdate the paper}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Same harness and 57 designs. Qwen3-Coder is 21 points above the 2025 anchor at run@1. DeepSeek-v4-pro is weaker at pass@1 because it is the model hit hardest by the token cap (47.7\% parse-failure rate), not because the newer checkpoint is less capable.}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:hls-ext}{{2}{3}{Same harness and 57 designs. Qwen3-Coder is 21 points above the 2025 anchor at run@1. DeepSeek-v4-pro is weaker at pass@1 because it is the model hit hardest by the token cap (47.7\% parse-failure rate), not because the newer checkpoint is less capable}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}What broke, independent of any model}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces HLS-Eval pass@1 by model and metric, bootstrap 95\% CIs over designs. Synthesis is omitted (no Vitis).}}{4}{figure.1}\protected@file@percent }
+\newlabel{fig:hls}{{1}{4}{HLS-Eval pass@1 by model and metric, bootstrap 95\% CIs over designs. Synthesis is omitted (no Vitis)}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Improvements I considered and did not run}{4}{section.3}\protected@file@percent }
+\newlabel{sec:improvements}{{3}{4}{Improvements I considered and did not run}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}HLS-Eval}{4}{subsection.3.1}\protected@file@percent }
+\citation{trets}
+\citation{jlpea}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Analog macromodel}{5}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Analog benchmarks: TRETS 2024 and JLPEA 2023}{5}{section.4}\protected@file@percent }
+\newlabel{sec:ams}{{4}{5}{Analog benchmarks: TRETS 2024 and JLPEA 2023}{section.4}{}}
+\citation{trets}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}The artifact URL was already dead at publication}{6}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Scaling (Figs.~3 and 11)}{6}{subsection.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces TRETS Figs.~3 and 11 re-derived from stated anchors, not from digitized pixels. Bandwidth interpolates the four caption points exactly. CAB/FG/MAC counts scale as $1/\lambda ^2$ from the 350\,nm SoC FPAA (600k FG parameters, $\approx $1~TMAC/s, 98 CABs on a 25\,mm$^2$ reference die). If Fig.~11's drawn lines are shallower than $\lambda ^{-2}$, that is a later overlay, not a fit.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:scaling}{{2}{6}{TRETS Figs.~3 and 11 re-derived from stated anchors, not from digitized pixels. Bandwidth interpolates the four caption points exactly. CAB/FG/MAC counts scale as $1/\lambda ^2$ from the 350\,nm SoC FPAA (600k FG parameters, $\approx $1~TMAC/s, 98 CABs on a 25\,mm$^2$ reference die). If Fig.~11's drawn lines are shallower than $\lambda ^{-2}$, that is a later overlay, not a fit}{figure.2}{}}
+\citation{ladder}
+\citation{socfpaa}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Case~II CAB arithmetic (Figs.~17--18)}{7}{subsection.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Case~II acoustic resource count. Weights $48\times 128=6144$ match the paper exactly.}}{7}{table.3}\protected@file@percent }
+\newlabel{tab:cab}{{3}{7}{Case~II acoustic resource count. Weights $48\times 128=6144$ match the paper exactly}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Executable Fig.~16, acoustic Case~I}{7}{subsection.4.4}\protected@file@percent }
+\citation{smartpaf}
+\citation{cryptonite}
+\citation{survey}
+\@writefile{toc}{\contentsline {section}{\numberline {5}A first project: AMS-Eval}{8}{section.5}\protected@file@percent }
+\newlabel{sec:amseval}{{5}{8}{A first project: AMS-Eval}{section.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Papers read, not reproduced}{8}{section.6}\protected@file@percent }
+\newlabel{sec:other}{{6}{8}{Papers read, not reproduced}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}What I am not claiming}{8}{section.7}\protected@file@percent }
+\bibcite{hlseval}{1}
+\bibcite{trets}{2}
+\bibcite{jlpea}{3}
+\bibcite{socfpaa}{4}
+\bibcite{ladder}{5}
+\bibcite{smartpaf}{6}
+\bibcite{cryptonite}{7}
+\bibcite{survey}{8}
+\gdef \@abspage@last{9}

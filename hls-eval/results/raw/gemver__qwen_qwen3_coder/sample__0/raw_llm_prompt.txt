@@ -1,0 +1,176 @@
+## Overview
+You are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.
+The task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.
+
+## Task Description
+Given a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.
+
+It should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.
+
+Only generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.
+
+Provide the complete design code in the single output; do not omit anything or leave placeholders.
+
+Hierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.
+
+## Output Format
+The generated HLS output code should be provided in the following format:
+```
+<OUTPUT_CODE name="kernel_name.cpp">
+    ...
+</OUTPUT_CODE>
+```
+Please use this XML format and do not use other formats like markdown code blocks or plain text.
+Only output the generated HLS code in the XML format and nothing else.
+
+## Task Inputs
+
+
+<INPUT_CODE name="kernel_description.md">
+Kernel Description:
+The `kernel_gemver` design is a high-level synthesis implementation of the GEMVER kernel, which performs multiple matrix-vector multiplications from the updated BLAS (Basic Linear Algebra Subprograms) standard. The kernel takes in several inputs, including scalars, matrices, and vectors, and produces two output vectors. The design consists of three main stages: matrix update, vector update, and final vector computation.
+
+It takes the following as inputs,
+
+- $\alpha, \beta$: scalars
+- $A$: $N \times N$ matrix
+- $u1, v1, u2, v2, y, z$: vectors of length $N$
+
+and gives the following as outputs:
+
+- $A$: $N \times N$ matrix, where $A = A + u1 \cdot v1^T + u2 \cdot v2^T$
+- $x$: vector of length $N$, where $x = \beta A^T y + z$
+- $w$: vector of length $N$, where $w = \alpha A x$
+
+---
+
+Top-Level Function: `kernel_gemver`
+
+Complete Function Signature of the Top-Level Function:
+`void kernel_gemver(double alpha, double beta, double A[40][40], double u1[40], double v1[40], double u2[40], double v2[40], double w[40], double x[40], double y[40], double z[40]);`
+
+Inputs:
+- `alpha`: a scalar value used in the final vector computation
+- `beta`: a scalar value used in the vector update stage
+- `A`: a 40x40 matrix used in the matrix update and vector update stages
+- `u1`, `v1`, `u2`, `v2`: four vectors of length 40 used in the matrix update stage
+- `y`, `z`: two vectors of length 40 used in the vector update stage
+- `w`, `x`: two output vectors of length 40
+
+Outputs:
+- `A`: the updated 40x40 matrix
+- `x`: the output vector of length 40
+- `w`: the output vector of length 40
+
+Important Data Structures and Data Types:
+- `double`: a 64-bit floating-point data type used for all inputs and outputs
+- `A`: a 40x40 matrix represented as a 2D array of `double` values
+- `u1`, `v1`, `u2`, `v2`, `y`, `z`, `w`, `x`: vectors of length 40 represented as 1D arrays of `double` values
+
+Sub-Components:
+- None
+</INPUT_CODE name="kernel_description.md">
+<INPUT_CODE name="gemver_tb.cpp">
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "gemver.h"
+
+void init_array(
+    int n,
+    double *alpha,
+    double *beta,
+    double A[40][40],
+    double u1[40],
+    double v1[40],
+    double u2[40],
+    double v2[40],
+    double w[40],
+    double x[40],
+    double y[40],
+    double z[40]) {
+    int i, j;
+
+    *alpha = 1.5;
+    *beta = 1.2;
+
+    double fn = (double)n;
+
+    for (i = 0; i < n; i++) {
+        u1[i] = i;
+        u2[i] = ((i + 1) / fn) / 2.0;
+        v1[i] = ((i + 1) / fn) / 4.0;
+        v2[i] = ((i + 1) / fn) / 6.0;
+        y[i] = ((i + 1) / fn) / 8.0;
+        z[i] = ((i + 1) / fn) / 9.0;
+        x[i] = 0.0;
+        w[i] = 0.0;
+        for (j = 0; j < n; j++)
+            A[i][j] = (double)(i * j % n) / n;
+    }
+}
+
+void print_array(int n, double w[40]) {
+    int i;
+
+    fprintf(stderr, "==BEGIN DUMP_ARRAYS==\n");
+    fprintf(stderr, "begin dump: %s", "w");
+    for (i = 0; i < n; i++) {
+        if (i % 20 == 0)
+            fprintf(stderr, "\n");
+        fprintf(stderr, "%0.6lf ", w[i]);
+    }
+    fprintf(stderr, "\nend   dump: %s\n", "w");
+    fprintf(stderr, "==END   DUMP_ARRAYS==\n");
+}
+
+int main() {
+
+    int n = 40;
+
+    double alpha;
+    double beta;
+    double A[40][40];
+    double u1[40];
+    double v1[40];
+    double u2[40];
+    double v2[40];
+    double w[40];
+    double x[40];
+    double y[40];
+    double z[40];
+
+    init_array(n, &alpha, &beta, A, u1, v1, u2, v2, w, x, y, z);
+
+    kernel_gemver(alpha, beta, A, u1, v1, u2, v2, w, x, y, z);
+
+    print_array(n, w);
+
+    return 0;
+}
+</INPUT_CODE name="gemver_tb.cpp">
+<INPUT_CODE name="gemver.h">
+#pragma once
+#include <cmath>
+
+void kernel_gemver(
+    double alpha,
+    double beta,
+    double A[40][40],
+    double u1[40],
+    double v1[40],
+    double u2[40],
+    double v2[40],
+    double w[40],
+    double x[40],
+    double y[40],
+    double z[40]);
+
+</INPUT_CODE name="gemver.h">
+
+
+
+## Task Output
+

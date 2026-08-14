@@ -1,0 +1,109 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "runs__deepseek_deepseek_v4_pro",
+    "benchmark_case_name": "runs",
+    "benchmark_case_tags": [
+        "c2hlsc"
+    ],
+    "model_name": "deepseek/deepseek-v4-pro",
+    "model_name_normalized": "deepseek_deepseek_v4_pro",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `Runs` kernel is designed to analyze a binary array `epsilon` of size 65535 and compute two metrics: the number of ones (`S`) and the number of runs (`V`). A \"run\" is defined as a contiguous sequence of identical values (either all zeros or all ones). The kernel iterates through the `epsilon` array to count the number of ones and the number of transitions between zeros and ones. The results are returned through pointer references to `res_S` and `res_V`.\n\n---\n\nTop-Level Function: `Runs`\n\nComplete Function Signature of the Top-Level Function:\n`void Runs(int *res_S, int *res_V, int epsilon[N]);`\n\nInputs:\n- `res_S`: A pointer to an integer where the number of ones in the `epsilon` array will be stored.\n- `res_V`: A pointer to an integer where the number of runs in the `epsilon` array will be stored.\n- `epsilon`: An array of integers of size 65535, where each element is either 0 or 1.\n\nOutputs:\n- `res_S`: The number of ones in the `epsilon` array.\n- `res_V`: The number of runs in the `epsilon` array.\n\nImportant Data Structures and Data Types:\n- `epsilon`: An array of integers of size 65535, where each element is either 0 or 1. This array is used as input to the kernel to compute the number of ones and runs.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"runs_tb.cpp\">\n#include \"runs.h\"\n\nint main() {\n    int i;\n    int epsilon_test[N];\n    for (i = 0; i < N; i++) {\n        epsilon_test[i] = i * 73 % 7 == 0;\n    }\n    int result_S, result_V;\n    Runs(&result_S, &result_V, epsilon_test);\n\n    printf(\"result S = %d\\n\", result_S);\n    printf(\"result S = %d\\n\", result_V);\n}\n\n</INPUT_CODE name=\"runs_tb.cpp\">\n<INPUT_CODE name=\"runs.h\">\n#pragma once\n\n#include <stdio.h>\n\n#define N 65535\n// static int epsilon[N]; // array of 0s and 1s\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]);\n</INPUT_CODE name=\"runs.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 27431.271923149,
+        "t1": 27464.359830331,
+        "execution_time": 33.08790718199816
+    },
+    "response_json": {
+        "id": "gen-1786574617-cxsguoyAoabXKL27R8zX",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"runs.cpp\">\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int count_ones = 0;\n    int count_runs = 0;\n    int prev = epsilon[0];\n\n    // The first element always starts the first run\n    count_ones = prev;\n    count_runs = 1;\n\n    for (int i = 1; i < N; i++) {\n#pragma HLS PIPELINE II=1\n        int curr = epsilon[i];\n        count_ones += curr;\n\n        if (curr != prev) {\n            count_runs++;\n        }\n\n        prev = curr;\n    }\n\n    *res_S = count_ones;\n    *res_V = count_runs;\n}\n</OUTPUT_CODE>",
+                    "role": "assistant",
+                    "reasoning": "We need generate C++ implementation for HLS. Need understand design. Header has #pragma once, include stdio, N 65535, function Runs(int *res_S, int *res_V, int epsilon[N]). We need implement in runs.cpp. Must align with description: binary array epsilon size 65535, each 0/1. Compute S number of ones, V number of runs. A run is contiguous sequence of identical values (either all zeros or all ones). Number of runs = number of transitions + 1? For array non-empty. Given binary sequence length N. Run count V: starts with first element run, each time current differs from previous increment run. So V = 1 + number of transitions. Also S = sum epsilon. Need produce via HLS.\n\nNeed careful: description says \"number of transitions between zeros and ones\" but output V number of runs. It says count number of transitions. But definition run: contiguous sequence identical values. So V equals number of runs. Implement.\n\nPotential HLS considerations: Use loop with dataflow? For N=65535, simple loop. Need handle res_S, res_V pointers. Could use local accumulation to avoid multiple writes? For HLS, likely top interface: res_S, res_V are scalar outputs via pointer. We can set *res_S = countS; *res_V = countV after loop. epsilon as array input.\n\nNeed function syntactically correct. Maybe include header \"runs.h\". Actually generated output code name kernel_name.cpp likely runs.cpp. The format name maybe \"runs.cpp\". We output only XML.\n\nLet's design:\n\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int S = 0;\n    int V = 0;\n    int prev = epsilon[0]; // if N always >0\n    S = prev; // if epsilon[0] is 0 or 1; since binary count ones.\n    V = 1; // first run\n    for (int i = 1; i < N; i++) {\n        #pragma HLS PIPELINE II=1\n        int current = epsilon[i];\n        S += current;\n        if (current != prev) {\n            V++;\n        }\n        prev = current;\n    }\n    *res_S = S;\n    *res_V = V;\n}\n\nPotential issue: S = prev; if prev 0 or 1. Fine. If N==0? N fixed 65535. But N constant.\n\nNeed HLS synthesizability. Use int. Array large; mapped to RAM/axi? But just function. For Vitis HLS, top-level array epsilon as pointer/size. In header declared int epsilon[N]. Actually in C++ array parameter decays to pointer but with size. HLS may infer RAM. It is fine.\n\nCould use sub-function? None.\n\nNeed ensure testbench expects S, V? It prints result_S and result_V but has typo printf(\"result S = %d\\n\", result_V); no matter.\n\nNeed maybe handle res_S/res_V volatile? Not needed.\n\nPotential HLS optimization directives? User requested generate code. Can include pragmas but not necessary. We can include #pragma HLS PIPELINE II=1 inside loop. But some HLS tools require #pragma HLS PIPELINE II=1 outside? The syntax: Place pragma in loop body or before? In Vitis HLS, #pragma HLS PIPELINE II=1 is placed inside loop body often before loop? Actually typical: \nfor (int i=0; i<N; i++) {\n#pragma HLS PIPELINE II=1\n...\n}\nWorks as directive for loop. We can include for performance.\n\nNeed think about possible bit width: N=65535, count S max 65535, V max 65535 fits int.\n\nNeed no placeholders.\n\nBut maybe we should include using hls namespace? No.\n\nPotential edge: The input array is binary values (0 or 1). S could be initialized to zero and then in loop sum all. Then V compute transitions. For loop from 0 to N-1:\nint S=0; int V=0; int prev = epsilon[0]? Need avoid out of bounds if N=0, but N=65535. Could do:\nint S=0;\nint V=1;\nint prev = epsilon[0];\nS = prev;\nfor(i=1...)\nBut more robust:\nint S = 0;\nint V = 0;\nint prev = epsilon[0];\nfor (int i=0; i<N; i++) {\n  int cur = epsilon[i];\n  S += cur;\n  if (i == 0) { V = 1; }\n  else if (cur != prev) { V++; }\n  prev = cur;\n}\nUnrolled? HLS handles if i==0 in pipelined loop? That would add branch but okay. But intializing V=0, prev=epsilon[0] before loop and loop from 1 is common.\n\nDescription: \"iterate through epsilon array to count number of ones and number of transitions between zeros and ones.\" It might count transitions only, V may be transitions+1. Need verify with deterministic test. Example epsilon all 0: runs=1, transitions=0. Our V=1. Good. If test in tb: epsilon_test = i*73%7==0; length 65535. It will have certain runs. V likely not zero.\n\nNeed consider if \"number of runs\" is defined as number of contiguous sequences either zeros or ones. For array [1,0,1], V=3 (runs: 1,0,1). Our code transitions=2, V=3. Good.\n\nPotential HLS issue: If we set *res_S = S; *res_V = V; after loop, the HLS might create output registers. Fine.\n\nLet's craft output XML.\n\nNeed maybe use C++ code:\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int count_ones = 0;\n    int count_runs = 0;\n    int prev = epsilon[0];\n\n    // The first element is always a run\n    count_ones = prev;\n    count_runs = 1;\n\n    for (int i = 1; i < N; i++) {\n#pragma HLS PIPELINE II=1\n        int curr = epsilon[i];\n        count_ones += curr;\n        if (curr != prev) {\n            count_runs++;\n        }\n        prev = curr;\n    }\n\n    *res_S = count_ones;\n    *res_V = count_runs;\n}\n\nCould also include #pragma HLS INTERFACE? Not needed.\n\nPotential issue: If testbench has epsilon values not strictly 0 and 1? Then S number of ones; count ones would be sum of numeric values, not \"number of ones\" if values are boolean. But description says each 0 or1 and test uses 0/1. Good.\n\nNeed check with HLS: Array epsilon[N] declared in header as int epsilon[N], function parameter with static? In HLS, unsized arrays often need m_axi? But for HLS synthesis, an array argument in C++ will infer RAM interface. Typically top function parameters: int epsilon[N] an array; Vitis HLS can infer ap_memory or m_axi. No need for code.\n\nNeed output format exactly:\n<OUTPUT_CODE name=\"runs.cpp\">\n...\n</OUTPUT_CODE>\n\nShould we name runs.cpp? The user says kernel_name.cpp? They gave header runs.h and testbench runs_tb.cpp. The implementation should be runs.cpp. So name runs.cpp.\n\nNeed not include markdown. Only XML. Ensure no trailing text.\n\nLet's produce final.",
+                    "reasoning_details": [
+                        {
+                            "type": "reasoning.text",
+                            "text": "We need generate C++ implementation for HLS. Need understand design. Header has #pragma once, include stdio, N 65535, function Runs(int *res_S, int *res_V, int epsilon[N]). We need implement in runs.cpp. Must align with description: binary array epsilon size 65535, each 0/1. Compute S number of ones, V number of runs. A run is contiguous sequence of identical values (either all zeros or all ones). Number of runs = number of transitions + 1? For array non-empty. Given binary sequence length N. Run count V: starts with first element run, each time current differs from previous increment run. So V = 1 + number of transitions. Also S = sum epsilon. Need produce via HLS.\n\nNeed careful: description says \"number of transitions between zeros and ones\" but output V number of runs. It says count number of transitions. But definition run: contiguous sequence identical values. So V equals number of runs. Implement.\n\nPotential HLS considerations: Use loop with dataflow? For N=65535, simple loop. Need handle res_S, res_V pointers. Could use local accumulation to avoid multiple writes? For HLS, likely top interface: res_S, res_V are scalar outputs via pointer. We can set *res_S = countS; *res_V = countV after loop. epsilon as array input.\n\nNeed function syntactically correct. Maybe include header \"runs.h\". Actually generated output code name kernel_name.cpp likely runs.cpp. The format name maybe \"runs.cpp\". We output only XML.\n\nLet's design:\n\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int S = 0;\n    int V = 0;\n    int prev = epsilon[0]; // if N always >0\n    S = prev; // if epsilon[0] is 0 or 1; since binary count ones.\n    V = 1; // first run\n    for (int i = 1; i < N; i++) {\n        #pragma HLS PIPELINE II=1\n        int current = epsilon[i];\n        S += current;\n        if (current != prev) {\n            V++;\n        }\n        prev = current;\n    }\n    *res_S = S;\n    *res_V = V;\n}\n\nPotential issue: S = prev; if prev 0 or 1. Fine. If N==0? N fixed 65535. But N constant.\n\nNeed HLS synthesizability. Use int. Array large; mapped to RAM/axi? But just function. For Vitis HLS, top-level array epsilon as pointer/size. In header declared int epsilon[N]. Actually in C++ array parameter decays to pointer but with size. HLS may infer RAM. It is fine.\n\nCould use sub-function? None.\n\nNeed ensure testbench expects S, V? It prints result_S and result_V but has typo printf(\"result S = %d\\n\", result_V); no matter.\n\nNeed maybe handle res_S/res_V volatile? Not needed.\n\nPotential HLS optimization directives? User requested generate code. Can include pragmas but not necessary. We can include #pragma HLS PIPELINE II=1 inside loop. But some HLS tools require #pragma HLS PIPELINE II=1 outside? The syntax: Place pragma in loop body or before? In Vitis HLS, #pragma HLS PIPELINE II=1 is placed inside loop body often before loop? Actually typical: \nfor (int i=0; i<N; i++) {\n#pragma HLS PIPELINE II=1\n...\n}\nWorks as directive for loop. We can include for performance.\n\nNeed think about possible bit width: N=65535, count S max 65535, V max 65535 fits int.\n\nNeed no placeholders.\n\nBut maybe we should include using hls namespace? No.\n\nPotential edge: The input array is binary values (0 or 1). S could be initialized to zero and then in loop sum all. Then V compute transitions. For loop from 0 to N-1:\nint S=0; int V=0; int prev = epsilon[0]? Need avoid out of bounds if N=0, but N=65535. Could do:\nint S=0;\nint V=1;\nint prev = epsilon[0];\nS = prev;\nfor(i=1...)\nBut more robust:\nint S = 0;\nint V = 0;\nint prev = epsilon[0];\nfor (int i=0; i<N; i++) {\n  int cur = epsilon[i];\n  S += cur;\n  if (i == 0) { V = 1; }\n  else if (cur != prev) { V++; }\n  prev = cur;\n}\nUnrolled? HLS handles if i==0 in pipelined loop? That would add branch but okay. But intializing V=0, prev=epsilon[0] before loop and loop from 1 is common.\n\nDescription: \"iterate through epsilon array to count number of ones and number of transitions between zeros and ones.\" It might count transitions only, V may be transitions+1. Need verify with deterministic test. Example epsilon all 0: runs=1, transitions=0. Our V=1. Good. If test in tb: epsilon_test = i*73%7==0; length 65535. It will have certain runs. V likely not zero.\n\nNeed consider if \"number of runs\" is defined as number of contiguous sequences either zeros or ones. For array [1,0,1], V=3 (runs: 1,0,1). Our code transitions=2, V=3. Good.\n\nPotential HLS issue: If we set *res_S = S; *res_V = V; after loop, the HLS might create output registers. Fine.\n\nLet's craft output XML.\n\nNeed maybe use C++ code:\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int count_ones = 0;\n    int count_runs = 0;\n    int prev = epsilon[0];\n\n    // The first element is always a run\n    count_ones = prev;\n    count_runs = 1;\n\n    for (int i = 1; i < N; i++) {\n#pragma HLS PIPELINE II=1\n        int curr = epsilon[i];\n        count_ones += curr;\n        if (curr != prev) {\n            count_runs++;\n        }\n        prev = curr;\n    }\n\n    *res_S = count_ones;\n    *res_V = count_runs;\n}\n\nCould also include #pragma HLS INTERFACE? Not needed.\n\nPotential issue: If testbench has epsilon values not strictly 0 and 1? Then S number of ones; count ones would be sum of numeric values, not \"number of ones\" if values are boolean. But description says each 0 or1 and test uses 0/1. Good.\n\nNeed check with HLS: Array epsilon[N] declared in header as int epsilon[N], function parameter with static? In HLS, unsized arrays often need m_axi? But for HLS synthesis, an array argument in C++ will infer RAM interface. Typically top function parameters: int epsilon[N] an array; Vitis HLS can infer ap_memory or m_axi. No need for code.\n\nNeed output format exactly:\n<OUTPUT_CODE name=\"runs.cpp\">\n...\n</OUTPUT_CODE>\n\nShould we name runs.cpp? The user says kernel_name.cpp? They gave header runs.h and testbench runs_tb.cpp. The implementation should be runs.cpp. So name runs.cpp.\n\nNeed not include markdown. Only XML. Ensure no trailing text.\n\nLet's produce final.",
+                            "format": "unknown",
+                            "index": 0
+                        }
+                    ]
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786574617,
+        "model": "deepseek/deepseek-v4-pro",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 1813,
+            "prompt_tokens": 938,
+            "total_tokens": 2751,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 1641,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 896,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0022141616,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0022141616,
+                "upstream_inference_prompt_cost": 6.902e-05,
+                "upstream_inference_completions_cost": 0.0021451416
+            }
+        },
+        "provider": "GMICloud"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"runs.cpp\">\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int count_ones = 0;\n    int count_runs = 0;\n    int prev = epsilon[0];\n\n    // The first element always starts the first run\n    count_ones = prev;\n    count_runs = 1;\n\n    for (int i = 1; i < N; i++) {\n#pragma HLS PIPELINE II=1\n        int curr = epsilon[i];\n        count_ones += curr;\n\n        if (curr != prev) {\n            count_runs++;\n        }\n\n        prev = curr;\n    }\n\n    *res_S = count_ones;\n    *res_V = count_runs;\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "runs.cpp": "\n#include \"runs.h\"\n\nvoid Runs(int *res_S, int *res_V, int epsilon[N]) {\n    int count_ones = 0;\n    int count_runs = 0;\n    int prev = epsilon[0];\n\n    // The first element always starts the first run\n    count_ones = prev;\n    count_runs = 1;\n\n    for (int i = 1; i < N; i++) {\n#pragma HLS PIPELINE II=1\n        int curr = epsilon[i];\n        count_ones += curr;\n\n        if (curr != prev) {\n            count_runs++;\n        }\n\n        prev = curr;\n    }\n\n    *res_S = count_ones;\n    *res_V = count_runs;\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 27464.70476492,
+            "t1": 27465.087825127,
+            "execution_time": 0.3830602070011082,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "result S = 9363\nresult S = 18725\n",
+            "stderr": "",
+            "t0": 27465.11077429,
+            "t1": 27465.144974365,
+            "execution_time": 0.034200075002445374,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 27465.151759874,
+            "t1": 27465.151759874,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

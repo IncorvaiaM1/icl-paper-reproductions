@@ -1,0 +1,87 @@
+I'll analyze the task and provide a solution for implementing the Floyd-Warshall algorithm based on the given inputs.
+
+First, let's understand the components:
+
+1. The algorithm is described in `kernel_description.md` with:
+   - Input: a weighted adjacency matrix (60x60)
+   - Output: a matrix of shortest paths (60x60)
+   - Algorithm: Floyd-Warshall recursive computation
+   - Data types: 60x60 integer matrix
+
+2. The test bench is provided in `floyd-warshall_tb.cpp` with:
+   - Test case initialization
+   - Path initialization with a 60x60 matrix
+   - Print functionality
+
+3. The header file `floyd-warshall.h` just declares the kernel function.
+
+Now, I'll implement the Floyd-Warshall kernel function in a new file `floyd-warshall.cpp`:
+
+```cpp
+#include "floyd-warshall.h"
+#include <climits>
+#include <algorithm>
+
+void kernel_floyd_warshall(int path[60][60]) {
+    // Initialize the solution matrix with the input path
+    int dist[60][60];
+    for (int i = 0; i < 60; i++) {
+        for (int j = 0; j < 60; j++) {
+            if (i == j) {
+                dist[i][j] = 0;
+            } else if (path[i][j] == 0) {
+                dist[i][j] = INT_MAX;
+            } else {
+                dist[i][j] = path[i][j];
+            }
+        }
+    }
+
+    // Floyd-Warshall algorithm
+    for (int k = 0; k < 60; k++) {
+        for (int i = 0; i < 60; i++) {
+            for (int j = 0; j < 60; j++) {
+                if (dist[i][k] != INT_MAX && 
+                    dist[k][j] != INT_MAX) {
+                    dist[i][j] = std::min(dist[i][j], 
+                                        dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+
+    // Copy the result back to the path matrix
+    for (int i = 0; i < 60; i++) {
+        for (int j = 0; j < 60; j++) {
+            path[i][j] = dist[i][j];
+        }
+    }
+}
+```
+
+Key implementation details:
+
+1. We handle the path initialization:
+   - Diagonal elements set to 0 (distance from a node to itself)
+   - 0 in input path treated as infinity (no path exists)
+   - Other values treated as edge weights
+
+2. Floyd-Warshall algorithm:
+   - Three nested loops (k, i, j)
+   - k is the intermediate node
+   - Update the shortest path from i to j by considering paths through k
+   - Handle infinity cases properly
+
+3. Copy the result back to the path matrix
+
+The implementation follows the mathematical description in the kernel documentation exactly, with the recursive formula implemented iteratively.
+
+The test bench will:
+1. Initialize a 60x60 path matrix
+2. Call the kernel function
+3. Print the results
+
+The solution is complete and should work with the provided test bench. The implementation handles all edge cases including:
+- No path (infinity)
+- Self-loops (0 distance)
+- Updates shortest paths correctly through intermediate nodes

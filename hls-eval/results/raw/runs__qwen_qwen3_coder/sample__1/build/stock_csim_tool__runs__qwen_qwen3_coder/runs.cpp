@@ -1,0 +1,33 @@
+
+#include "runs.h"
+
+void Runs(int *res_S, int *res_V, int epsilon[N]) {
+    int S = 0;
+    int V = 0;
+
+    // Handle the case of an empty array
+    if (N == 0) {
+        *res_S = 0;
+        *res_V = 0;
+        return;
+    }
+
+    // Initialize the run count with 1 since there's at least one element
+    V = 1;
+
+    // Iterate through the array to count ones and runs
+    for (int i = 0; i < N; i++) {
+        // Count the number of ones
+        if (epsilon[i] == 1) {
+            S++;
+        }
+
+        // Count transitions between different values (runs)
+        if (i > 0 && epsilon[i] != epsilon[i - 1]) {
+            V++;
+        }
+    }
+
+    *res_S = S;
+    *res_V = V;
+}

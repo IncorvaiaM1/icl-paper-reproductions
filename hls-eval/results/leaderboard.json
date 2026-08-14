@@ -1,0 +1,397 @@
+{
+  "schema_version": "0.1.0",
+  "generated_at": "2026-08-12",
+  "source": {
+    "eval_runs": [
+      "hls_gen_zero_shot__main (reproduction, stock C-sim backend, OpenRouter)"
+    ],
+    "note": "Real data from a from-scratch reproduction run, not the shipped dummy payload. Deviations from the paper: (1) provider is OpenRouter, not Together AI -- serving stack/quantization not controlled, see report; (2) synthesis (pass_synth) was skipped -- Vitis HLS is not installed, so that stage is null for every row rather than fabricated; (3) qwen/qwen-2.5-coder-32b-instruct was dropped from the anchor set after isolating a single-provider (Cloudflare) failure that reproduced on every real-prompt request variant -- see report for the debug trail; (4) max_tokens=8192 truncated a meaningful share of completions from longer outputs, especially reasoning/verbose models -- treat parse/compile/run rates as a lower bound on model capability, not solely a capability score."
+  },
+  "metrics": [
+    {
+      "id": "pass_rate",
+      "label": "Pass Rate (avg over benchmarks)"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "gen_zero_shot_c2hlsc",
+      "label": "Zero-Shot Generation: C2HLSC",
+      "tags": [
+        "gen",
+        "zero_shot",
+        "c2hlsc"
+      ]
+    },
+    {
+      "id": "gen_zero_shot_machsuite",
+      "label": "Zero-Shot Generation: MachSuite",
+      "tags": [
+        "gen",
+        "zero_shot",
+        "machsuite"
+      ]
+    },
+    {
+      "id": "gen_zero_shot_polybench",
+      "label": "Zero-Shot Generation: PolyBench",
+      "tags": [
+        "gen",
+        "zero_shot",
+        "polybench"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "id": "deepseek_deepseek_chat_v3_0324",
+      "label": "DeepSeek V3 (0324)",
+      "provider": "openrouter",
+      "model_name": "deepseek/deepseek-chat-v3-0324"
+    },
+    {
+      "id": "deepseek_deepseek_v4_pro",
+      "label": "DeepSeek V4 Pro",
+      "provider": "openrouter",
+      "model_name": "deepseek/deepseek-v4-pro"
+    },
+    {
+      "id": "qwen_qwen3_235b_a22b_thinking_2507",
+      "label": "Qwen3 235B Thinking (2507)",
+      "provider": "openrouter",
+      "model_name": "qwen/qwen3-235b-a22b-thinking-2507"
+    },
+    {
+      "id": "qwen_qwen3_coder",
+      "label": "Qwen3 Coder",
+      "provider": "openrouter",
+      "model_name": "qwen/qwen3-coder"
+    }
+  ],
+  "results": [
+    {
+      "task_id": "gen_zero_shot_c2hlsc",
+      "metrics": [
+        {
+          "metric_id": "pass_rate",
+          "k_values": [
+            {
+              "k": 1,
+              "runs": [
+                {
+                  "model_id": "deepseek_deepseek_chat_v3_0324",
+                  "model_label": "DeepSeek V3 (0324)",
+                  "score": 0.4833,
+                  "breakdown": {
+                    "pass_parse": 0.5333,
+                    "pass_compile": 0.4833,
+                    "pass_tb": 0.4833,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "deepseek_deepseek_v4_pro",
+                  "model_label": "DeepSeek V4 Pro",
+                  "score": 0.5,
+                  "breakdown": {
+                    "pass_parse": 0.5,
+                    "pass_compile": 0.5,
+                    "pass_tb": 0.5,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_235b_a22b_thinking_2507",
+                  "model_label": "Qwen3 235B Thinking (2507)",
+                  "score": 0.7333,
+                  "breakdown": {
+                    "pass_parse": 0.85,
+                    "pass_compile": 0.7333,
+                    "pass_tb": 0.7333,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_coder",
+                  "model_label": "Qwen3 Coder",
+                  "score": 0.8667,
+                  "breakdown": {
+                    "pass_parse": 0.9833,
+                    "pass_compile": 0.8667,
+                    "pass_tb": 0.8667,
+                    "pass_synth": null
+                  }
+                }
+              ]
+            },
+            {
+              "k": 5,
+              "runs": [
+                {
+                  "model_id": "deepseek_deepseek_chat_v3_0324",
+                  "model_label": "DeepSeek V3 (0324)",
+                  "score": 0.75,
+                  "breakdown": {
+                    "pass_parse": 0.8333,
+                    "pass_compile": 0.75,
+                    "pass_tb": 0.75,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "deepseek_deepseek_v4_pro",
+                  "model_label": "DeepSeek V4 Pro",
+                  "score": 0.75,
+                  "breakdown": {
+                    "pass_parse": 0.75,
+                    "pass_compile": 0.75,
+                    "pass_tb": 0.75,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_235b_a22b_thinking_2507",
+                  "model_label": "Qwen3 235B Thinking (2507)",
+                  "score": 0.9167,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 0.9167,
+                    "pass_tb": 0.9167,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_coder",
+                  "model_label": "Qwen3 Coder",
+                  "score": 1.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 1.0,
+                    "pass_tb": 1.0,
+                    "pass_synth": null
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "gen_zero_shot_machsuite",
+      "metrics": [
+        {
+          "metric_id": "pass_rate",
+          "k_values": [
+            {
+              "k": 1,
+              "runs": [
+                {
+                  "model_id": "deepseek_deepseek_chat_v3_0324",
+                  "model_label": "DeepSeek V3 (0324)",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 0.5176,
+                    "pass_compile": 0.5059,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "deepseek_deepseek_v4_pro",
+                  "model_label": "DeepSeek V4 Pro",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 0.3882,
+                    "pass_compile": 0.3529,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_235b_a22b_thinking_2507",
+                  "model_label": "Qwen3 235B Thinking (2507)",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 0.6353,
+                    "pass_compile": 0.6235,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_coder",
+                  "model_label": "Qwen3 Coder",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 0.9882,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                }
+              ]
+            },
+            {
+              "k": 5,
+              "runs": [
+                {
+                  "model_id": "deepseek_deepseek_chat_v3_0324",
+                  "model_label": "DeepSeek V3 (0324)",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 0.7647,
+                    "pass_compile": 0.7647,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "deepseek_deepseek_v4_pro",
+                  "model_label": "DeepSeek V4 Pro",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 0.5882,
+                    "pass_compile": 0.5882,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_235b_a22b_thinking_2507",
+                  "model_label": "Qwen3 235B Thinking (2507)",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 1.0,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_coder",
+                  "model_label": "Qwen3 Coder",
+                  "score": 0.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 1.0,
+                    "pass_tb": 0.0,
+                    "pass_synth": null
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "gen_zero_shot_polybench",
+      "metrics": [
+        {
+          "metric_id": "pass_rate",
+          "k_values": [
+            {
+              "k": 1,
+              "runs": [
+                {
+                  "model_id": "deepseek_deepseek_chat_v3_0324",
+                  "model_label": "DeepSeek V3 (0324)",
+                  "score": 0.7357,
+                  "breakdown": {
+                    "pass_parse": 0.7429,
+                    "pass_compile": 0.7357,
+                    "pass_tb": 0.7357,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "deepseek_deepseek_v4_pro",
+                  "model_label": "DeepSeek V4 Pro",
+                  "score": 0.5786,
+                  "breakdown": {
+                    "pass_parse": 0.6143,
+                    "pass_compile": 0.5786,
+                    "pass_tb": 0.5786,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_235b_a22b_thinking_2507",
+                  "model_label": "Qwen3 235B Thinking (2507)",
+                  "score": 0.75,
+                  "breakdown": {
+                    "pass_parse": 0.75,
+                    "pass_compile": 0.75,
+                    "pass_tb": 0.75,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_coder",
+                  "model_label": "Qwen3 Coder",
+                  "score": 1.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 1.0,
+                    "pass_tb": 1.0,
+                    "pass_synth": null
+                  }
+                }
+              ]
+            },
+            {
+              "k": 5,
+              "runs": [
+                {
+                  "model_id": "deepseek_deepseek_chat_v3_0324",
+                  "model_label": "DeepSeek V3 (0324)",
+                  "score": 0.9643,
+                  "breakdown": {
+                    "pass_parse": 0.9643,
+                    "pass_compile": 0.9643,
+                    "pass_tb": 0.9643,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "deepseek_deepseek_v4_pro",
+                  "model_label": "DeepSeek V4 Pro",
+                  "score": 0.9286,
+                  "breakdown": {
+                    "pass_parse": 0.9286,
+                    "pass_compile": 0.9286,
+                    "pass_tb": 0.9286,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_235b_a22b_thinking_2507",
+                  "model_label": "Qwen3 235B Thinking (2507)",
+                  "score": 1.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 1.0,
+                    "pass_tb": 1.0,
+                    "pass_synth": null
+                  }
+                },
+                {
+                  "model_id": "qwen_qwen3_coder",
+                  "model_label": "Qwen3 Coder",
+                  "score": 1.0,
+                  "breakdown": {
+                    "pass_parse": 1.0,
+                    "pass_compile": 1.0,
+                    "pass_tb": 1.0,
+                    "pass_synth": null
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

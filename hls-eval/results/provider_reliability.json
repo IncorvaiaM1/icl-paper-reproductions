@@ -1,0 +1,38 @@
+{
+  "per_model": {
+    "deepseek/deepseek-chat-v3-0324": {
+      "calls": 285,
+      "provider_errors": 1,
+      "retries_used": 1,
+      "gave_up": 0
+    },
+    "qwen/qwen3-coder": {
+      "calls": 285,
+      "provider_errors": 0,
+      "retries_used": 0,
+      "gave_up": 0
+    },
+    "deepseek/deepseek-v4-pro": {
+      "calls": 285,
+      "provider_errors": 0,
+      "retries_used": 0,
+      "gave_up": 0
+    },
+    "qwen/qwen3-235b-a22b-thinking-2507": {
+      "calls": 285,
+      "provider_errors": 1,
+      "retries_used": 1,
+      "gave_up": 0
+    }
+  },
+  "totals": {
+    "calls": 1140,
+    "provider_errors": 2,
+    "retries_used": 2,
+    "gave_up": 0
+  },
+  "routing": {
+    "require_parameters": true,
+    "allow_fallbacks": true
+  }
+}

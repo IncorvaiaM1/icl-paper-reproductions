@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "gesummv__qwen_qwen3_coder",
+    "benchmark_case_name": "gesummv",
+    "benchmark_case_tags": [
+        "polybench"
+    ],
+    "model_name": "qwen/qwen3-coder",
+    "model_name_normalized": "qwen_qwen3_coder",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `kernel_gesummv` design is a high-level synthesis implementation of the summed matrix-vector multiplication algorithm, which is an extension of the Basic Linear Algebra Subprograms (BLAS) library. This kernel takes in two matrices `A` and `B`, two scalars `alpha` and `beta`, and a vector `x` as inputs, and produces a vector `y` as output. The output vector `y` is computed as `y = alpha * Ax + beta * Bx`, where `Ax` and `Bx` are the matrix-vector products of `A` and `B` with `x`, respectively.\n\nIt takes the following as inputs,\n\n- $\\alpha, \\beta$: scalars\n- $A, B$: $N \\times N$ matrix\n- $x$: vector of length $N$\n\nand gives the following as outputs:\n\n- $y$: vector of length $N$, where $y = \\alpha Ax + \\beta Bx$\n\n---\n\nTop-Level Function: `kernel_gesummv`\n\nComplete Function Signature of the Top-Level Function:\n`void kernel_gesummv(double alpha, double beta, double A[30][30], double B[30][30], double tmp[30], double x[30], double y[30]);`\n\nInputs:\n- `alpha`: a scalar value of type `double` that represents the scaling factor for the matrix-vector product `Ax`.\n- `beta`: a scalar value of type `double` that represents the scaling factor for the matrix-vector product `Bx`.\n- `A`: a 2D matrix of size `30x30` with elements of type `double`, representing the first input matrix.\n- `B`: a 2D matrix of size `30x30` with elements of type `double`, representing the second input matrix.\n- `x`: a 1D vector of length `30` with elements of type `double`, representing the input vector.\n- `tmp`: a 1D vector of length `30` with elements of type `double`, used as a temporary storage for intermediate results.\n\nOutputs:\n- `y`: a 1D vector of length `30` with elements of type `double`, representing the output vector computed as `y = alpha * Ax + beta * Bx`.\n\nImportant Data Structures and Data Types:\n- `double[30][30]`: a 2D matrix data structure with elements of type `double`, used to represent the input matrices `A` and `B`.\n- `double[30]`: a 1D vector data structure with elements of type `double`, used to represent the input vector `x`, temporary vector `tmp`, and output vector `y`.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"gesummv_tb.cpp\">\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#include \"gesummv.h\"\n\nvoid init_array(\n    int n,\n    double *alpha,\n    double *beta,\n    double A[30][30],\n    double B[30][30],\n    double x[30]) {\n    int i, j;\n\n    *alpha = 1.5;\n    *beta = 1.2;\n    for (i = 0; i < n; i++) {\n        x[i] = (double)(i % n) / n;\n        for (j = 0; j < n; j++) {\n            A[i][j] = (double)((i * j + 1) % n) / n;\n            B[i][j] = (double)((i * j + 2) % n) / n;\n        }\n    }\n}\n\nvoid print_array(int n, double y[30])\n\n{\n    int i;\n\n    fprintf(stderr, \"==BEGIN DUMP_ARRAYS==\\n\");\n    fprintf(stderr, \"begin dump: %s\", \"y\");\n    for (i = 0; i < n; i++) {\n        if (i % 20 == 0)\n            fprintf(stderr, \"\\n\");\n        fprintf(stderr, \"%0.6lf \", y[i]);\n    }\n    fprintf(stderr, \"\\nend   dump: %s\\n\", \"y\");\n    fprintf(stderr, \"==END   DUMP_ARRAYS==\\n\");\n}\n\nint main() {\n\n    int n = 30;\n\n    double alpha;\n    double beta;\n    double A[30][30];\n    double B[30][30];\n    double tmp[30];\n    double x[30];\n    double y[30];\n\n    init_array(n, &alpha, &beta, A, B, x);\n\n    kernel_gesummv(alpha, beta, A, B, tmp, x, y);\n\n    print_array(n, y);\n\n    return 0;\n}\n</INPUT_CODE name=\"gesummv_tb.cpp\">\n<INPUT_CODE name=\"gesummv.h\">\n#pragma once\n#include <cmath>\n\nvoid kernel_gesummv(\n    double alpha,\n    double beta,\n    double A[30][30],\n    double B[30][30],\n    double tmp[30],\n    double x[30],\n    double y[30]);\n\n</INPUT_CODE name=\"gesummv.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 20024.270894491,
+        "t1": 20027.662626931,
+        "execution_time": 3.391732439999032
+    },
+    "response_json": {
+        "id": "gen-1786567043-kdQvtv2Cl3r4PQP06ZmC",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_gesummv.cpp\">\n#include \"gesummv.h\"\n\nvoid kernel_gesummv(\n    double alpha,\n    double beta,\n    double A[30][30],\n    double B[30][30],\n    double tmp[30],\n    double x[30],\n    double y[30]) {\n\n    // Compute Ax and store in tmp\n    for (int i = 0; i < 30; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 30; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Compute y = alpha * Ax + beta * Bx\n    for (int i = 0; i < 30; i++) {\n        y[i] = 0.0;\n        for (int j = 0; j < 30; j++) {\n            y[i] += B[i][j] * x[j];\n        }\n        y[i] = alpha * tmp[i] + beta * y[i];\n    }\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786567043,
+        "model": "qwen/qwen3-coder",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 248,
+            "prompt_tokens": 1468,
+            "total_tokens": 1716,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.00094224,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.00094224,
+                "upstream_inference_prompt_cost": 0.00055784,
+                "upstream_inference_completions_cost": 0.0003844
+            }
+        },
+        "provider": "Novita"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_gesummv.cpp\">\n#include \"gesummv.h\"\n\nvoid kernel_gesummv(\n    double alpha,\n    double beta,\n    double A[30][30],\n    double B[30][30],\n    double tmp[30],\n    double x[30],\n    double y[30]) {\n\n    // Compute Ax and store in tmp\n    for (int i = 0; i < 30; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 30; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Compute y = alpha * Ax + beta * Bx\n    for (int i = 0; i < 30; i++) {\n        y[i] = 0.0;\n        for (int j = 0; j < 30; j++) {\n            y[i] += B[i][j] * x[j];\n        }\n        y[i] = alpha * tmp[i] + beta * y[i];\n    }\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_gesummv.cpp": "\n#include \"gesummv.h\"\n\nvoid kernel_gesummv(\n    double alpha,\n    double beta,\n    double A[30][30],\n    double B[30][30],\n    double tmp[30],\n    double x[30],\n    double y[30]) {\n\n    // Compute Ax and store in tmp\n    for (int i = 0; i < 30; i++) {\n        tmp[i] = 0.0;\n        for (int j = 0; j < 30; j++) {\n            tmp[i] += A[i][j] * x[j];\n        }\n    }\n\n    // Compute y = alpha * Ax + beta * Bx\n    for (int i = 0; i < 30; i++) {\n        y[i] = 0.0;\n        for (int j = 0; j < 30; j++) {\n            y[i] += B[i][j] * x[j];\n        }\n        y[i] = alpha * tmp[i] + beta * y[i];\n    }\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 20027.906397162,
+            "t1": 20028.235146895,
+            "execution_time": 0.3287497329984035,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "==BEGIN DUMP_ARRAYS==\nbegin dump: y\n1.885000 23.820000 21.795000 21.730000 20.675000 19.510000 18.625000 19.920000 19.875000 20.110000 15.535000 19.820000 18.085000 18.900000 18.975000 12.010000 20.195000 20.120000 18.085000 19.200000 \n15.235000 20.110000 19.295000 19.100000 17.545000 18.010000 18.495000 18.490000 17.375000 15.200000 \nend   dump: y\n==END   DUMP_ARRAYS==\n",
+            "t0": 20028.254037947,
+            "t1": 20028.276248077,
+            "execution_time": 0.022210129998711636,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 20028.280283067,
+            "t1": 20028.280283067,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

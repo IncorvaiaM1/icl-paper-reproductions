@@ -1,0 +1,59 @@
+
+#include "nussinov.h"
+
+void kernel_nussinov(char seq[60], int table[60][60]) {
+    int i, j, k;
+    int max_score, score1, score2, score3, score4;
+
+    // Initialize the table to zero
+    for (i = 0; i < 60; i++) {
+        for (j = 0; j < 60; j++) {
+            table[i][j] = 0;
+        }
+    }
+
+    // Fill the table using dynamic programming
+    for (int gap = 1; gap < 60; gap++) {
+        for (i = 0; i < 60 - gap; i++) {
+            j = i + gap;
+
+            // Case 1: table[i+1][j]
+            score1 = (i + 1 < 60) ? table[i + 1][j] : 0;
+
+            // Case 2: table[i][j-1]
+            score2 = (j - 1 >= 0) ? table[i][j - 1] : 0;
+
+            // Case 3: table[i+1][j-1] + w(i,j)
+            score3 = 0;
+            if (i + 1 < 60 && j - 1 >= 0) {
+                char a = seq[i];
+                char b = seq[j];
+                int match = 0;
+                if ((a == 'A' && b == 'U') || (a == 'U' && b == 'A') ||
+                    (a == 'C' && b == 'G') || (a == 'G' && b == 'C')) {
+                    match = 1;
+                }
+                score3 = table[i + 1][j - 1] + match;
+            }
+
+            // Case 4: max over k of (table[i][k] + table[k+1][j])
+            score4 = 0;
+            if (i < j) {
+                for (k = i + 1; k < j; k++) {
+                    int sum = table[i][k] + table[k + 1][j];
+                    if (sum > score4) {
+                        score4 = sum;
+                    }
+                }
+            }
+
+            // Compute the maximum of the four scores
+            max_score = score1;
+            if (score2 > max_score) max_score = score2;
+            if (score3 > max_score) max_score = score3;
+            if (score4 > max_score) max_score = score4;
+
+            table[i][j] = max_score;
+        }
+    }
+}

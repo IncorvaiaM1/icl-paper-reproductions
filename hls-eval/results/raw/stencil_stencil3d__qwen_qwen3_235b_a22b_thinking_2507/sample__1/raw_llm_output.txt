@@ -1,0 +1,26 @@
+<OUTPUT_CODE name="stencil_stencil3d.cpp">
+#include "stencil_stencil3d.h"
+
+void stencil3d(TYPE C[2], TYPE orig[SIZE], TYPE sol[SIZE]) {
+    for (int k = 0; k < height_size; k++) {
+        for (int j = 0; j < col_size; j++) {
+            for (int i = 0; i < row_size; i++) {
+                if (i == 0 || i == row_size-1 || j == 0 || j == col_size-1 || k == 0 || k == height_size-1) {
+                    sol[INDX(row_size, col_size, i, j, k)] = orig[INDX(row_size, col_size, i, j, k)];
+                } else {
+                    sol[INDX(row_size, col_size, i, j, k)] = 
+                        C[0] * orig[INDX(row_size, col_size, i, j, k)] 
+                        + C[1] * ( 
+                            orig[INDX(row_size, col_size, i, j, k+1)] 
+                            + orig[INDX(row_size, col_size, i, j, k-1)] 
+                            + orig[INDX(row_size, col_size, i, j+1, k)] 
+                            + orig[INDX(row_size, col_size, i, j-1, k)] 
+                            + orig[INDX(row_size, col_size, i+1, j, k)] 
+                            + orig[INDX(row_size, col_size, i-1, j, k)]
+                        );
+                }
+            }
+        }
+    }
+}
+</OUTPUT_CODE>

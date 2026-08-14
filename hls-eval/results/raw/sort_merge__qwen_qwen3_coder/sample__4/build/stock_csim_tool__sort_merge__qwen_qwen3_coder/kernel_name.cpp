@@ -1,0 +1,50 @@
+
+#include "sort_merge.h"
+
+static TYPE temp[SIZE];
+
+void merge(TYPE a[SIZE], int start, int m, int stop) {
+    int i, j, k;
+
+merge_label1:
+    for (i = start; i <= m; i++) {
+        temp[i] = a[i];
+    }
+
+merge_label2:
+    for (j = m + 1; j <= stop; j++) {
+        temp[j] = a[j];
+    }
+
+    i = start;
+    j = m + 1;
+    k = start;
+
+merge_label3:
+    while (k <= stop) {
+        if (i > m) {
+            a[k++] = temp[j++];
+        } else if (j > stop) {
+            a[k++] = temp[i++];
+        } else if (temp[i] <= temp[j]) {
+            a[k++] = temp[i++];
+        } else {
+            a[k++] = temp[j++];
+        }
+    }
+}
+
+void ms_mergesort(TYPE a[SIZE]) {
+    int l, m, h, i;
+
+    l = 1;
+    while (l < SIZE) {
+        m = l - 1;
+        while (m < SIZE - 1) {
+            h = (m + l < SIZE - 1) ? m + l : SIZE - 1;
+            merge(a, m - l + 1, m, h);
+            m = m + l * 2;
+        }
+        l = l * 2;
+    }
+}

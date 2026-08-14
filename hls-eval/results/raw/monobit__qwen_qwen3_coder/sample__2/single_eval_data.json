@@ -1,0 +1,100 @@
+{
+    "eval_type": "hls_gen_zero_shot",
+    "eval_id": "monobit__qwen_qwen3_coder",
+    "benchmark_case_name": "monobit",
+    "benchmark_case_tags": [
+        "c2hlsc"
+    ],
+    "model_name": "qwen/qwen3-coder",
+    "model_name_normalized": "qwen_qwen3_coder",
+    "temperature": 0.7,
+    "n_samples": 5,
+    "prompt": "## Overview\nYou are a helpful export hardware engineer and software developer who will assist the user with hardware design tasks for high-level synthesis.\nThe task will center around high-level synthesis (HLS) code written in C++ for a hardware design. The HLS design is written to target the latest Vitis HLS tool from Xilinx, which maps C++ code to a Verilog implementation for FPGAs.\n\n## Task Description\nGiven a natural language description of an HLS design, a pre-written C++ design header, and a pre-written C++ testbench, generate the C++ implementation of the HLS design that aligns with the natural language description.\n\nIt should be functionally equivalent to the natural language description, be consistent with the provided header file, and pass the testbench. The design should also be synthesizable by the HLS tool.\n\nOnly generate the code for the design; do not modify the header file or the testbench. Make sure to import the header file as well.\n\nProvide the complete design code in the single output; do not omit anything or leave placeholders.\n\nHierarchical design, sub-functions, template functions, structs, typedefs, and define statements are allowed but should be used only if appropriate.\n\n## Output Format\nThe generated HLS output code should be provided in the following format:\n```\n<OUTPUT_CODE name=\"kernel_name.cpp\">\n    ...\n</OUTPUT_CODE>\n```\nPlease use this XML format and do not use other formats like markdown code blocks or plain text.\nOnly output the generated HLS code in the XML format and nothing else.\n\n## Task Inputs\n\n\n<INPUT_CODE name=\"kernel_description.md\">\nKernel Description:\nThe `Frequency` kernel is designed to compute a statistical measure based on a binary sequence. Specifically, it calculates the sum of a transformed binary array `epsilon`, where each element of `epsilon` is either 0 or 1. The transformation applied to each element is `2 * epsilon[i] - 1`, which maps 0 to -1 and 1 to 1. The kernel then accumulates these transformed values to produce a single integer result. This result can be interpreted as a measure of the balance between 0s and 1s in the input sequence; a result close to 0 indicates a balanced sequence, while a result far from 0 indicates a sequence with a bias towards 0s or 1s.\n\n---\n\nTop-Level Function: `Frequency`\n\nComplete Function Signature of the Top-Level Function:\n`void Frequency(int *result, int epsilon[N]);`\n\nInputs:\n- `result`: A pointer to an integer where the computed frequency result will be stored. The data type is `int`, and it is used to hold the final accumulated sum.\n- `epsilon`: An array of integers of size `N` (128 in this case), where each element is either 0 or 1. The data type is `int`, and the array layout is a contiguous block of memory containing `N` integers.\n\nOutputs:\n- `result`: The computed frequency result is stored in the memory location pointed to by `result`. The result is an integer that represents the sum of the transformed values of the input array `epsilon`.\n\nImportant Data Structures and Data Types:\n- `epsilon`: An array of integers of size `N` (128). Each element is either 0 or 1, representing a binary sequence. The data type is `int`, and the array layout is a contiguous block of memory.\n\nSub-Components:\n- None\n</INPUT_CODE name=\"kernel_description.md\">\n<INPUT_CODE name=\"monobit_tb.cpp\">\n#include \"monobit.h\"\n\nint main() {\n    int i;\n    int epsilon_test[N];\n    for (i = 0; i < N; i++) {\n        epsilon_test[i] = i * 73 % 7 == 0;\n    }\n    int result;\n    Frequency(&result, epsilon_test);\n\n    printf(\"result = %d\\n\", result);\n}\n</INPUT_CODE name=\"monobit_tb.cpp\">\n<INPUT_CODE name=\"monobit.h\">\n#include <stdio.h>\n\n#define N 128\n// static int epsilon[N]; // array of 0s and 1s\n\nvoid Frequency(int *result, int epsilon[N]);\n</INPUT_CODE name=\"monobit.h\">\n\n\n\n## Task Output\n\n",
+    "model_timeout": false,
+    "prompt_too_long": false,
+    "llm_execution_time": {
+        "t0": 24597.000905402,
+        "t1": 24601.841877974,
+        "execution_time": 4.840972571997554
+    },
+    "response_json": {
+        "id": "gen-1786571712-7bXVNAJ99cLkFCAy1d3w",
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                    "content": "<OUTPUT_CODE name=\"kernel_name.cpp\">\n#include \"monobit.h\"\n\nvoid Frequency(int *result, int epsilon[N]) {\n    int sum = 0;\n    for (int i = 0; i < N; i++) {\n        int transformed = 2 * epsilon[i] - 1;\n        sum += transformed;\n    }\n    *result = sum;\n}\n</OUTPUT_CODE>",
+                    "role": "assistant"
+                },
+                "native_finish_reason": "stop"
+            }
+        ],
+        "created": 1786571712,
+        "model": "qwen/qwen3-coder",
+        "object": "chat.completion",
+        "usage": {
+            "completion_tokens": 82,
+            "prompt_tokens": 890,
+            "total_tokens": 972,
+            "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 832,
+                "cache_write_tokens": 0,
+                "video_tokens": 0
+            },
+            "cost": 0.0001826,
+            "is_byok": false,
+            "cost_details": {
+                "upstream_inference_cost": 0.0001826,
+                "upstream_inference_prompt_cost": 0.0001006,
+                "upstream_inference_completions_cost": 8.2e-05
+            }
+        },
+        "provider": "DeepInfra"
+    },
+    "raw_output": "<OUTPUT_CODE name=\"kernel_name.cpp\">\n#include \"monobit.h\"\n\nvoid Frequency(int *result, int epsilon[N]) {\n    int sum = 0;\n    for (int i = 0; i < N; i++) {\n        int transformed = 2 * epsilon[i] - 1;\n        sum += transformed;\n    }\n    *result = sum;\n}\n</OUTPUT_CODE>",
+    "generated_code": {
+        "kernel_name.cpp": "\n#include \"monobit.h\"\n\nvoid Frequency(int *result, int epsilon[N]) {\n    int sum = 0;\n    for (int i = 0; i < N; i++) {\n        int transformed = 2 * epsilon[i] - 1;\n        sum += transformed;\n    }\n    *result = sum;\n}\n"
+    },
+    "can_parse_output": true,
+    "c_compile_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "t0": 24602.110395109,
+            "t1": 24602.445170177,
+            "execution_time": 0.33477506800045376,
+            "timeout": false
+        }
+    },
+    "c_run_out": {
+        "data_execution": {
+            "return_code": 0,
+            "stdout": "result = -90\n",
+            "stderr": "",
+            "t0": 24602.467699621,
+            "t1": 24602.48809964,
+            "execution_time": 0.020400018998770975,
+            "timeout": false
+        }
+    },
+    "vitis_hls_tool_out": {
+        "data_execution": {
+            "return_code": -99,
+            "stdout": "",
+            "stderr": "SYNTHESIS SKIPPED: Vitis HLS not installed",
+            "t0": 24602.492822398,
+            "t1": 24602.492822398,
+            "execution_time": 0.0,
+            "timeout": false
+        },
+        "data_tool": {}
+    }
+}

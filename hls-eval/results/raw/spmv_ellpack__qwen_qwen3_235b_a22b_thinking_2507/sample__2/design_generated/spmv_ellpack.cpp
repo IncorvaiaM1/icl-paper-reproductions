@@ -1,0 +1,16 @@
+
+#include "spmv_ellpack.h"
+
+void ellpack(TYPE nzval[N * L], int32_t cols[N * L], TYPE vec[N], TYPE out[N]) {
+    for (int i = 0; i < N; i++) {
+    #pragma HLS LOOP_LABEL ellpack_1
+    #pragma HLS PIPELINE
+        out[i] = 0.0;
+        for (int j = 0; j < L; j++) {
+        #pragma HLS LOOP_LABEL ellpack_2
+        #pragma HLS UNROLL
+            int index = i * L + j;
+            out[i] += nzval[index] * vec[cols[index]];
+        }
+    }
+}

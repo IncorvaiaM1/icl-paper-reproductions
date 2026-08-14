@@ -1,0 +1,18 @@
+
+#include "atax.h"
+
+void kernel_atax(double A[38][42], double x[42], double y[42], double tmp[38]) {
+    for (int i = 0; i < 38; ++i) {
+        tmp[i] = 0.0;
+        for (int j = 0; j < 42; ++j) {
+            tmp[i] += A[i][j] * x[j];
+        }
+    }
+
+    for (int j = 0; j < 42; ++j) {
+        y[j] = 0.0;
+        for (int i = 0; i < 38; ++i) {
+            y[j] += A[i][j] * tmp[i];
+        }
+    }
+}

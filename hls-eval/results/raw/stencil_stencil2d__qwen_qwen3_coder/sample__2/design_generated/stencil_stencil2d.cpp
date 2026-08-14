@@ -1,0 +1,33 @@
+
+#include "stencil_stencil2d.h"
+
+void stencil(
+    TYPE orig[row_size * col_size],
+    TYPE sol[row_size * col_size],
+    TYPE filter[f_size]) {
+
+    // Iterate over the rows and columns of the input array
+    for (int i = 0; i < row_size - 2; i++) {
+        for (int j = 0; j < col_size - 2; j++) {
+            // Temporary variable to accumulate the stencil computation
+            TYPE temp = 0;
+
+            // Iterate over the elements of the filter (3x3)
+            for (int k1 = 0; k1 < 3; k1++) {
+                for (int k2 = 0; k2 < 3; k2++) {
+                    // Calculate the index for the input array
+                    int orig_index = (i + k1) * col_size + (j + k2);
+                    // Calculate the index for the filter array
+                    int filter_index = k1 * 3 + k2;
+                    // Temporary variable to store the product
+                    TYPE mul = orig[orig_index] * filter[filter_index];
+                    // Accumulate the result
+                    temp += mul;
+                }
+            }
+
+            // Store the result in the output array
+            sol[i * col_size + j] = temp;
+        }
+    }
+}

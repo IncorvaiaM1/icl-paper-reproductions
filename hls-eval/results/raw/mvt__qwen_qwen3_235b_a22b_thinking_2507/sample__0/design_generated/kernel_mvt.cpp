@@ -1,0 +1,28 @@
+
+#include "mvt.h"
+
+void kernel_mvt(
+    double x1[40],
+    double x2[40],
+    double y_1[40],
+    double y_2[40],
+    double A[40][40]) 
+{
+    // Compute x1 = x1 + A * y_1
+    for (int i = 0; i < 40; i++) {
+        double sum1 = 0.0;
+        for (int j = 0; j < 40; j++) {
+            sum1 += A[i][j] * y_1[j];
+        }
+        x1[i] += sum1;
+    }
+
+    // Compute x2 = x2 + A^T * y_2
+    for (int i = 0; i < 40; i++) {
+        double sum2 = 0.0;
+        for (int j = 0; j < 40; j++) {
+            sum2 += A[j][i] * y_2[j];
+        }
+        x2[i] += sum2;
+    }
+}

@@ -1,0 +1,11 @@
+
+#include "add_round_key.h"
+
+void AddRoundKey(unsigned char round, state_t *state, const unsigned char *RoundKey) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < Nb; j++) {
+            int offset = round * (4 * Nb) + i * Nb + j;
+            (*state)[i][j] ^= RoundKey[offset];
+        }
+    }
+}
