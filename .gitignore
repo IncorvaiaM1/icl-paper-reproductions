@@ -1,0 +1,35 @@
+# Local-only and generated files. The public tree is the PDF, findings,
+# aggregations, and source — not planning notes, email drafts, or raw sweeps.
+
+.env
+**/.env
+**/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# LaTeX junk
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Internal planning and correspondence — keep on disk, do not push
+hls-eval/email_draft.md
+hls-eval/NEXT.md
+hls-eval/PLAN.md
+hls-eval/STATUS.md
+hls-eval/RUNBOOK.md
+analog-benchmarks/GAMEPLAN.md
+analog-benchmarks/GAMEPLAN_48h.md
+analog-benchmarks/paper_notes_*.md
+analog-benchmarks/papers/
+
+# Bulky generated artifacts
+hls-eval/results/raw/
+analog-benchmarks/ams-bench/data/

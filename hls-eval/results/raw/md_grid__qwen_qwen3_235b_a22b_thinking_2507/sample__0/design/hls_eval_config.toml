@@ -1,5 +1,0 @@
-tags = ["machsuite"]
-tb_data = [
-    "input.data",
-    "check.data",
-]
